@@ -189,7 +189,7 @@ void GuiManager::DrawUI()
 		props.turbulence_offset_x = turbulence_offset_x;
 		props.turbulence_offset_y = turbulence_offset_y;
 
-		float* noise = PerlinNoise2D(res, &props);
+		float* noise = NoiseGenerator::PerlinNoise2D(res, &props);
 		this->SetNoiseData(noise, res, res);
 		Logger::Log("Generated 2D noise preview");
 		free(noise);

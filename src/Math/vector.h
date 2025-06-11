@@ -1,5 +1,6 @@
 #pragma once
-#include <stdexcept>              // Для std::runtime_error, если заменяешь fatal_error
+
+#include <stdexcept>
 
 #define PI      3.14159265358979323846264338327950f
 #define PI2     6.28318530717958647692528676655901f

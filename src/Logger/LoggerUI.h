@@ -1,5 +1,4 @@
-#ifndef LOGGER_UI_H
-#define LOGGER_UI_H
+#pragma once
 
 #include "Logger.h"
 #include "imgui.h"
@@ -54,4 +53,3 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 
 	ImGui::End();
 }
-#endif // LOGGER_UI_H
