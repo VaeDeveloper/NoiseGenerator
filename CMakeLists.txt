@@ -69,6 +69,11 @@ add_executable(NoiseGenerator
   src/Noise/NoiseTypes.h
   src/Noise/NoisePreviewPanel.cpp
   src/Noise/NoisePreviewPanel.h
+  src/Image/ImageExporter.cpp
+  src/Image/ImageExporter.h
+
+
+  src/ThirdParty/stb_image_write.h
 )
 
 target_include_directories(NoiseGenerator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)

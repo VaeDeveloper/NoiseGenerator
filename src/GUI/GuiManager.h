@@ -15,4 +15,7 @@ public:
 private:
 	bool dockBuilt = false;
 	NoisePreviewPanel noisePreview;
+
+	bool showNoiseGenerator = true;
+	bool showOutputLog = true;
 };
