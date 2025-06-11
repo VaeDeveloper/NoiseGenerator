@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -8,32 +7,34 @@
 #include <chrono>
 #include <ctime>
 
-enum class LogType {
-    Info,
-    Warning,
-    Error
+enum class LogType 
+{
+	Info,
+	Warning,
+	Error
 };
 
-struct LogEntry {
-    LogType type;
-    std::string message;
+struct LogEntry 
+{
+	LogType type;
+	std::string message;
 };
 
-class Logger {
+class Logger 
+{
 public:
-    static void Log(const std::string& message);
-    static void Warn(const std::string& message);
-    static void Err(const std::string& message);
+	static void Log(const std::string& message);
+	static void Warn(const std::string& message);
+	static void Err(const std::string& message);
 
-    static void SaveLogToFile();
-    static void Clear();
-    static const std::vector<LogEntry>& GetMessages();
+	static void SaveLogToFile();
+	static void Clear();
+	static const std::vector<LogEntry>& GetMessages();
 
-    static std::string filePath;
+	static std::string filePath;
 
 private:
-    static std::vector<LogEntry> messages;
-    static std::string GetTimestamp();
+	static std::vector<LogEntry> messages;
+	static std::string GetTimestamp();
 };
 
-#endif // LOGGER_H

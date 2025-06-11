@@ -67,8 +67,6 @@ add_executable(NoiseGenerator
   src/Noise/NoiseMath.cpp
   src/Noise/NoiseMath.h
   src/Noise/NoiseTypes.h
-  src/Noise/NoiseRenderer.h
-  src/Noise/NoiseRenderer.cpp
   src/Noise/NoisePreviewPanel.cpp
   src/Noise/NoisePreviewPanel.h
 )

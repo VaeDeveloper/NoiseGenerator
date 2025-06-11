@@ -66,11 +66,12 @@ void NGApplication::RenderScene()
 	glViewport(0, 0, 1280, 720);
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	// Тут можешь рисовать OpenGL сцены
 }
 
-void NGApplication::Run() {
-	while(!glfwWindowShouldClose(window)) {
+void NGApplication::Run() 
+{
+	while(!glfwWindowShouldClose(window)) 
+	{
 		glfwPollEvents();
 
 		gui.BeginFrame();
@@ -87,7 +88,8 @@ void NGApplication::Shutdown()
 {
 	gui.Shutdown();
 
-	if(window) {
+	if(window) 
+	{
 		glfwDestroyWindow(window);
 		window = nullptr;
 	}

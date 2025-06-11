@@ -40,7 +40,8 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 			Logger::SaveLogToFile();
 			Logger::Log("Log saved to " + Logger::filePath);
 		}
-		catch(const std::exception& e) {
+		catch(const std::exception& e) 
+		{
 			Logger::Err(e.what());
 		}
 	}

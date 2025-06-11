@@ -5,7 +5,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	NGApplication app;
 	if(!app.Init())
+	{
 		return -1;
+	}
 
 	app.Run();
 	return 0;

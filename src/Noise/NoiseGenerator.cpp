@@ -305,7 +305,8 @@ namespace NoiseGenerator
 		do
 		{
 			octaves++;
-		} while((1 << octaves) < (res));
+		} 
+		while((1 << octaves) < (res));
 
 		for(int level = 0; level < octaves; level++)
 		{
@@ -313,8 +314,7 @@ namespace NoiseGenerator
 			{
 				data = StupidNoise3D(res, freq, data, scale);
 
-				fprintf(stdout, "octave %d computed.\n", level + 1);
-				fflush(stdout);
+				Logger::Log("Octave " + std::to_string(level + 1) + " computed.");
 			}
 
 			freq *= 2;
