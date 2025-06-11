@@ -77,3 +77,9 @@ target_include_directories(NoiseGenerator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/sr
 target_link_libraries(NoiseGenerator PRIVATE imgui glfw glad OpenGL::GL)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT NoiseGenerator)
+
+if (WIN32)
+  set_target_properties(NoiseGenerator PROPERTIES
+    WIN32_EXECUTABLE TRUE
+  )
+endif()

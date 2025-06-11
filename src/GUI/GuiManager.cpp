@@ -59,18 +59,22 @@ void GuiManager::DrawUI()
 
 	if(!dockBuilt)
 	{
-		ImGui::DockBuilderRemoveNode(dockspace_id);
+		ImGui::DockBuilderRemoveNode(dockspace_id); // clear any previous layout
 		ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
 		ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
 		ImGuiID dock_main_id = dockspace_id;
-		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.2f, nullptr, &dock_main_id);
+
 		ImGuiID dock_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
 
-		ImGui::DockBuilderDockWindow("Hello, ImGui!", dock_main_id);
+		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.5f, nullptr, &dock_main_id);
+		ImGuiID dock_right = dock_main_id;
+
+		ImGui::DockBuilderDockWindow("Noise Generator", dock_left);
+		ImGui::DockBuilderDockWindow("Noise Preview", dock_right);
 		ImGui::DockBuilderDockWindow("Output Log", dock_bottom);
+
 		ImGui::DockBuilderFinish(dockspace_id);
-		
 		dockBuilt = true;
 	}
 
@@ -117,7 +121,7 @@ void GuiManager::DrawUI()
 	ImGui::DockSpace(dockspace_id);
 	ImGui::End();
 
-	ImGui::Begin("Noise Generator");
+	ImGui::Begin("Noise Generator", nullptr, ImGuiWindowFlags_NoTitleBar);
 
 	static int resolutionIndex = 3;
 	static const char* resolutions[] = { "8", "16", "32", "64", "128", "256", "512" };
@@ -206,7 +210,7 @@ void GuiManager::DrawUI()
 	noisePreview.Draw();
 
 	// Log window
-	ImGui::Begin("Output Log");
+	ImGui::Begin("Output Log", nullptr, ImGuiWindowFlags_NoTitleBar);
 	DrawLoggerWindow();
 	ImGui::End();
 }

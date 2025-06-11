@@ -30,7 +30,7 @@ void NoisePreviewPanel::UpdateTexture(const float* data, int width, int height)
 void NoisePreviewPanel::Draw()
 {
 	if(!textureInitialized) return;
-	ImGui::Begin("Noise Preview");
+	ImGui::Begin("Noise Preview", nullptr, ImGuiWindowFlags_NoTitleBar);
 	ImGui::Text("Preview %dx%d", texWidth, texHeight);
 	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(512, 512));
 	ImGui::End();
