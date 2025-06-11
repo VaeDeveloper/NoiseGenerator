@@ -38,7 +38,8 @@ bool NGApplication::InitGLFW()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(1280, 720, "Noise Generator", nullptr, nullptr);
-	if(!window) {
+	if(!window) 
+	{
 		Logger::Err("Failed to create GLFW window");
 		glfwTerminate();
 		return false;
@@ -52,7 +53,8 @@ bool NGApplication::InitGLFW()
 
 bool NGApplication::InitOpenGL() 
 {
-	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
+	{
 		Logger::Err("Failed to initialize GLAD");
 		return false;
 	}
@@ -87,7 +89,6 @@ void NGApplication::Run()
 void NGApplication::Shutdown()
 {
 	gui.Shutdown();
-
 	if(window) 
 	{
 		glfwDestroyWindow(window);
