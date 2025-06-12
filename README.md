@@ -62,3 +62,11 @@ CMake ≥ 3.11
 C++17 compatible compiler
 OpenGL 3.3+ support
 Internet connection (for dependency fetching)
+
+
+## 🧠 Roadmap / Ideas
+
+- [ ] Save/load generation presets (e.g., JSON)
+- [ ] GPU acceleration (OpenGL / compute shaders)
+- [ ] Export to .bmp / .jpg
+- [ ] Multi-threaded tile-based noise generation
