@@ -1,5 +1,7 @@
 #include "NoisePreviewPanel.h"
 #include <imgui.h>
+#include <imgui_internal.h>
+
 #include <vector>
 
 void NoisePreviewPanel::Init()
@@ -31,7 +33,16 @@ void NoisePreviewPanel::Draw()
 {
 	if(!textureInitialized) return;
 	ImGui::Begin("Noise Preview", nullptr, ImGuiWindowFlags_NoTitleBar);
+	ImGuiID dock_id = ImGui::GetWindowDockID();
+	if(dock_id != 0)
+	{
+		if(ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id))
+		{
+			if(node->WantHiddenTabBarUpdate)
+				node->WantHiddenTabBarToggle = true;
+		}
+	} 
 	ImGui::Text("Preview %dx%d", texWidth, texHeight);
-	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(512, 512));
+	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(1024, 1024));
 	ImGui::End();
 }

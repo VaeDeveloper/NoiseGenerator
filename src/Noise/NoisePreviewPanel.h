@@ -8,6 +8,11 @@ public:
 	void UpdateTexture(const float* data, int width, int height);
 	void Draw();
 
+	bool IsInitialized() const { return textureInitialized; }
+	GLuint GetTextureId() const { return textureId; }
+	int GetWidth() const { return texWidth; }
+	int GetHeight() const { return texHeight; }
+
 private:
 	GLuint textureId = 0;
 	int texWidth = 0, texHeight = 0;

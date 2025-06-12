@@ -37,7 +37,7 @@ bool NGApplication::InitGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1280, 720, "Noise Generator", nullptr, nullptr);
+	window = glfwCreateWindow(WindowWidth, WindowHeight, "Noise Generator", nullptr, nullptr);
 	if(!window) 
 	{
 		Logger::Err("Failed to create GLFW window");
@@ -65,7 +65,7 @@ bool NGApplication::InitOpenGL()
 
 void NGApplication::RenderScene() 
 {
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, WindowWidth, WindowHeight);
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }

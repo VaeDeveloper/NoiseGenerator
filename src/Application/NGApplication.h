@@ -16,6 +16,9 @@ private:
 	GLFWwindow* window = nullptr;
 	GuiManager gui;
 
+	const float WindowWidth = 1280;
+	const float WindowHeight = 880;
+
 	bool InitGLFW();
 	bool InitOpenGL();
 	void RenderScene();

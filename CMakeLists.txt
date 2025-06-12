@@ -71,6 +71,7 @@ add_executable(NoiseGenerator
   src/Noise/NoisePreviewPanel.h
   src/Image/ImageExporter.cpp
   src/Image/ImageExporter.h
+  src/Utils/RandomUtils.h
 
 
   src/ThirdParty/stb_image_write.h

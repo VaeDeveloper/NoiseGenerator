@@ -8,7 +8,9 @@
 #include <backends/imgui_impl_opengl3.h>
 #include "Noise/NoiseTypes.h"
 #include "Noise/NoiseGenerator.h"
-
+#include "Image/ImageExporter.h"
+#include <random>
+#include <windows.h>
 void GuiManager::Init(GLFWwindow* window)
 {
 	IMGUI_CHECKVERSION();
@@ -20,12 +22,22 @@ void GuiManager::Init(GLFWwindow* window)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 	Logger::Log("ImGui initialized");
-	Logger::Log("OpenGL #version 330");
 	noisePreview.Init();
+}
+
+void GuiManager::QueueUITask(std::function<void()> task)
+{
+	std::lock_guard<std::mutex> lock(uiMutex);
+	uiTasks.push(std::move(task));
 }
 
 void GuiManager::Shutdown()
 {
+	if(generationThread.joinable())
+	{
+		generationThread.join();
+	}
+
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -48,7 +60,8 @@ void GuiManager::Render()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GuiManager::SetNoiseData(float* data, int width, int height) {
+void GuiManager::SetNoiseData(float* data, int width, int height) 
+{
 	noisePreview.UpdateTexture(data, width, height);
 }
 
@@ -60,17 +73,22 @@ void GuiManager::DrawUI()
 	if(!dockBuilt)
 	{
 		ImGui::DockBuilderRemoveNode(dockspace_id); // clear any previous layout
-		ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+		ImGui::DockBuilderAddNode(dockspace_id,
+			ImGuiDockNodeFlags_DockSpace |
+			ImGuiDockNodeFlags_NoDockingSplit |
+			ImGuiDockNodeFlags_NoDockingOverMe |
+			ImGuiDockNodeFlags_NoTabBar |
+			ImGuiDockNodeFlags_NoDockingInCentralNode);
+
 		ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-
 		ImGuiID dock_main_id = dockspace_id;
-
 		ImGuiID dock_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
-
 		ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.5f, nullptr, &dock_main_id);
+		ImGuiID dock_left_bottom = ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.1f, nullptr, &dock_left);
 		ImGuiID dock_right = dock_main_id;
 
 		ImGui::DockBuilderDockWindow("Noise Generator", dock_left);
+		ImGui::DockBuilderDockWindow("Generation Progress", dock_left_bottom);
 		ImGui::DockBuilderDockWindow("Noise Preview", dock_right);
 		ImGui::DockBuilderDockWindow("Output Log", dock_bottom);
 
@@ -93,16 +111,43 @@ void GuiManager::DrawUI()
 	{
 		if(ImGui::BeginMenu("File"))
 		{
-			
-			if(ImGui::MenuItem("Save", "Ctrl+S"))
+			if(ImGui::BeginMenu("Save As"))
 			{
-				Logger::Log("Save clicked");
+				if(ImGui::MenuItem("Export as PNG"))
+				{
+					if(noisePreview.IsInitialized())
+					{
+						if(ImageExporter::SavePNG("export.png", noisePreview.GetTextureId(), noisePreview.GetWidth(), noisePreview.GetHeight()))
+						{
+							Logger::Log("Saved noise as PNG: export.png");
+						}
+						else
+						{
+							Logger::Err("Failed to save PNG");
+						}
+					}
+				}
 
+				if(ImGui::MenuItem("Export as TGA"))
+				{
+					if(noisePreview.IsInitialized())
+					{
+						if(ImageExporter::SaveTGA("export.tga", noisePreview.GetTextureId(), noisePreview.GetWidth(), noisePreview.GetHeight()))
+						{
+							Logger::Log("Saved noise as TGA: export.tga");
+						}
+						else
+						{
+							Logger::Err("Failed to save TGA");
+						}
+					}
+				}
+
+				ImGui::EndMenu();
 			}
 
 			ImGui::Separator();
 
-			
 			if(ImGui::MenuItem("Exit", "Alt+F4"))
 			{
 				exit(0);
@@ -120,7 +165,15 @@ void GuiManager::DrawUI()
 
 		if(ImGui::BeginMenu("Help"))
 		{
-			ImGui::MenuItem("About");
+			if(ImGui::MenuItem("About"))
+			{
+#ifdef _WIN32
+				ShellExecuteA(NULL, "open", "https://github.com/VaeDeveloper/NoiseGenerator", NULL, NULL, SW_SHOWNORMAL);
+#else
+				system("xdg-open https://github.com/VaeDeveloper/NoiseGenerator"); // Linux
+				// macOS: system("open https://github.com/VaeDeveloper/NoiseGenerator");
+#endif
+			}
 			ImGui::EndMenu();
 		}
 
@@ -134,9 +187,18 @@ void GuiManager::DrawUI()
 	if(showNoiseGenerator)
 	{
 		ImGui::Begin("Noise Generator", nullptr, ImGuiWindowFlags_NoTitleBar);
+		ImGuiID dock_id = ImGui::GetWindowDockID();
+		if(dock_id != 0)
+		{
+			if(ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id))
+			{
+				if(node->WantHiddenTabBarUpdate)
+					node->WantHiddenTabBarToggle = true;
+			}
+		}
 
 		static int resolutionIndex = 3;
-		static const char* resolutions[] = { "8", "16", "32", "64", "128", "256", "512" };
+		static const char* resolutions[] = { "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096" };
 
 		// Base properties
 		static int seed = 42;
@@ -184,49 +246,94 @@ void GuiManager::DrawUI()
 		ImGui::InputInt("Preview Width", &previewWidth);
 		ImGui::InputInt("Preview Height", &previewHeight);
 
-		if(ImGui::Button("Generate 2D Noise"))
+		if(!isGenerating)
 		{
-			int res = 8 << resolutionIndex;
-			noise_properties props = {};
-			props.seed = seed;
-			props.res = resolutionIndex;
-			props.roughness = roughness;
-			props.marbling = marbling;
-			props.low_freq_skip = low_freq_skip;
-			props.high_freq_skip = high_freq_skip;
+			if(ImGui::Button("Generate 2D Noise") && !isGenerating)
+			{
+				int res = 8 << resolutionIndex;
+				noise_properties props = {};
+				props.seed = std::random_device{}();
+				props.res = resolutionIndex;
+				props.roughness = roughness;
+				props.marbling = marbling;
+				props.low_freq_skip = low_freq_skip;
+				props.high_freq_skip = high_freq_skip;
 
-			props.turbulence = turbulence;
-			props.turbulence_res = turbulence_res;
-			props.turbulence_roughness = turbulence_roughness;
-			props.turbulence_low_freq_skip = turbulence_low_freq_skip;
-			props.turbulence_high_freq_skip = turbulence_high_freq_skip;
-			props.turbulence_marbling = turbulence_marbling;
-			props.turbulence_expshift = turbulence_expshift;
-			props.turbulence_offset_x = turbulence_offset_x;
-			props.turbulence_offset_y = turbulence_offset_y;
+				props.turbulence = turbulence;
+				props.turbulence_res = turbulence_res;
+				props.turbulence_roughness = turbulence_roughness;
+				props.turbulence_low_freq_skip = turbulence_low_freq_skip;
+				props.turbulence_high_freq_skip = turbulence_high_freq_skip;
+				props.turbulence_marbling = turbulence_marbling;
+				props.turbulence_expshift = turbulence_expshift;
+				props.turbulence_offset_x = turbulence_offset_x;
+				props.turbulence_offset_y = turbulence_offset_y;
 
-			float* noise = NoiseGenerator::PerlinNoise2D(res, &props);
-			this->SetNoiseData(noise, res, res);
-			Logger::Log("Generated 2D noise preview");
-			free(noise);
+				isGenerating = true;
+				generationProgress = 0.0f;
+				generationThread = std::thread([this, res, props] () {
+					float* noise = NoiseGenerator::PerlinNoise2D(res, &props, [this] (float progress)
+						{
+							this->generationProgress = progress;
+						});
+
+					this->QueueUITask([this, noise, res] ()
+						{
+							this->SetNoiseData(noise, res, res);
+							Logger::Log("Generated 2D noise preview");
+							free(noise);
+							this->isGenerating = false;
+							this->generationProgress = -1.0f;
+						});
+					});
+
+				generationThread.detach();
+			}
+
+			ImGui::SameLine();
+
+			if(ImGui::Button("Clear"))
+			{
+				this->SetNoiseData(nullptr, 0, 0);
+				Logger::Warn("Preview cleared");
+			}
 		}
 
-		ImGui::SameLine();
-		if(ImGui::Button("Clear"))
+		if(isGenerating)
 		{
-			this->SetNoiseData(nullptr, 0, 0);
-			Logger::Warn("Preview cleared");
+			ImGui::ProgressBar(generationProgress, ImVec2(-1.0f, 0.0f), generationProgress >= 1.0f ? "Done" : "Generating...");
 		}
 
 		ImGui::End();
 	}
+
+
+
 	noisePreview.Draw();
 
 	// Log window
 	if(showOutputLog)
 	{
 		ImGui::Begin("Output Log", nullptr, ImGuiWindowFlags_NoTitleBar);
+		ImGuiID dock_id = ImGui::GetWindowDockID();
+		if(dock_id != 0 )
+		{
+			if(ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id))
+			{
+				if (node->WantHiddenTabBarUpdate)
+					node->WantHiddenTabBarToggle = true;
+			}
+		}
 		DrawLoggerWindow();
 		ImGui::End();
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(uiMutex);
+		while(!uiTasks.empty())
+		{
+			uiTasks.front()(); // execute
+			uiTasks.pop();
+		}
 	}
 }
