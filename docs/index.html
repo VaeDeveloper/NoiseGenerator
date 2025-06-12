@@ -16,20 +16,21 @@
       color: white;
       overflow: hidden;
     }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-    .content {
+    .glitch {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      animation: glitchAnim 1s infinite;
+    }
+    @keyframes glitchAnim {
+      0% { text-shadow: 2px 0 red, -2px 0 cyan; }
+      20% { text-shadow: -2px 0 red, 2px 0 cyan; }
+      40% { text-shadow: 2px 2px red, -2px -2px cyan; }
+      60% { text-shadow: -2px 2px red, 2px -2px cyan; }
+      80% { text-shadow: 2px -2px red, -2px 2px cyan; }
+      100% { text-shadow: 0 0 red, 0 0 cyan; }
     }
     h1 {
       font-size: 3em;
@@ -61,8 +62,7 @@
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <div class="content">
+  <div class="glitch">
     <h1>Noise Generator</h1>
     <p>Procedural 2D noise with C++17, OpenGL and ImGui</p>
     <div>
@@ -71,51 +71,5 @@
     </div>
     <img src="noise_generator.gif" alt="Noise Preview" class="preview" />
   </div>
-
-  <script>
-    const canvas = document.getElementById('bg');
-    const ctx = canvas.getContext('2d');
-    let w, h, particles;
-
-    function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-
-    function initParticles() {
-      particles = Array.from({ length: 100 }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.7,
-        vy: (Math.random() - 0.5) * 0.7,
-        r: 1 + Math.random() * 2
-      }));
-    }
-
-    function draw() {
-      ctx.fillStyle = 'rgba(13,13,13,0.2)';
-      ctx.fillRect(0, 0, w, h);
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-        ctx.fillStyle = '#00ffff';
-        ctx.fill();
-      }
-      requestAnimationFrame(draw);
-    }
-
-    window.addEventListener('resize', () => {
-      resize();
-      initParticles();
-    });
-
-    resize();
-    initParticles();
-    draw();
-  </script>
 </body>
 </html>
