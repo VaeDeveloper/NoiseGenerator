@@ -15,6 +15,11 @@ An interactive C++ desktop application for generating and visualizing procedural
 
 ---
 
+## 📸 Preview
+
+![Noise Generator Preview](docs/noise_generator.gif)
+
+---
 ## 🧩 Dependencies
 
 | Library          | Purpose                  |
@@ -24,5 +29,32 @@ An interactive C++ desktop application for generating and visualizing procedural
 | [Dear ImGui](https://github.com/ocornut/imgui) | GUI rendering                |
 | stb_image_write  | PNG & TGA image saving   |
 | OpenGL 3.3+       | GPU rendering backend     |
+---
 
-You can integrate these manually or using CMake/your build system of choice.
+## 🛠 Building with CMake
+This project uses CMake ≥ 3.11 and automatically fetches its dependencies (GLFW, GLAD, ImGui) via FetchContent. No manual installation required.
+
+🔧 Build Instructions
+
+Windows (Visual Studio):
+```
+git clone https://github.com/VaeDeveloper/NoiseGenerator.git
+cd NoiseGenerator
+cmake -B build -G "Visual Studio 17 2022" -A x64
+```
+
+Linux
+```
+git clone https://github.com/VaeDeveloper/NoiseGenerator.git
+cd NoiseGenerator
+mkdir build && cd build
+cmake ..
+make
+./NoiseGenerator
+```
+
+✅ Requirements
+CMake ≥ 3.11
+C++17 compatible compiler
+OpenGL 3.3+ support
+Internet connection (for dependency fetching)
