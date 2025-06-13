@@ -21,7 +21,7 @@ An interactive C++ desktop application for generating and visualizing procedural
 
 ## 📸 Preview
 
-![Noise Generator Preview](docs/noise_generator.gif)
+![Noise Generator Preview](docs/noise_generator2.gif)
 
 ---
 ## 🧩 Dependencies
