@@ -62,6 +62,7 @@ add_executable(NoiseGenerator
   src/Application/NGApplication.h
   src/GUI/GuiManager.cpp
   src/GUI/GuiManager.h
+  src/GUI/GuiUtils.h
   src/Noise/NoiseGenerator.cpp
   src/Noise/NoiseGenerator.h
   src/Noise/NoiseMath.cpp

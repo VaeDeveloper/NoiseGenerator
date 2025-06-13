@@ -57,3 +57,35 @@ bool ImageExporter::SaveTGA(const std::string& filename, unsigned int textureId,
 		return false;
 	}
 }
+
+bool ImageExporter::SaveBMP(const std::string& filename, unsigned int textureId, int width, int height)
+{
+	std::vector<unsigned char> pixels(width * height);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
+
+	std::vector<unsigned char> rgb(width * height * 3);
+	for(int i = 0; i < width * height; ++i) {
+		rgb[i * 3 + 0] = pixels[i];
+		rgb[i * 3 + 1] = pixels[i];
+		rgb[i * 3 + 2] = pixels[i];
+	}
+
+	return stbi_write_bmp(filename.c_str(), width, height, 3, rgb.data());
+}
+
+bool ImageExporter::SaveJPG(const std::string& filename, unsigned int textureId, int width, int height, int quality)
+{
+	std::vector<unsigned char> pixels(width * height);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
+
+	std::vector<unsigned char> rgb(width * height * 3);
+	for(int i = 0; i < width * height; ++i) {
+		rgb[i * 3 + 0] = pixels[i];
+		rgb[i * 3 + 1] = pixels[i];
+		rgb[i * 3 + 2] = pixels[i];
+	}
+
+	return stbi_write_jpg(filename.c_str(), width, height, 3, rgb.data(), quality);
+}

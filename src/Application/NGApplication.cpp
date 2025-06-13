@@ -95,6 +95,5 @@ void NGApplication::Shutdown()
 		window = nullptr;
 	}
 	glfwTerminate();
-
 	Logger::Log("Application shutdown");
 }

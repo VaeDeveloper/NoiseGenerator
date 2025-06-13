@@ -2,8 +2,8 @@
 #include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/Logger.h"
-#include <imgui.h>
-#include <imgui_internal.h>
+
+
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include "Noise/NoiseTypes.h"
@@ -15,14 +15,18 @@
 
 namespace NoiseGenerator
 {
+	constexpr int spaceOffset = 24;
+
 	template<typename WidgetFunc>
 	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
 	{
-		widget();
+		if(*lockState) ImGui::BeginDisabled(true);
+		widget(); 
+		if(*lockState) ImGui::EndDisabled();
 
 		ImGui::SameLine();
 		float space = ImGui::GetContentRegionAvail().x;
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - 24);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - spaceOffset);
 
 		const char* icon = *lockState ? ICON_FA_LOCK : ICON_FA_LOCK_OPEN;
 
@@ -52,35 +56,46 @@ void GuiManager::Init(GLFWwindow* window)
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	
+	InitStyleConfig(io);
+	InitFontConfig(io);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+	Logger::Log("ImGui initialized");
+
+	noisePreview.Init();
+}
+
+void GuiManager::InitStyleConfig(const ImGuiIO& io)
+{
 	ImGui::StyleColorsDark();
 	ImGuiStyle& style = ImGui::GetStyle();
 	io.Fonts->AddFontDefault();
 
-	style.ItemSpacing = ImVec2(12.0f, 10.0f); // по умолчанию (8,4)
+	style.ItemSpacing = ImVec2(12.0f, 10.0f);
 
-	style.FrameRounding = 2.0f;  // кнопки, инпуты
-	style.WindowRounding = 8.0f;  // окна
-	style.ChildRounding = 6.0f;  // вложенные окна
-	style.PopupRounding = 6.0f;  // попапы
-	style.ScrollbarRounding = 6.0f;  // скроллбары
-	style.GrabRounding = 2.0f;  // слайдеры и ползунки
+	style.FrameRounding = 2.0f;
+	style.WindowRounding = 8.0f;
+	style.ChildRounding = 6.0f;
+	style.PopupRounding = 6.0f;
+	style.ScrollbarRounding = 6.0f;
+	style.GrabRounding = 2.0f;
+}
 
+void GuiManager::InitFontConfig(const ImGuiIO& io)
+{
 	ImFontConfig config;
 	config.MergeMode = true;
 	config.PixelSnapH = true;
 	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-
-	if(!io.Fonts->AddFontFromFileTTF("../fonts/fa-solid-900.ttf", 12.0f, &config, icon_ranges)) {
+	if(!io.Fonts->AddFontFromFileTTF("../fonts/fa-solid-900.ttf", 12.0f, &config, icon_ranges))
+	{
 		Logger::Err("Failed to load Font Awesome font!");
 	}
-	else {
+	else
+	{
 		Logger::Log("Font Awesome loaded");
 	}
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-	Logger::Log("ImGui initialized");
-	noisePreview.Init();
 }
 
 void GuiManager::QueueUITask(std::function<void()> task)
@@ -198,6 +213,36 @@ void GuiManager::DrawUI()
 						else
 						{
 							Logger::Err("Failed to save TGA");
+						}
+					}
+				}
+
+				if(ImGui::MenuItem(ICON_FA_FILE_IMAGE " Export as BMP"))
+				{
+					if(noisePreview.IsInitialized())
+					{
+						if(ImageExporter::SaveBMP("export.bmp", noisePreview.GetTextureId(), noisePreview.GetWidth(), noisePreview.GetHeight()))
+						{
+							Logger::Log("Saved BMP: export.bmp");
+						}
+						else
+						{
+							Logger::Err("Failed to save BMP");
+						}
+					}
+				}
+
+				if(ImGui::MenuItem(ICON_FA_FILE_IMAGE " Export as JPG"))
+				{
+					if(noisePreview.IsInitialized())
+					{
+						if(ImageExporter::SaveJPG("export.jpg", noisePreview.GetTextureId(), noisePreview.GetWidth(), noisePreview.GetHeight(), 90))
+						{
+							Logger::Log("Saved JPG: export.jpg");
+						}
+						else
+						{
+							Logger::Err("Failed to save JPG");
 						}
 					}
 				}
@@ -414,7 +459,7 @@ void GuiManager::DrawUI()
 				if(!lockRoughness) roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
 				if(!lockMarbling) marbling = ImLerp(0.0f, 10.0f, static_cast<float>(rand()) / RAND_MAX);
 				if(!lockLowFreq) low_freq_skip = rand() % 5;
-				if(!lockHighFreq) high_freq_skip = rand() % 5; 
+				if(!lockHighFreq) high_freq_skip = rand() % 5;
 				if(!lockTurbulence) turbulence = ImLerp(0.0f, 64.0f, static_cast<float>(rand()) / RAND_MAX);
 				if(!lockTurbRes) turbulence_res = rand() % IM_ARRAYSIZE(resolutions);
 				if(!lockTurbRoughness) turbulence_roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
@@ -426,6 +471,24 @@ void GuiManager::DrawUI()
 				if(!lockOffsetY) turbulence_offset_y = ImLerp(-1.0f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
 				Logger::Log("Randomize noise settings");
 			}
+			ImGui::SameLine();
+			static int randomStyle = 0;
+			const char* randomStyles[] = {
+				"Full Random",
+				"Controlled Chaos",
+				"Organic",
+				"Extreme",
+				"Minimal",
+			};
+
+			if(ImGui::Button(ICON_FA_FLASK  " Mutate"))
+			{
+
+			}
+
+			ImGui::SameLine();
+			ImGui::Combo("Random Style", &randomStyle, randomStyles, IM_ARRAYSIZE(randomStyles));
+
 
 			if(ImGui::Button(ICON_FA_PLAY " Generate 2D Noise") && !isGenerating)
 			{
@@ -476,7 +539,10 @@ void GuiManager::DrawUI()
 				this->SetNoiseData(nullptr, 0, 0);
 				Logger::Warn("Preview cleared");
 			}
+
 		}
+
+
 
 		if(isGenerating)
 		{
