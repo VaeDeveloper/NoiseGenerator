@@ -2,7 +2,7 @@
 
 #include "Logger.h"
 #include "imgui.h"
-
+#include "ThirdParty/IconsFontAwesome5.h"
 inline void DrawLoggerWindow(bool* open = nullptr)
 {
 	ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
@@ -31,23 +31,29 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 		ImGui::TextWrapped("%s", entry.message.c_str());
 		ImGui::PopStyleColor();
 	}
+
+	if(ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 5.0f) 
+	{
+		ImGui::SetScrollHereY(1.0f);
+	}
 	ImGui::EndChild();
 
-	if(ImGui::Button("Save to File")) 
+	if(ImGui::Button(ICON_FA_SAVE " Save to File"))
 	{
-		try 
+		try
 		{
 			Logger::SaveLogToFile();
 			Logger::Log("Log saved to " + Logger::filePath);
 		}
-		catch(const std::exception& e) 
+		catch(const std::exception& e)
 		{
 			Logger::Err(e.what());
 		}
 	}
 
 	ImGui::SameLine();
-	if(ImGui::Button("Clear")) 
+
+	if(ImGui::Button(ICON_FA_TRASH " Clear"))
 	{
 		Logger::Clear();
 	}

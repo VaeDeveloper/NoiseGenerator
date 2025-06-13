@@ -13,8 +13,12 @@ public:
 	int GetWidth() const { return texWidth; }
 	int GetHeight() const { return texHeight; }
 
+	void SetPreviewWidth(float Width) { previewWidht = Width; }
+	void SetPreviewHeight(float Height) { previewHeight = Height; }
 private:
 	GLuint textureId = 0;
 	int texWidth = 0, texHeight = 0;
 	bool textureInitialized = false;
+
+	float previewWidht, previewHeight;
 };

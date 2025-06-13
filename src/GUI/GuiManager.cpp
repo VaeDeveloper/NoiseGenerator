@@ -1,4 +1,4 @@
-
+﻿
 #include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/Logger.h"
@@ -11,6 +11,41 @@
 #include "Image/ImageExporter.h"
 #include <random>
 #include <windows.h>
+
+
+namespace NoiseGenerator
+{
+	template<typename WidgetFunc>
+	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
+	{
+		widget();
+
+		ImGui::SameLine();
+		float space = ImGui::GetContentRegionAvail().x;
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - 24);
+
+		const char* icon = *lockState ? ICON_FA_LOCK : ICON_FA_LOCK_OPEN;
+
+		ImGui::PushID(lockID);
+		if(ImGui::Button(icon, ImVec2(24, 22)))
+		{
+			*lockState = !*lockState;
+			Logger::Log(std::string("Lock toggled: ") + lockID + " = " + (*lockState ? "true" : "false"));
+		}
+		ImGui::PopID();
+	}
+
+	template<typename T>
+	void LogWidget(const char* label, T* value, std::function<bool()> widget)
+	{
+		if(widget())
+		{
+			Logger::Log(std::string(label) + " = " + std::to_string(*value));
+		}
+	}
+
+}
+
 void GuiManager::Init(GLFWwindow* window)
 {
 	IMGUI_CHECKVERSION();
@@ -18,6 +53,29 @@ void GuiManager::Init(GLFWwindow* window)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
+	ImGuiStyle& style = ImGui::GetStyle();
+	io.Fonts->AddFontDefault();
+
+	style.ItemSpacing = ImVec2(12.0f, 10.0f); // по умолчанию (8,4)
+
+	style.FrameRounding = 2.0f;  // кнопки, инпуты
+	style.WindowRounding = 8.0f;  // окна
+	style.ChildRounding = 6.0f;  // вложенные окна
+	style.PopupRounding = 6.0f;  // попапы
+	style.ScrollbarRounding = 6.0f;  // скроллбары
+	style.GrabRounding = 2.0f;  // слайдеры и ползунки
+
+	ImFontConfig config;
+	config.MergeMode = true;
+	config.PixelSnapH = true;
+	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+
+	if(!io.Fonts->AddFontFromFileTTF("../fonts/fa-solid-900.ttf", 12.0f, &config, icon_ranges)) {
+		Logger::Err("Failed to load Font Awesome font!");
+	}
+	else {
+		Logger::Log("Font Awesome loaded");
+	}
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
@@ -67,6 +125,7 @@ void GuiManager::SetNoiseData(float* data, int width, int height)
 
 void GuiManager::DrawUI()
 {
+	using namespace NoiseGenerator;
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
 
@@ -109,11 +168,11 @@ void GuiManager::DrawUI()
 	// === Menu Bar ===
 	if(ImGui::BeginMenuBar())
 	{
-		if(ImGui::BeginMenu("File"))
+		if(ImGui::BeginMenu(ICON_FA_FILE " File"))
 		{
-			if(ImGui::BeginMenu("Save As"))
+			if(ImGui::BeginMenu(ICON_FA_SAVE " Save As"))
 			{
-				if(ImGui::MenuItem("Export as PNG"))
+				if(ImGui::MenuItem(ICON_FA_FILE_IMAGE " Export as PNG"))
 				{
 					if(noisePreview.IsInitialized())
 					{
@@ -128,7 +187,7 @@ void GuiManager::DrawUI()
 					}
 				}
 
-				if(ImGui::MenuItem("Export as TGA"))
+				if(ImGui::MenuItem(ICON_FA_FILE_IMAGE " Export as TGA"))
 				{
 					if(noisePreview.IsInitialized())
 					{
@@ -148,7 +207,7 @@ void GuiManager::DrawUI()
 
 			ImGui::Separator();
 
-			if(ImGui::MenuItem("Exit", "Alt+F4"))
+			if(ImGui::MenuItem(ICON_FA_DOOR_OPEN " Exit", "Alt+F4"))
 			{
 				exit(0);
 			}
@@ -156,24 +215,26 @@ void GuiManager::DrawUI()
 			ImGui::EndMenu();
 		}
 
-		if(ImGui::BeginMenu("View"))
+		if(ImGui::BeginMenu(ICON_FA_EYE " View"))
 		{
-			ImGui::MenuItem("Noise Generator", nullptr, &showNoiseGenerator);
-			ImGui::MenuItem("Output Log", nullptr, &showOutputLog);
+			ImGui::MenuItem(ICON_FA_TERMINAL " Output Log", nullptr, &showOutputLog);
 			ImGui::EndMenu();
 		}
 
-		if(ImGui::BeginMenu("Help"))
+		if(ImGui::BeginMenu(ICON_FA_QUESTION_CIRCLE " Help"))
 		{
-			if(ImGui::MenuItem("About"))
+			if(ImGui::MenuItem(ICON_FA_INFO_CIRCLE " About"))
 			{
 #ifdef _WIN32
 				ShellExecuteA(NULL, "open", "https://github.com/VaeDeveloper/NoiseGenerator", NULL, NULL, SW_SHOWNORMAL);
+
 #else
 				system("xdg-open https://github.com/VaeDeveloper/NoiseGenerator"); // Linux
 				// macOS: system("open https://github.com/VaeDeveloper/NoiseGenerator");
 #endif
+				Logger::Log("Open Github Page");
 			}
+			
 			ImGui::EndMenu();
 		}
 
@@ -181,8 +242,24 @@ void GuiManager::DrawUI()
 	}
 
 	ImGui::DockSpace(dockspace_id);
-
 	ImGui::End();
+
+	static bool lockResolution = false;
+	static bool lockRoughness = false;
+	static bool lockMarbling = false;
+	static bool lockSeed = false;
+	static bool lockLowFreq = false;
+	static bool lockHighFreq = false;
+	static bool lockTurbulence = false;
+	static bool lockTurbRes = false;
+	static bool lockTurbRoughness = false;
+	static bool lockTurbLow = false;
+	static bool lockTurbHigh = false;
+	static bool lockTurbMarbling = false;
+	static bool lockExpShift = false;
+	static bool lockOffsetX = false;
+	static bool lockOffsetY = false;
+	static bool lockPreviewSize = false;
 
 	if(showNoiseGenerator)
 	{
@@ -196,6 +273,8 @@ void GuiManager::DrawUI()
 					node->WantHiddenTabBarToggle = true;
 			}
 		}
+
+
 
 		static int resolutionIndex = 3;
 		static const char* resolutions[] = { "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096" };
@@ -219,36 +298,136 @@ void GuiManager::DrawUI()
 		static float turbulence_offset_y = 0.0f;
 
 		// Preview control
-		static int previewWidth = 256;
-		static int previewHeight = 256;
-
+		static int previewSize = 1; // default: 512
+		static const char* previewResolution[] = { "256", "512", "1024" };
+		static const int previewSizes[] = { 256, 512, 1024 };
+		
 		// Layout
 		ImGui::Text("Noise Settings");
-		ImGui::Combo("Resolution", &resolutionIndex, resolutions, IM_ARRAYSIZE(resolutions));
-		ImGui::SliderFloat("Roughness", &roughness, 0.01f, 1.0f);
-		ImGui::SliderFloat("Marbling", &marbling, 0.0f, 10.0f);
-		ImGui::InputInt("Seed", &seed);
-		ImGui::SliderInt("Low Freq Skip", &low_freq_skip, 0, 12);
-		ImGui::SliderInt("High Freq Skip", &high_freq_skip, 0, 12);
+		if(ImGui::Combo("Resolution", &resolutionIndex, resolutions, IM_ARRAYSIZE(resolutions)))
+		{
+			Logger::Log(std::string("Resolution = ") + resolutions[resolutionIndex]);
+		}
+
+		LabeledWidgetWithLock("##lockRough", &lockRoughness, [&] () {
+			LogWidget("Roughness", &roughness, [&] () {
+				return ImGui::SliderFloat("Roughness", &roughness, 0.01f, 1.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockMarb", &lockMarbling, [&] () {
+			LogWidget("Marbling", &marbling, [&] () {
+				return ImGui::SliderFloat("Marbling", &marbling, 0.0f, 10.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockSeed", &lockSeed, [&] () {
+			LogWidget("Seed", &seed, [&] () {
+				return ImGui::InputInt("Seed", &seed);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockLF", &lockLowFreq, [&] () {
+			LogWidget("Low Freq Skip", &low_freq_skip, [&] () {
+				return ImGui::SliderInt("Low Freq Skip", &low_freq_skip, 0, 12);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockHF", &lockHighFreq, [&] () {
+			LogWidget("High Freq Skip", &high_freq_skip, [&] () {
+				return ImGui::SliderInt("High Freq Skip", &high_freq_skip, 0, 12);
+				});
+			});
 
 		ImGui::SeparatorText("Turbulence");
-		ImGui::SliderFloat("Turbulence", &turbulence, 0.0f, 64.0f);
-		ImGui::Combo("Turbulence Res", &turbulence_res, resolutions, IM_ARRAYSIZE(resolutions));
-		ImGui::SliderFloat("Turbulence Roughness", &turbulence_roughness, 0.01f, 1.0f);
-		ImGui::SliderInt("Turb Low Freq Skip", &turbulence_low_freq_skip, 0, 12);
-		ImGui::SliderInt("Turb High Freq Skip", &turbulence_high_freq_skip, 0, 12);
-		ImGui::SliderFloat("Turbulence Marbling", &turbulence_marbling, 0.0f, 10.0f);
-		ImGui::SliderFloat("Exp Shift", &turbulence_expshift, -4.0f, 4.0f);
-		ImGui::SliderFloat("Turb Offset X", &turbulence_offset_x, -1.0f, 1.0f);
-		ImGui::SliderFloat("Turb Offset Y", &turbulence_offset_y, -1.0f, 1.0f);
+
+		LabeledWidgetWithLock("##lockTurb", &lockTurbulence, [&] () {
+			LogWidget("Turbulence", &turbulence, [&] () {
+				return ImGui::SliderFloat("Turbulence", &turbulence, 0.0f, 64.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockTurbRes", &lockTurbRes, [&] () {
+			LogWidget("Turbulence Res", &turbulence_res, [&] () {
+				return ImGui::Combo("Turbulence Res", &turbulence_res, resolutions, IM_ARRAYSIZE(resolutions));
+				});
+			});
+
+		LabeledWidgetWithLock("##lockTurbRough", &lockTurbRoughness, [&] () {
+			LogWidget("Turbulence Roughness", &turbulence_roughness, [&] () {
+				return ImGui::SliderFloat("Turbulence Roughness", &turbulence_roughness, 0.01f, 1.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockTurbLF", &lockTurbLow, [&] () {
+			LogWidget("Turb Low Freq Skip", &turbulence_low_freq_skip, [&] () {
+				return ImGui::SliderInt("Turb Low Freq Skip", &turbulence_low_freq_skip, 0, 12);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockTurbHF", &lockTurbHigh, [&] () {
+			LogWidget("Turb High Freq Skip", &turbulence_high_freq_skip, [&] () {
+				return ImGui::SliderInt("Turb High Freq Skip", &turbulence_high_freq_skip, 0, 12);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockTurbMarb", &lockTurbMarbling, [&] () {
+			LogWidget("Turbulence Marbling", &turbulence_marbling, [&] () {
+				return ImGui::SliderFloat("Turbulence Marbling", &turbulence_marbling, 0.0f, 10.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockExp", &lockExpShift, [&] () {
+			LogWidget("Exp Shift", &turbulence_expshift, [&] () {
+				return ImGui::SliderFloat("Exp Shift", &turbulence_expshift, -4.0f, 4.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockX", &lockOffsetX, [&] () {
+			LogWidget("Turb Offset X", &turbulence_offset_x, [&] () {
+				return ImGui::SliderFloat("Turb Offset X", &turbulence_offset_x, -1.0f, 1.0f);
+				});
+			});
+
+		LabeledWidgetWithLock("##lockY", &lockOffsetY, [&] () {
+			LogWidget("Turb Offset Y", &turbulence_offset_y, [&] () {
+				return ImGui::SliderFloat("Turb Offset Y", &turbulence_offset_y, -1.0f, 1.0f);
+				});
+			});
 
 		ImGui::SeparatorText("Preview Output");
-		ImGui::InputInt("Preview Width", &previewWidth);
-		ImGui::InputInt("Preview Height", &previewHeight);
+		if(ImGui::Combo("Preview Size", &previewSize, previewResolution, IM_ARRAYSIZE(previewResolution)))
+		{
+			// Logger::Log(std::string("Preview Size") + previewSizes[previewSize]);
+		}
+
+		int previewWidth = previewSizes[previewSize];
+		int previewHeight = previewSizes[previewSize];
+		noisePreview.SetPreviewWidth(previewWidth);
+		noisePreview.SetPreviewHeight(previewHeight);
 
 		if(!isGenerating)
 		{
-			if(ImGui::Button("Generate 2D Noise") && !isGenerating)
+			if(ImGui::Button(" " ICON_FA_RANDOM " Randomize"))
+			{
+				if(!lockSeed) seed = rand();
+				if(!lockRoughness) roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockMarbling) marbling = ImLerp(0.0f, 10.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockLowFreq) low_freq_skip = rand() % 5;
+				if(!lockHighFreq) high_freq_skip = rand() % 5; 
+				if(!lockTurbulence) turbulence = ImLerp(0.0f, 64.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockTurbRes) turbulence_res = rand() % IM_ARRAYSIZE(resolutions);
+				if(!lockTurbRoughness) turbulence_roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockTurbLow) turbulence_low_freq_skip = rand() % 5;
+				if(!lockTurbHigh) turbulence_high_freq_skip = rand() % 5;
+				if(!lockTurbMarbling) turbulence_marbling = ImLerp(0.0f, 10.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockExpShift) turbulence_expshift = ImLerp(-4.0f, 4.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockOffsetX) turbulence_offset_x = ImLerp(-1.0f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
+				if(!lockOffsetY) turbulence_offset_y = ImLerp(-1.0f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
+				Logger::Log("Randomize noise settings");
+			}
+
+			if(ImGui::Button(ICON_FA_PLAY " Generate 2D Noise") && !isGenerating)
 			{
 				int res = 8 << resolutionIndex;
 				noise_properties props = {};
@@ -292,7 +471,7 @@ void GuiManager::DrawUI()
 
 			ImGui::SameLine();
 
-			if(ImGui::Button("Clear"))
+			if(ImGui::Button(ICON_FA_TRASH " Clear"))
 			{
 				this->SetNoiseData(nullptr, 0, 0);
 				Logger::Warn("Preview cleared");
@@ -307,9 +486,8 @@ void GuiManager::DrawUI()
 		ImGui::End();
 	}
 
-
-
 	noisePreview.Draw();
+
 
 	// Log window
 	if(showOutputLog)

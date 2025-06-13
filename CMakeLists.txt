@@ -75,6 +75,8 @@ add_executable(NoiseGenerator
 
 
   src/ThirdParty/stb_image_write.h
+  src/ThirdParty/IconsFontAwesome5.h
+
 )
 
 target_include_directories(NoiseGenerator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
