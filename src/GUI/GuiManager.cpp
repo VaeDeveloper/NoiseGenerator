@@ -12,15 +12,15 @@
 #include "Noise/NoiseGenerator.h"
 #include "Image/ImageExporter.h"
 #include <random>
-
 #include <type_traits>
+
 
 namespace NG
 {
 	constexpr int spaceOffset = 24;
 	constexpr const char* GitURL = "https://github.com/VaeDeveloper/NoiseGenerator";
 	
-	static bool fullscreen = false;
+	
 
 	template<typename WidgetFunc>
 	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
@@ -190,7 +190,7 @@ void GuiManager::DrawMenuBar()
 
 			ImGui::Separator();
 
-			if(ImGui::MenuItem(WITH_ICON("DoorOpen","Exit", "Alt+F4")))
+			if(ImGui::MenuItem(WITH_ICON("DoorOpen","Exit"), "Alt+F4"))
 			{
 				exit(0);
 			}
@@ -200,12 +200,12 @@ void GuiManager::DrawMenuBar()
 
 		if(ImGui::BeginMenu(WITH_ICON("Eye","View")))
 		{
-			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log", nullptr, &showOutputLog));
+			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &showOutputLog);
 
-			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen", "F11", &NG::fullscreen)))
+			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &fullscreen))
 			{
 				GLFWwindow* window = glfwGetCurrentContext();
-				if(NG::fullscreen)
+				if(fullscreen)
 				{
 					const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 					glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
@@ -656,10 +656,10 @@ void GuiManager::DrawUI()
 
 	if(ImGui::IsKeyPressed(ImGuiKey_F11, false))
 	{
-		NG::fullscreen = !NG::fullscreen;
+		fullscreen = !fullscreen;
 
 		GLFWwindow* window = glfwGetCurrentContext();
-		if(NG::fullscreen)
+		if(fullscreen)
 		{
 			const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 			glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);

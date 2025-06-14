@@ -92,6 +92,7 @@ private:
 	void DrawResolutionComboWithLock();
 
 private:
+	bool fullscreen = false;
 	bool dockBuilt = false;
 	bool showOutputLog = true;
 	bool showNoiseGenerator = true;
