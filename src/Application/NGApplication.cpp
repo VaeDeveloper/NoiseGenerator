@@ -1,5 +1,5 @@
 #include "NGApplication.h"
-#include "Logger/Logger.h"
+
 
 
 NGApplication::NGApplication() {}
@@ -9,65 +9,97 @@ NGApplication::~NGApplication()
 	Shutdown();
 }
 
-bool NGApplication::Init() {
-	if(!InitGLFW())
+InitStatus NGApplication::Init() 
+{
+	auto glfwStatus = InitGLFW();
+	if(glfwStatus != InitStatus::Success) 
 	{
-		return false;
+		Logger::Err("Failed to initialize GLFW");
+		return glfwStatus;
 	}
 
-	if(!InitOpenGL()) 
+	auto glStatus = InitOpenGL();
+	if(glStatus != InitStatus::Success) 
 	{
-		return false;
+		Logger::Err("Failed to initialize OpenGL");
+		return glStatus;
 	}
+	
+	LogGraphicsInfo();
 
 	gui.Init(window);
 	Logger::Log("Application initialized");
-	return true;
+	return InitStatus::Success;
 }
 
-bool NGApplication::InitGLFW()
+InitStatus NGApplication::InitGLFW()
 {
-	if(!glfwInit()) 
+	if(!glfwInit())
 	{
 		Logger::Err("Failed to initialize GLFW");
-		return false;
+		return InitStatus::GLFW_InitFailed;
 	}
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(WindowWidth, WindowHeight, "Noise Generator", nullptr, nullptr);
+	window = glfwCreateWindow(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), "Noise Generator", nullptr, nullptr);
 	if(!window) 
 	{
 		Logger::Err("Failed to create GLFW window");
 		glfwTerminate();
-		return false;
+		return InitStatus::WindowCreationFailed;
 	}
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	Logger::Log("GLFW initialized");
-	return true;
+	int glfwMajor, glfwMinor, glfwRev;
+	glfwGetVersion(&glfwMajor, &glfwMinor, &glfwRev);
+
+	Logger::Log("GLFW Version      : " + std::to_string(glfwMajor) + "." +
+		std::to_string(glfwMinor) + "." + std::to_string(glfwRev));
+
+	return InitStatus::Success;
 }
 
-bool NGApplication::InitOpenGL() 
+InitStatus NGApplication::InitOpenGL() 
 {
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
 	{
 		Logger::Err("Failed to initialize GLAD");
-		return false;
+		return InitStatus::GLAD_InitFailed;
 	}
 
-	Logger::Log("OpenGL context initialized");
-	return true;
+	return InitStatus::Success;
 }
 
 void NGApplication::RenderScene() 
 {
-	glViewport(0, 0, WindowWidth, WindowHeight);
+	glViewport(0, 0, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void NGApplication::LogGraphicsInfo()
+{
+	Logger::Log("OpenGL Version    : " + std::string((const char*)glGetString(GL_VERSION)));
+	Logger::Log("GLSL Version      : " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
+	Logger::Log("GL Vendor         : " + std::string((const char*)glGetString(GL_VENDOR)));
+	Logger::Log("GL Renderer       : " + std::string((const char*)glGetString(GL_RENDERER)));
+}
+
+std::string NGApplication::StatusToString(InitStatus status)
+{
+	switch(status)
+	{
+	case InitStatus::Success: return "Success";
+	case InitStatus::GLFW_InitFailed: return "GLFW initialization failed";
+	case InitStatus::WindowCreationFailed: return "Window creation failed";
+	case InitStatus::OpenGL_InitFailed: return "OpenGL initialization failed";
+	case InitStatus::GLAD_InitFailed: return "GLAD loading failed";
+	default: return "Unknown error";
+	}
 }
 
 void NGApplication::Run() 

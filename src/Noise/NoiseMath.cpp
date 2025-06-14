@@ -1,7 +1,8 @@
 #include "NoiseMath.h"
 #include <cmath>
+#include <immintrin.h> 
 
-namespace NoiseGenerator
+namespace NG
 {
 	int CalcIndex1D(int x, int res)
 	{
@@ -62,10 +63,10 @@ namespace NoiseGenerator
 
 		for(int i = 0; i < 4; i++)
 		{
-			c[i] = NoiseGenerator::Interpolate1D(data + i * 4, xf);
+			c[i] = NG::Interpolate1D(data + i * 4, xf);
 		}
 
-		return NoiseGenerator::Interpolate1D(c, yf);
+		return NG::Interpolate1D(c, yf);
 	}
 
 	float Interpolate3D(const float* data, float xf, float yf, float zf)
@@ -74,10 +75,10 @@ namespace NoiseGenerator
 
 		for(int i = 0; i < 4; i++)
 		{
-			c[i] = NoiseGenerator::Interpolate2D(data + i * 16, xf, yf);
+			c[i] = NG::Interpolate2D(data + i * 16, xf, yf);
 		}
 
-		return NoiseGenerator::Interpolate1D(c, zf);
+		return NG::Interpolate1D(c, zf);
 	}
 
 	float Interpolate1D_Linear(const float* data, float xf)
@@ -85,16 +86,17 @@ namespace NoiseGenerator
 		return data[1] + xf * (data[2] - data[1]);
 	}
 
+
 	float Interpolate2D_Linear(const float* data, float xf, float yf)
 	{
 		float c[4];
 
 		for(int i = 0; i < 4; i++)
 		{
-			c[i] = NoiseGenerator::Interpolate1D_Linear(data + i * 4, xf);
+			c[i] = NG::Interpolate1D_Linear(data + i * 4, xf);
 		}
 
-		return NoiseGenerator::Interpolate1D_Linear(c, yf);
+		return NG::Interpolate1D_Linear(c, yf);
 	}
 
 	float Interpolate3D_Linear(const float* data, float xf, float yf, float zf)
@@ -103,10 +105,10 @@ namespace NoiseGenerator
 
 		for(int i = 0; i < 4; i++)
 		{
-			c[i] = NoiseGenerator::Interpolate2D_Linear(data + i * 16, xf, yf);
+			c[i] = NG::Interpolate2D_Linear(data + i * 16, xf, yf);
 		}
 
-		return NoiseGenerator::Interpolate1D_Linear(c, zf);
+		return NG::Interpolate1D_Linear(c, zf);
 	}
 
 	float Sample2D(const float* data, short width, short height, float x, float y)

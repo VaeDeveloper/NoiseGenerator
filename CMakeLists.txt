@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.11)
+﻿cmake_minimum_required(VERSION 3.11)
 project(NoiseGenerator)
 
 include(FetchContent)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GLFW
 FetchContent_Declare(
@@ -63,6 +67,7 @@ add_executable(NoiseGenerator
   src/GUI/GuiManager.cpp
   src/GUI/GuiManager.h
   src/GUI/GuiUtils.h
+  src/GUI/IconRegistry.h
   src/Noise/NoiseGenerator.cpp
   src/Noise/NoiseGenerator.h
   src/Noise/NoiseMath.cpp
@@ -77,7 +82,40 @@ add_executable(NoiseGenerator
 
   src/ThirdParty/stb_image_write.h
   src/ThirdParty/IconsFontAwesome5.h
+)
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
+    src/main.cpp
+    
+    src/Application/NGApplication.cpp
+    src/Application/NGApplication.h
+    
+    src/GUI/GuiManager.cpp
+    src/GUI/GuiManager.h
+    src/GUI/GuiUtils.h
+    src/GUI/IconRegistry.h
+    
+    src/Image/ImageExporter.cpp
+    src/Image/ImageExporter.h
+    
+    src/Logger/Logger.cpp
+    src/Logger/Logger.h
+    src/Logger/LoggerUI.h
+    
+    src/Math/vector.h
+    
+    src/Noise/NoiseGenerator.cpp
+    src/Noise/NoiseGenerator.h
+    src/Noise/NoiseMath.cpp
+    src/Noise/NoiseMath.h
+    src/Noise/NoisePreviewPanel.cpp
+    src/Noise/NoisePreviewPanel.h
+    src/Noise/NoiseTypes.h
+    
+    src/Utils/RandomUtils.h
+    
+    src/ThirdParty/stb_image_write.h
+    src/ThirdParty/IconsFontAwesome5.h
 )
 
 target_include_directories(NoiseGenerator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -90,3 +128,18 @@ if (WIN32)
     WIN32_EXECUTABLE TRUE
   )
 endif()
+
+option(USE_UNICODE_MESSAGES "Use emoji in build messages" ON)
+message(STATUS "🚀 Configuring NoiseGenerator project")
+message(STATUS "🧠 Using C++ standard: ${CMAKE_CXX_STANDARD}")
+
+if (WIN32)
+    message(STATUS "🖥  Platform: Windows")
+elseif (UNIX AND NOT APPLE)
+    message(STATUS "🐧 Platform: Linux")
+elseif (APPLE)
+    message(STATUS "🍎 Platform: macOS")
+endif()
+
+message(STATUS "📦 GLFW, GLAD, and ImGui successfully fetched and added")
+message(STATUS "✅ NoiseGenerator target configured and linked")

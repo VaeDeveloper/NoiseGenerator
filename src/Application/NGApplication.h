@@ -1,6 +1,16 @@
 #pragma once
 #include <glad/glad.h>
 #include "GUI/GuiManager.h"
+#include "Logger/Logger.h"
+
+enum class InitStatus
+{
+	Success,
+	GLFW_InitFailed,
+	WindowCreationFailed,
+	OpenGL_InitFailed,
+	GLAD_InitFailed
+};
 
 class NGApplication
 {
@@ -8,10 +18,11 @@ public:
 	NGApplication();
 	~NGApplication();
 
-	bool Init();
+	InitStatus Init();
 	void Run();
 	void Shutdown();
 
+	static std::string StatusToString(InitStatus status);
 private:
 	GLFWwindow* window = nullptr;
 	GuiManager gui;
@@ -19,7 +30,10 @@ private:
 	const float WindowWidth = 2000;
 	const float WindowHeight = 1020;
 
-	bool InitGLFW();
-	bool InitOpenGL();
+	InitStatus InitGLFW();
+	InitStatus InitOpenGL();
 	void RenderScene();
+
+	void LogGraphicsInfo();
+
 };

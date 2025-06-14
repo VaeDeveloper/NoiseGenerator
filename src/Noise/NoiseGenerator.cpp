@@ -8,7 +8,7 @@
 #include <cstring>
 
 
-namespace NoiseGenerator
+namespace NG
 {
 	float* StupidNoise1D(int res, int freq, float* data2, float scale, unsigned int seed)
 	{

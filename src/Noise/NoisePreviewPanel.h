@@ -10,15 +10,16 @@ public:
 
 	bool IsInitialized() const { return textureInitialized; }
 	GLuint GetTextureId() const { return textureId; }
-	int GetWidth() const { return texWidth; }
-	int GetHeight() const { return texHeight; }
+	float GetWidth() const { return texWidth; }
+	float GetHeight() const { return texHeight; }
 
 	void SetPreviewWidth(float Width) { previewWidht = Width; }
 	void SetPreviewHeight(float Height) { previewHeight = Height; }
 private:
-	GLuint textureId = 0;
-	int texWidth = 0, texHeight = 0;
 	bool textureInitialized = false;
-
-	float previewWidht, previewHeight;
+	float texWidth = 0;
+	float texHeight = 0;
+	float previewWidht = 0;
+	float previewHeight = 0;
+	GLuint textureId = 0;
 };
