@@ -62,4 +62,5 @@ Internet connection (for dependency fetching)
 - [ ] GPU acceleration (OpenGL / compute shaders) 
 - [ ] Export to .bmp / .jpg - DONE !!! 
 - [ ] Multi-threaded tile-based noise generation
-- [ ] Add ImFileDialog for save image
+- [ ] ImFileDialog for save image
+- [ ] Saving Layout's 
