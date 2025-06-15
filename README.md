@@ -1,7 +1,7 @@
 # Noise Generator
 ![C++17](https://img.shields.io/badge/language-C%2B%2B17-blue)
 ![OpenGL](https://img.shields.io/badge/OpenGL-3.3+-green)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue)
+![Platform](https://img.shields.io/badge/platform-Windows-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 An interactive C++ desktop application for generating and visualizing procedural 2D noise (including Perlin noise) with customizable parameters, preview rendering, and export options.
