@@ -20,8 +20,6 @@ namespace NG
 	constexpr int spaceOffset = 24;
 	constexpr const char* GitURL = "https://github.com/VaeDeveloper/NoiseGenerator";
 	
-	
-
 	template<typename WidgetFunc>
 	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
 	{
