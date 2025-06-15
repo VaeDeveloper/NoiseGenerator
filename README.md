@@ -15,7 +15,7 @@ An interactive C++ desktop application for generating and visualizing procedural
 - ✅ Adjustable parameters: resolution, seed, roughness, marbling, frequency skips
 - ✅ Turbulence distortion with exponential shifting and offsets
 - ✅ Live preview of generated noise textures
-- ✅ Export to `.png` and `.tga` formats
+- ✅ Export to `.png`, `.tga`, `.bmp` and `.jpg` formats
 - ✅ Built-in logger (with UI panel and save-to-file functionality)
 - ✅ Asynchronous generation with visual progress
 
@@ -69,6 +69,7 @@ Internet connection (for dependency fetching)
 ## 🧠 Roadmap / Ideas
 
 - [ ] Save/load generation presets (e.g., JSON)
-- [ ] GPU acceleration (OpenGL / compute shaders)
-- [ ] Export to .bmp / .jpg
+- [ ] GPU acceleration (OpenGL / compute shaders) 
+- [ ] Export to .bmp / .jpg - DONE !!! 
 - [ ] Multi-threaded tile-based noise generation
+- [ ] Add ImFileDialog for save image
