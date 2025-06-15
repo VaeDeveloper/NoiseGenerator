@@ -13,8 +13,32 @@
 #include "Image/ImageExporter.h"
 #include <random>
 #include <type_traits>
+#include <nfd.h>
+#include <string>
 
 
+inline std::string ToUpper(const std::string& str) 
+{
+	std::string result = str;
+	std::transform(result.begin(), result.end(), result.begin(),
+		[] (unsigned char c) { return std::toupper(c); });
+	return result;
+}
+
+inline bool EndsWith(const std::string& str, const std::string& suffix) 
+{
+	return str.size() >= suffix.size() &&
+		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string EnsureExtension(const std::string& path, const std::string& ext) 
+{
+	if(!EndsWith(path, ext) && !EndsWith(path, ToUpper(ext))) 
+	{
+		return path + ext;
+	}
+	return path;
+}
 namespace NG
 {
 	constexpr int spaceOffset = 24;
@@ -38,15 +62,15 @@ namespace NG
 		float space = ImGui::GetContentRegionAvail().x;
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - spaceOffset);
 
-		const char* iconKey = *lockState ? "Lock" : "LockOpen";
+		
 
 		ImGui::PushID(lockID);
-		if(ImGui::Button(WITH_ICON(iconKey, *lockState ? "Locked" : "Unlocked"), ImVec2(24, 22)))
+		if(ImGui::Button(*lockState ? ICON_FA_LOCK : ICON_FA_LOCK_OPEN, ImVec2(24, 22)))
 		{
 			*lockState = !*lockState;
 			Logger::Log(std::string("Lock toggled: ") + lockID + " = " + (*lockState ? "true" : "false"));
 		}
-		ImGui::PopID(); 
+		ImGui::PopID();
 	}
 
 	template<typename T>
@@ -57,6 +81,8 @@ namespace NG
 			Logger::Log(std::string(label) + " = " + NG::StringUtils::ToString(*value));
 		}
 	}
+
+
 }
 
 void GuiManager::Init(GLFWwindow* window)
@@ -115,36 +141,78 @@ void GuiManager::DrawMenuBar()
 		{
 			if(ImGui::BeginMenu(WITH_ICON("Save", "Save As")))
 			{
+
 				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as PNG")))
 				{
 					if(noisePreview.IsInitialized())
 					{
-						if(ImageExporter::SavePNG("export.png", noisePreview.GetTextureId(), 
-							static_cast<int>(noisePreview.GetWidth()), 
-							static_cast<int>(noisePreview.GetHeight())))
+						nfdchar_t* outPath = nullptr;
+						nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
+						if(result == NFD_OKAY)
 						{
-							Logger::Log("Saved noise as PNG: export.png");
+							std::string pathStr(outPath);
+							if(pathStr.length() < 4 ||
+								!(EndsWith(pathStr, ".png") || EndsWith(pathStr, ".PNG")))
+							{
+								pathStr += ".png";
+							}
+
+							bool ok = ImageExporter::SavePNG(
+								pathStr.c_str(),
+								noisePreview.GetTextureId(),
+								static_cast<int>(noisePreview.GetWidth()),
+								static_cast<int>(noisePreview.GetHeight())
+							);
+
+							if(ok)
+								Logger::Log("Saved noise as PNG: " + pathStr);
+							else
+								Logger::Err("Failed to save PNG: " + pathStr);
+
+							free(outPath);
+						}
+						else if(result == NFD_CANCEL)
+						{
+							Logger::Log("Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err("Failed to save PNG");
+							Logger::Err("NFD Error: " + std::string(NFD_GetError()));
 						}
 					}
 				}
 
-				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as TGA")))
+				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as TGA"))) 
 				{
-					if(noisePreview.IsInitialized())
+					if(noisePreview.IsInitialized()) 
 					{
-						if(ImageExporter::SaveTGA("export.tga", noisePreview.GetTextureId(), 
-							static_cast<int>(noisePreview.GetWidth()), 
-							static_cast<int>(noisePreview.GetHeight())))
+						nfdchar_t* outPath = nullptr;
+						nfdresult_t result = NFD_SaveDialog("tga", nullptr, &outPath);
+						if(result == NFD_OKAY) 
 						{
-							Logger::Log("Saved noise as TGA: export.tga");
+							std::string pathStr = EnsureExtension(outPath, ".tga");
+							bool ok = ImageExporter::SaveTGA(pathStr.c_str(),
+								noisePreview.GetTextureId(),
+								static_cast<int>(noisePreview.GetWidth()),
+								static_cast<int>(noisePreview.GetHeight()));
+
+							if(ok)
+							{
+								Logger::Log("Saved noise as TGA: " + pathStr);
+							}
+							else
+							{
+								Logger::Err("Failed to save TGA: " + pathStr);
+							}
+							free(outPath);
 						}
-						else
+						else if(result == NFD_CANCEL) 
 						{
-							Logger::Err("Failed to save TGA");
+							Logger::Log("Save dialog canceled.");
+						}
+						else 
+						{
+							Logger::Err("NFD Error: " + std::string(NFD_GetError()));
 						}
 					}
 				}
@@ -153,32 +221,76 @@ void GuiManager::DrawMenuBar()
 				{
 					if(noisePreview.IsInitialized())
 					{
-						if(ImageExporter::SaveBMP("export.bmp", noisePreview.GetTextureId(), 
-							static_cast<int>(noisePreview.GetWidth()), 
-							static_cast<int>(noisePreview.GetHeight())))
+						nfdchar_t* outPath = nullptr;
+						nfdresult_t result = NFD_SaveDialog("bmp", nullptr, &outPath);
+						if(result == NFD_OKAY)
 						{
-							Logger::Log("Saved BMP: export.bmp");
+							std::string pathStr = EnsureExtension(outPath, ".bmp");
+
+							bool ok = ImageExporter::SaveBMP(
+								pathStr.c_str(),
+								noisePreview.GetTextureId(),
+								static_cast<int>(noisePreview.GetWidth()),
+								static_cast<int>(noisePreview.GetHeight()));
+
+							if(ok)
+							{
+								Logger::Log("Saved BMP: " + pathStr);
+							}
+							else
+							{
+								Logger::Err("Failed to save BMP: " + pathStr);
+							}
+
+							free(outPath);
+						}
+						else if(result == NFD_CANCEL)
+						{
+							Logger::Log("Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err("Failed to save BMP");
+							Logger::Err(std::string("NFD Error: ") + NFD_GetError());
 						}
 					}
 				}
 
-				if(ImGui::MenuItem(WITH_ICON("FileImage","Export as JPG")))
+				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as JPG")))
 				{
 					if(noisePreview.IsInitialized())
 					{
-						if(ImageExporter::SaveJPG("export.jpg", noisePreview.GetTextureId(),
-							static_cast<int>(noisePreview.GetWidth()), 
-							static_cast<int>(noisePreview.GetHeight()), 90))
+						nfdchar_t* outPath = nullptr;
+						nfdresult_t result = NFD_SaveDialog("jpg", nullptr, &outPath);
+						if(result == NFD_OKAY)
 						{
-							Logger::Log("Saved JPG: export.jpg");
+							std::string pathStr = EnsureExtension(outPath, ".jpg");
+
+							bool ok = ImageExporter::SaveJPG(
+								pathStr.c_str(),
+								noisePreview.GetTextureId(),
+								static_cast<int>(noisePreview.GetWidth()),
+								static_cast<int>(noisePreview.GetHeight()),
+								90 // JPEG quality
+							);
+
+							if(ok)
+							{
+								Logger::Log("Saved JPG: " + pathStr);
+							}
+							else
+							{
+								Logger::Err("Failed to save JPG: " + pathStr);
+							}
+
+							free(outPath);
+						}
+						else if(result == NFD_CANCEL)
+						{
+							Logger::Log("Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err("Failed to save JPG");
+							Logger::Err(std::string("NFD Error: ") + NFD_GetError());
 						}
 					}
 				}
@@ -188,7 +300,7 @@ void GuiManager::DrawMenuBar()
 
 			ImGui::Separator();
 
-			if(ImGui::MenuItem(WITH_ICON("DoorOpen","Exit"), "Alt+F4"))
+			if(ImGui::MenuItem(WITH_ICON("DoorOpen", "Exit"), "Alt+F4"))
 			{
 				exit(0);
 			}
@@ -196,7 +308,7 @@ void GuiManager::DrawMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if(ImGui::BeginMenu(WITH_ICON("Eye","View")))
+		if(ImGui::BeginMenu(WITH_ICON("Eye", "View")))
 		{
 			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &showOutputLog);
 
@@ -382,6 +494,7 @@ void GuiManager::DrawResolutionComboWithLock()
 		allLocked = !allLocked;
 		SetAllLock(allLocked);
 		Logger::Log(std::string(allLocked ? "All parameters locked" : "All parameters unlocked"));
+
 	}
 	ImGui::PopID();
 }
@@ -464,6 +577,8 @@ void GuiManager::DrawUI()
 
 	ImGui::Begin("DockSpaceRoot", nullptr, host_flags);
 	DrawMenuBar();
+
+
 	ImGui::DockSpace(dockspace_id);
 	ImGui::End();
 

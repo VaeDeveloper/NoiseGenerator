@@ -2,6 +2,7 @@
 #include "Application/NGApplication.h"
 #include "Logger/Logger.h"
 
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	NGApplication app;

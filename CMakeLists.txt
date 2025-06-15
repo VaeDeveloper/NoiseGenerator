@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# -----------------------
 # GLFW
+# -----------------------
 FetchContent_Declare(
   glfw
   GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -15,7 +17,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+# -----------------------
 # GLAD (OpenGL loader)
+# -----------------------
 FetchContent_Declare(
   glad
   GIT_REPOSITORY https://github.com/Dav1dde/glad.git
@@ -23,13 +27,38 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glad)
 
+# -----------------------
 # ImGui
+# -----------------------
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
   GIT_TAG        docking  
 )
 FetchContent_MakeAvailable(imgui)
+
+# -----------------------
+# NativeFileDialog (NFD)
+# -----------------------
+FetchContent_Declare(
+  nativefiledialog
+  GIT_REPOSITORY https://github.com/mlabbe/nativefiledialog.git
+  GIT_TAG        master
+)
+FetchContent_MakeAvailable(nativefiledialog)
+
+add_library(
+  nfd 
+  STATIC
+  ${nativefiledialog_SOURCE_DIR}/src/nfd_common.c
+  ${nativefiledialog_SOURCE_DIR}/src/nfd_win.cpp
+)
+
+target_include_directories(
+  nfd 
+  PUBLIC
+  ${nativefiledialog_SOURCE_DIR}/src/include
+)
 
 find_package(OpenGL REQUIRED)
 
@@ -81,7 +110,9 @@ add_executable(NoiseGenerator
 
 
   src/ThirdParty/stb_image_write.h
+  src/ThirdParty/stb_image.h
   src/ThirdParty/IconsFontAwesome5.h
+
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
@@ -116,10 +147,26 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     
     src/ThirdParty/stb_image_write.h
     src/ThirdParty/IconsFontAwesome5.h
+
 )
 
-target_include_directories(NoiseGenerator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(NoiseGenerator PRIVATE imgui glfw glad OpenGL::GL)
+target_include_directories(NoiseGenerator 
+  PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/_deps/nativefiledialog-src/src/include
+)
+
+target_link_libraries(
+  NoiseGenerator 
+  PRIVATE 
+  imgui 
+  glfw 
+  glad 
+  OpenGL::GL  
+  nfd
+)
+
+message(STATUS "NFD include dir: ${nativefiledialog_SOURCE_DIR}/include")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT NoiseGenerator)
 
