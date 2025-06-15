@@ -1,6 +1,8 @@
 # Noise Generator
 ![C++17](https://img.shields.io/badge/language-C%2B%2B17-blue)
-![OpenGL](https://img.shields.io/badge/OpenGL-3.3+-green)
+![OpenGL](https://img.shields.io/badge/OpenGL-4.3-green)
+![GLFW](https://img.shields.io/badge/Windowing-GLFW-0099cc)
+![ImGui](https://img.shields.io/badge/GUI-Dear%20ImGui-blueviolet)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
