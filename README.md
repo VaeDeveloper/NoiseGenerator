@@ -49,20 +49,10 @@ cd NoiseGenerator
 cmake -B build -G "Visual Studio 17 2022" -A x64
 ```
 
-Linux
-```
-git clone https://github.com/VaeDeveloper/NoiseGenerator.git
-cd NoiseGenerator
-mkdir build && cd build
-cmake ..
-make
-./NoiseGenerator
-```
-
 ✅ Requirements
 CMake ≥ 3.11
 C++17 compatible compiler
-OpenGL 3.3+ support
+OpenGL 4.3+ support
 Internet connection (for dependency fetching)
 
 
