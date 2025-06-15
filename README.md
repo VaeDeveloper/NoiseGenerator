@@ -34,7 +34,7 @@ An interactive C++ desktop application for generating and visualizing procedural
 | [GLAD](https://glad.dav1d.de/)        | OpenGL function loader       |
 | [Dear ImGui](https://github.com/ocornut/imgui) | GUI rendering                |
 | stb_image_write  | PNG & TGA image saving   |
-| OpenGL 3.3+       | GPU rendering backend     |
+| OpenGL 4.3+       | GPU rendering backend     |
 ---
 
 ## 🛠 Building with CMake
