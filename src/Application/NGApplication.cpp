@@ -2,7 +2,7 @@
 #include "Config/SettingsManager.h"
 
 
-NGApplication::NGApplication() {}
+NGApplication::NGApplication(){}
 
 NGApplication::~NGApplication() 
 {
@@ -12,6 +12,8 @@ NGApplication::~NGApplication()
 InitStatus NGApplication::Init() 
 {
 	SettingsManager::Get().Load();
+	WindowWidth = SettingsManager::Get().GetWindowWidth();
+	WindowHeight = SettingsManager::Get().GetWindowHeight();
 
 	auto glfwStatus = InitGLFW();
 	if(glfwStatus != InitStatus::Success) 
@@ -29,7 +31,7 @@ InitStatus NGApplication::Init()
 	
 	LogGraphicsInfo();
 
-	gui.Init(window);
+	GUI.Init(window);
 	Logger::Log("Application initialized");
 	return InitStatus::Success;
 }
@@ -45,7 +47,7 @@ InitStatus NGApplication::InitGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(static_cast<int>(SettingsManager::Get().GetWindowWidth()), static_cast<int>(SettingsManager::Get().GetWindowHeight()), "Noise Generator", nullptr, nullptr);
+	window = glfwCreateWindow(WindowWidth, WindowHeight, "Noise Generator", nullptr, nullptr);
 	if(!window) 
 	{
 		Logger::Err("Failed to create GLFW window");
@@ -78,7 +80,7 @@ InitStatus NGApplication::InitOpenGL()
 
 void NGApplication::RenderScene() 
 {
-	glViewport(0, 0, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+	glViewport(0, 0, WindowWidth, WindowHeight);
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -110,11 +112,13 @@ void NGApplication::Run()
 	{
 		glfwPollEvents();
 
-		gui.BeginFrame();
-		gui.DrawUI();
+		GUI.BeginFrame();
+		GUI.DrawUI();
 
+		/* render */
 		RenderScene();
-		gui.Render();
+
+		GUI.Render();
 
 		glfwSwapBuffers(window);
 	}
@@ -122,7 +126,7 @@ void NGApplication::Run()
 
 void NGApplication::Shutdown()
 {
-	gui.Shutdown();
+	GUI.Shutdown();
 	if(window) 
 	{
 		glfwDestroyWindow(window);

@@ -4,21 +4,19 @@
 #include "INIReader.h"
 
 
-class SettingsManager
+class SettingsManager final
 {
 public:
 	static SettingsManager& Get();
 
 	bool Load(const std::string& path = "../config/settings.ini");
 
-	// Getters
+
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;
 
-
 	float GetFontSize() const;
 	std::string GetTheme() const;
-
 
 private:
 	SettingsManager() = default;

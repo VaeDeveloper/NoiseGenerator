@@ -25,10 +25,10 @@ public:
 	static std::string StatusToString(InitStatus status);
 private:
 	GLFWwindow* window = nullptr;
-	GuiManager gui;
+	GuiManager GUI;
 
-	const float WindowWidth = 2000;
-	const float WindowHeight = 1120;
+	int WindowWidth = 2000;
+	int WindowHeight = 1120;
 
 	InitStatus InitGLFW();
 	InitStatus InitOpenGL();

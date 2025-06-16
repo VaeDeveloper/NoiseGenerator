@@ -383,6 +383,12 @@ void GuiManager::DrawMenuBar()
 					glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
 				}
 			}
+			bool showInfo = noisePreview.GetShowInfoPanel();
+
+			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "Info Panel"), nullptr, &showInfo))
+			{
+				noisePreview.SetShowInfoPanel(showInfo);
+			}
 
 			ImGui::EndMenu();
 		}
