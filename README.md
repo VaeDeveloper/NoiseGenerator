@@ -33,6 +33,8 @@ An interactive C++ desktop application for generating and visualizing procedural
 | [GLFW](https://www.glfw.org/)         | Window & input handling      |
 | [GLAD](https://glad.dav1d.de/)        | OpenGL function loader       |
 | [Dear ImGui](https://github.com/ocornut/imgui) | GUI rendering                |
+| [Native File Dialog](https://github.com/mlabbe/nativefiledialog) | Native File Dialog     |
+| [inih](https://github.com/benhoyt/inih)        |  .INI file parser     |
 | stb_image_write  | PNG & TGA image saving   |
 | OpenGL 4.3+       | GPU rendering backend     |
 ---
@@ -62,5 +64,5 @@ Internet connection (for dependency fetching)
 - [ ] GPU acceleration (OpenGL / compute shaders) 
 - [ ] Export to .bmp / .jpg - DONE !!! 
 - [ ] Multi-threaded tile-based noise generation
-- [ ] ImFileDialog for save image
+- [ ] Native File Dialog for save image - DONE !!!
 - [ ] Saving Layout's 
