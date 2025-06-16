@@ -37,6 +37,7 @@ An interactive C++ desktop application for generating and visualizing procedural
 | [inih](https://github.com/benhoyt/inih)        |  .INI file parser     |
 | stb_image_write  | PNG & TGA image saving   |
 | OpenGL 4.3+       | GPU rendering backend     |
+| IconsFontAwesome5 | icons for ImGui         |
 ---
 
 ## 🛠 Building with CMake
