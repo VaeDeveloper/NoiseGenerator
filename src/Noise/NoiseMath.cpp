@@ -1,6 +1,8 @@
 #include "NoiseMath.h"
 #include <cmath>
 #include <immintrin.h> 
+#include <cassert>
+#include <algorithm>
 
 namespace NG
 {
@@ -113,15 +115,46 @@ namespace NG
 
 	float Sample2D(const float* data, short width, short height, float x, float y)
 	{
-		short xi = static_cast<short>(floorf(x * static_cast<float>(width)));
-		short yi = static_cast<short>(floorf(y * static_cast<float>(height)));
-		float xf = x * width - floorf(x * width);
-		float yf = y * height - floorf(y * height);
+		//assert(data != nullptr && "Sample2D: data is null!");
+		//assert(width > 0 && height > 0);
+		//short xi = static_cast<short>(floorf(x * static_cast<float>(width)));
+		//short yi = static_cast<short>(floorf(y * static_cast<float>(height)));
+		//float xf = x * width - floorf(x * width);
+		//float yf = y * height - floorf(y * height);
 
-		float d1 = data[((xi + 0 + width) % width) + ((yi + 0 + height) % height) * width] * (1.0f - xf) +
-			data[((xi + 1 + width) % width) + ((yi + 0 + height) % height) * width] * xf;
-		float d2 = data[((xi + 0 + width) % width) + ((yi + 1 + height) % height) * width] * (1.0f - xf) +
-			data[((xi + 1 + width) % width) + ((yi + 1 + height) % height) * width] * xf;
+		//float d1 = data[((xi + 0 + width) % width) + ((yi + 0 + height) % height) * width] * (1.0f - xf) +
+		//	data[((xi + 1 + width) % width) + ((yi + 0 + height) % height) * width] * xf;
+		//float d2 = data[((xi + 0 + width) % width) + ((yi + 1 + height) % height) * width] * (1.0f - xf) +
+		//	data[((xi + 1 + width) % width) + ((yi + 1 + height) % height) * width] * xf;
+
+		//return d1 * (1.0f - yf) + d2 * yf;
+
+		if(!data || width <= 0 || height <= 0) 
+		{
+			return 0.0f;
+		}
+
+		x = std::clamp(x, 0.0f, 0.999f);
+		y = std::clamp(y, 0.0f, 0.999f);
+
+		short xi = static_cast<short>(x * width);
+		short yi = static_cast<short>(y * height);
+
+		float xf = x * width - xi;
+		float yf = y * height - yi;
+
+		auto index = [&] (short ix, short iy) 
+			{
+				ix = (ix + width) % width;
+				iy = (iy + height) % height;
+				return iy * width + ix;
+			};
+
+		float d1 = data[index(xi, yi)] * (1.0f - xf) +
+			data[index(xi + 1, yi)] * xf;
+
+		float d2 = data[index(xi, yi + 1)] * (1.0f - xf) +
+			data[index(xi + 1, yi + 1)] * xf;
 
 		return d1 * (1.0f - yf) + d2 * yf;
 	}

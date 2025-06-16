@@ -15,7 +15,10 @@
 #include <type_traits>
 #include <nfd.h>
 #include <string>
+#include <filesystem>  
+#include "Config/SettingsManager.h"
 
+namespace fs = std::filesystem;
 
 inline std::string ToUpper(const std::string& str) 
 {
@@ -39,11 +42,15 @@ std::string EnsureExtension(const std::string& path, const std::string& ext)
 	}
 	return path;
 }
+
+
 namespace NG
 {
 	constexpr int spaceOffset = 24;
 	constexpr const char* GitURL = "https://github.com/VaeDeveloper/NoiseGenerator";
-	
+	constexpr const int Full_Width = 2000;
+	constexpr const int Full_Height = 1120;
+
 	template<typename WidgetFunc>
 	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
 	{
@@ -103,7 +110,8 @@ void GuiManager::Init(GLFWwindow* window)
 
 void GuiManager::InitStyleConfig(const ImGuiIO& io)
 {
-	ImGui::StyleColorsDark();
+
+	InitThemeStyle();
 	ImGuiStyle& style = ImGui::GetStyle();
 	io.Fonts->AddFontDefault();
 
@@ -123,13 +131,64 @@ void GuiManager::InitFontConfig(const ImGuiIO& io)
 	config.MergeMode = true;
 	config.PixelSnapH = true;
 	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-	if(!io.Fonts->AddFontFromFileTTF("../fonts/fa-solid-900.ttf", 12.0f, &config, icon_ranges))
+
+	std::vector<fs::path> fontSearchPaths = 
 	{
-		Logger::Err("Failed to load Font Awesome font!");
+		fs::current_path() / "fonts" / "fa-solid-900.ttf",
+		fs::current_path() / ".." / "fonts" / "fa-solid-900.ttf",
+		fs::current_path() / ".." / ".." / "fonts" / "fa-solid-900.ttf" 
+	};
+
+	fs::path fontPath;
+	for(const auto& path : fontSearchPaths)
+	{
+		if(fs::exists(path))
+		{
+			fontPath = fs::weakly_canonical(path);
+			break;
+		}
+	}
+
+	if(fontPath.empty())
+	{
+		Logger::Err("Font Awesome not found in known paths!");
+		Logger::Log("Working directory: " + fs::current_path().string());
+		return;
+	}
+
+	float fontSize = SettingsManager::Get().GetFontSize();
+	Logger::Log("Font size: " + NG::StringUtils::ToString(fontSize));
+
+	if(!io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, &config, icon_ranges))
+	{
+		Logger::Err("Failed to load Font Awesome font from: " + fontPath.string());
 	}
 	else
 	{
-		Logger::Log("Font Awesome loaded");
+		Logger::Log("Font Awesome loaded from: " + fontPath.string());
+	}
+
+}
+
+void GuiManager::InitThemeStyle()
+{
+	std::string theme = SettingsManager::Get().GetTheme();
+
+	if(theme == "dark")
+	{
+		ImGui::StyleColorsDark();
+	}
+	else if(theme == "light")
+	{
+		ImGui::StyleColorsLight();
+	}
+	else if(theme == "classic")
+	{
+		ImGui::StyleColorsClassic();
+	}
+	else
+	{
+		ImGui::StyleColorsDark();
 	}
 }
 
@@ -150,13 +209,7 @@ void GuiManager::DrawMenuBar()
 						nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
 						if(result == NFD_OKAY)
 						{
-							std::string pathStr(outPath);
-							if(pathStr.length() < 4 ||
-								!(EndsWith(pathStr, ".png") || EndsWith(pathStr, ".PNG")))
-							{
-								pathStr += ".png";
-							}
-
+							std::string pathStr = EnsureExtension(outPath, ".png");
 							bool ok = ImageExporter::SavePNG(
 								pathStr.c_str(),
 								noisePreview.GetTextureId(),
@@ -165,9 +218,13 @@ void GuiManager::DrawMenuBar()
 							);
 
 							if(ok)
-								Logger::Log("Saved noise as PNG: " + pathStr);
+							{
+								Logger::Log("Saved PNG: " + pathStr);
+							}
 							else
+							{
 								Logger::Err("Failed to save PNG: " + pathStr);
+							}
 
 							free(outPath);
 						}
@@ -198,7 +255,7 @@ void GuiManager::DrawMenuBar()
 
 							if(ok)
 							{
-								Logger::Log("Saved noise as TGA: " + pathStr);
+								Logger::Log("Saved TGA: " + pathStr);
 							}
 							else
 							{
@@ -311,7 +368,6 @@ void GuiManager::DrawMenuBar()
 		if(ImGui::BeginMenu(WITH_ICON("Eye", "View")))
 		{
 			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &showOutputLog);
-
 			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &fullscreen))
 			{
 				GLFWwindow* window = glfwGetCurrentContext();
@@ -322,8 +378,8 @@ void GuiManager::DrawMenuBar()
 				}
 				else
 				{
-					int width = 2000;
-					int height = 1020;
+					int width = SettingsManager::Get().GetWindowWidth();
+					int height = SettingsManager::Get().GetWindowHeight();;
 					glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
 				}
 			}
@@ -331,6 +387,7 @@ void GuiManager::DrawMenuBar()
 			ImGui::EndMenu();
 		}
 
+#ifdef _DEBUG 
 		if(ImGui::BeginMenu(WITH_ICON("QuestionCircle", "Help")))
 		{
 			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "About")))
@@ -340,6 +397,7 @@ void GuiManager::DrawMenuBar()
 
 			ImGui::EndMenu();
 		}
+#endif // DEBUG
 
 		ImGui::EndMenuBar();
 	}
@@ -575,13 +633,14 @@ void GuiManager::DrawUI()
 		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
 		ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
 
+
+	/* Menu Bar */
 	ImGui::Begin("DockSpaceRoot", nullptr, host_flags);
 	DrawMenuBar();
-
-
 	ImGui::DockSpace(dockspace_id);
 	ImGui::End();
 
+	/** Generate Action */
 	ImGui::Begin("Noise Generator", nullptr, ImGuiWindowFlags_NoTitleBar);
 	SHOW_HIDDEN_TAB_BAR(ImGui::GetWindowDockID());
 	ImGui::SeparatorText("Generate Action");
@@ -609,32 +668,59 @@ void GuiManager::DrawUI()
 
 		isGenerating = true;
 		generationProgress = 0.0f;
-		generationThread = std::thread([this, res, props] () {
-			float* noise = NG::PerlinNoise2D(res, &props, [this] (float progress)
-				{
-					this->generationProgress = progress;
-				});
+		cancelRequested = false;
+		generationThread = std::thread([this, res, props] () 
+			{
+				float* noise = NG::PerlinNoise2D(res, &props, [this] (float progress) 
+					{
+						this->generationProgress = progress;
+						return !this->cancelRequested; 
+					});
 
-			this->QueueUITask([this, noise, res] ()
+				if(noise != nullptr) 
 				{
-					this->SetNoiseData(noise, res, res);
-					Logger::Log("Generated 2D noise preview");
-					free(noise);
-					this->isGenerating = false;
-					this->generationProgress = -1.0f;
-				});
+					this->QueueUITask([this, noise, res] () 
+						{
+							this->SetNoiseData(noise, res, res);
+							Logger::Log("Generated 2D noise preview");
+							free(noise);
+							this->generationProgress = -1.0f;
+							this->isGenerating = false;
+						});
+				}
+				else 
+				{
+					this->QueueUITask([this] () 
+						{
+							Logger::Warn("Noise generation cancelled.");
+							this->SetNoiseData(nullptr, 0, 0);
+							this->generationProgress = -1.0f;
+							this->isGenerating = false;
+						});
+				}
 			});
 
 		generationThread.detach();
 	}
+	ImGui::EndDisabled();
+	ImGui::SameLine();
+
+	if(ImGui::Button(WITH_ICON("TimesCircle", "Cancel"), ImVec2(120, 30))) {
+		cancelRequested = true;
+		Logger::Warn("Cancel requested by user");
+	}
+
 
 	ImGui::SameLine();
+
+	ImGui::BeginDisabled(isGenerating);
 	if(ImGui::Button(WITH_ICON("Trash", "Clear"), ImVec2(120, 30)))
 	{
 		this->SetNoiseData(nullptr, 0, 0);
 		Logger::Warn("Preview cleared");
 	}
 	ImGui::EndDisabled();
+
 
 	// Random 
 	ImGui::TextUnformatted(WITH_ICON("Dice", "Randomize Action"));
@@ -770,7 +856,6 @@ void GuiManager::DrawUI()
 	if(ImGui::IsKeyPressed(ImGuiKey_F11, false))
 	{
 		fullscreen = !fullscreen;
-
 		GLFWwindow* window = glfwGetCurrentContext();
 		if(fullscreen)
 		{
@@ -779,11 +864,10 @@ void GuiManager::DrawUI()
 		}
 		else
 		{
-			int width = 2000;
-			int height = 1020;
-			glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
+			glfwSetWindowMonitor(window, nullptr, 100, 100, NG::Full_Width, NG::Full_Height, 0);
 		}
 	}
 
 }
 
+/*  */

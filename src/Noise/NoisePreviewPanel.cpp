@@ -157,13 +157,20 @@ void NoisePreviewPanel::Draw()
 	ImGui::BeginGroup(); // Info block
 	ImGui::Text("  Parameter Info: ");
 	ImGui::Spacing();
-	ImGui::TextWrapped(" - Seed - Defines randomness. Same seed = same result.");
-	ImGui::TextWrapped(" - Roughness - Controls fractal sharpness and detail.");
-	ImGui::TextWrapped(" - Marbling - Adds sine-based pattern distortion.");
-	ImGui::TextWrapped(" - Turbulence - Warps base noise with another noise layer.");
-	ImGui::TextWrapped(" - Exp Shift - Modifies turbulence power exponentially.");
-	ImGui::TextWrapped(" - Freq Skip - Filters specific frequency bands (low/high).");
-	ImGui::TextWrapped(" - Offsets - Moves turbulence sampling in X/Y directions.");
+	ImGui::TextWrapped(" - Seed: Defines randomness. Same seed = same result.");
+	ImGui::TextWrapped(" - Roughness: Controls fractal sharpness and detail.");
+	ImGui::TextWrapped(" - Marbling: Adds sine-based pattern distortion.");
+	ImGui::TextWrapped(" - Turbulence: Warps base noise with another noise layer.");
+	ImGui::TextWrapped(" - Exp Shift: Modifies turbulence power exponentially.");
+	ImGui::TextWrapped(" - Freq Skip: Filters specific frequency bands (low/high).");
+	ImGui::TextWrapped(" - Offsets: Moves turbulence sampling in X/Y directions.");
+	ImGui::Spacing();
+	ImGui::Text("  Tips & Shortcuts:");
+	ImGui::Spacing();
+	ImGui::TextWrapped(" - F11: Toggle fullscreen mode.");
+	ImGui::TextWrapped(" - Alt+F4: Exit application.");
+	ImGui::TextWrapped(" - Export menu: Save previews in PNG/TGA/BMP/JPG formats.");
+	ImGui::TextWrapped(" - Lock buttons: Prevent randomization of specific parameters.");
 	ImGui::EndGroup();
 
 	ImGui::End(); // Noise Preview

@@ -80,6 +80,7 @@ private:
 	void QueueUITask(std::function<void()> task);
 	void InitStyleConfig(const ImGuiIO& io);
 	void InitFontConfig(const ImGuiIO& io);
+	void InitThemeStyle();
 
 	void DrawMenuBar();
 	void DrawOutputLog();
@@ -95,13 +96,16 @@ private:
 	bool fullscreen = false;
 	bool dockBuilt = false;
 	bool showOutputLog = true;
-	bool showNoiseGenerator = true;
 	NoisePreviewPanel noisePreview;
 
 	std::thread generationThread;
 	std::atomic<bool> isGenerating = false;
+
+	std::atomic<bool> cancelRequested = false;
 	std::atomic<float> generationProgress = -1.0f;
 
 	std::mutex uiMutex;
+
+
 	std::queue<std::function<void()>> uiTasks;
 };

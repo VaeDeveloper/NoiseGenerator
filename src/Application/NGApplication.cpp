@@ -1,5 +1,5 @@
 #include "NGApplication.h"
-
+#include "Config/SettingsManager.h"
 
 
 NGApplication::NGApplication() {}
@@ -11,6 +11,8 @@ NGApplication::~NGApplication()
 
 InitStatus NGApplication::Init() 
 {
+	SettingsManager::Get().Load();
+
 	auto glfwStatus = InitGLFW();
 	if(glfwStatus != InitStatus::Success) 
 	{
@@ -43,7 +45,7 @@ InitStatus NGApplication::InitGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), "Noise Generator", nullptr, nullptr);
+	window = glfwCreateWindow(static_cast<int>(SettingsManager::Get().GetWindowWidth()), static_cast<int>(SettingsManager::Get().GetWindowHeight()), "Noise Generator", nullptr, nullptr);
 	if(!window) 
 	{
 		Logger::Err("Failed to create GLFW window");

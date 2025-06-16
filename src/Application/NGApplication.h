@@ -28,7 +28,7 @@ private:
 	GuiManager gui;
 
 	const float WindowWidth = 2000;
-	const float WindowHeight = 1020;
+	const float WindowHeight = 1120;
 
 	InitStatus InitGLFW();
 	InitStatus InitOpenGL();

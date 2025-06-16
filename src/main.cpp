@@ -3,6 +3,12 @@
 #include "Logger/Logger.h"
 
 
+#ifdef _DEBUG
+#pragma message("Debug build!")
+#else
+#pragma message("Release build!")
+#endif
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	NGApplication app;

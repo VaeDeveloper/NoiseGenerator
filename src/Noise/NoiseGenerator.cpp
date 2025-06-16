@@ -117,35 +117,32 @@ namespace NG
 		return data2;
 	}
 
-	float* PerlinNoise2D(int res, const noise_properties* in_props, std::function<void(float)> onProgress)
+	float* PerlinNoise2D(int res, const noise_properties* in_props, std::function<bool(float)> onProgress)
 	{
 		float* data = nullptr;
-		float  scale = 1.0f;
-		int    freq = 2;
-		int    octaves = 0;
+		float scale = 1.0f;
+		int freq = 2;
+		int octaves = 0;
 		while((1 << octaves) < res) octaves++;
 
-		for(int level = 0; level < octaves; level++)
-		{
-			if(level >= in_props->low_freq_skip &&
-				level <= octaves - in_props->high_freq_skip)
-			{
+		for(int level = 0; level < octaves; level++) {
+			if(level >= in_props->low_freq_skip && level <= octaves - in_props->high_freq_skip) {
 				unsigned int levelSeed = in_props->seed + level * 31;
 				data = StupidNoise2D(res, freq, data, scale, levelSeed);
 			}
 
-			if(onProgress)
-				onProgress((float)level / octaves * 0.4f);
+			if(onProgress && !onProgress((float)level / octaves * 0.4f)) {
+				if(data) free(data);
+				return nullptr;
+			}
 
 			freq *= 2;
 			scale *= in_props->roughness;
 		}
 
-		if(!data)
-		{
+		if(!data) {
 			data = (float*)calloc(sizeof(float), res * res);
-			if(!data)
-			{
+			if(!data) {
 				Logger::Err("Out of memory");
 				throw std::runtime_error("Out of memory");
 			}
@@ -153,8 +150,7 @@ namespace NG
 		}
 
 		// === Turbulence Pass ===
-		if(in_props->turbulence != 0.0f)
-		{
+		if(in_props->turbulence != 0.0f) {
 			noise_properties prop = *in_props;
 			prop.turbulence = 0.0f;
 			prop.roughness = in_props->turbulence_roughness;
@@ -166,22 +162,27 @@ namespace NG
 			float turbulence_exp = powf(2.0f, in_props->turbulence_expshift);
 
 			prop.seed = in_props->seed + 100;
-			float* dx = PerlinNoise2D(turbulence_res, &prop, [] (float) {});
+			float* dx = PerlinNoise2D(turbulence_res, &prop, [] (float) { return true; });
 			prop.seed = in_props->seed + 200;
-			float* dy = PerlinNoise2D(turbulence_res, &prop, [] (float) {});
+			float* dy = PerlinNoise2D(turbulence_res, &prop, [] (float) { return true; });
+
+			if(!dx || !dy) {
+				if(data) free(data);
+				if(dx) free(dx);
+				if(dy) free(dy);
+				Logger::Err("Turbulence sub-pass canceled or failed");
+				return nullptr;
+			}
 
 			float* temp = new float[res * res];
 			memcpy(temp, data, res * res * sizeof(float));
 
-			for(int j = 0; j < res; j++)
-			{
-				for(int i = 0; i < res; i++)
-				{
+			for(int j = 0; j < res; j++) {
+				for(int i = 0; i < res; i++) {
 					float x = Sample2D(dx, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 					float y = Sample2D(dy, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 
-					if(turbulence_exp != 1.0f)
-					{
+					if(turbulence_exp != 1.0f) {
 						x = powf(fabsf(x), turbulence_exp) * (x >= 0.0f ? 1.0f : -1.0f);
 						y = powf(fabsf(y), turbulence_exp) * (y >= 0.0f ? 1.0f : -1.0f);
 					}
@@ -194,8 +195,14 @@ namespace NG
 
 					data[i + j * res] = Sample2D(temp, res, res, x, y);
 				}
-				if(onProgress)
-					onProgress(0.4f + (float)j / res * 0.5f);
+
+				if(onProgress && !onProgress(0.4f + (float)j / res * 0.5f)) {
+					delete[] temp;
+					free(data);
+					free(dx);
+					free(dy);
+					return nullptr;
+				}
 			}
 
 			delete[] temp;
@@ -205,27 +212,25 @@ namespace NG
 
 		// === Normalize ===
 		float min_v = data[0], max_v = data[0];
-		for(int i = 1; i < res * res; i++)
-		{
+		for(int i = 1; i < res * res; i++) {
 			if(data[i] < min_v) min_v = data[i];
 			if(data[i] > max_v) max_v = data[i];
 		}
-		for(int i = 0; i < res * res; i++)
-		{
+		for(int i = 0; i < res * res; i++) {
 			data[i] = (data[i] - min_v) / (max_v - min_v);
 		}
 
 		// === Marbling ===
-		if(in_props->marbling != 0.0f)
-		{
-			for(int i = 0; i < res * res; i++)
-			{
+		if(in_props->marbling != 0.0f) {
+			for(int i = 0; i < res * res; i++) {
 				data[i] = sinf(PI2 * data[i] * in_props->marbling) * 0.5f + 0.5f;
 			}
 		}
 
-		if(onProgress)
-			onProgress(1.0f);
+		if(onProgress && !onProgress(1.0f)) {
+			free(data);
+			return nullptr;
+		}
 
 		return data;
 	}
