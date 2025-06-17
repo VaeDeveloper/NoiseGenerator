@@ -18,11 +18,11 @@ public:
 	NGApplication();
 	~NGApplication();
 
-	InitStatus Init();
-	void Run();
+	InitStatus InitializeApplication();
+	void RunApplication();
 	void Shutdown();
 
-	static std::string StatusToString(InitStatus status);
+	static std::string GetInitStatus(InitStatus status);
 private:
 	GLFWwindow* window = nullptr;
 	GuiManager GUI;
@@ -30,8 +30,8 @@ private:
 	int WindowWidth = 2000;
 	int WindowHeight = 1120;
 
-	InitStatus InitGLFW();
-	InitStatus InitOpenGL();
+	InitStatus InitializeGLFW();
+	InitStatus InitializeOpenGL();
 	void RenderScene();
 
 	void LogGraphicsInfo();

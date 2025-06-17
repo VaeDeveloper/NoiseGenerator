@@ -9,20 +9,20 @@ NGApplication::~NGApplication()
 	Shutdown();
 }
 
-InitStatus NGApplication::Init() 
+InitStatus NGApplication::InitializeApplication()
 {
 	SettingsManager::Get().Load();
 	WindowWidth = SettingsManager::Get().GetWindowWidth();
 	WindowHeight = SettingsManager::Get().GetWindowHeight();
 
-	auto glfwStatus = InitGLFW();
+	auto glfwStatus = InitializeGLFW();
 	if(glfwStatus != InitStatus::Success) 
 	{
 		Logger::Err("Failed to initialize GLFW");
 		return glfwStatus;
 	}
 
-	auto glStatus = InitOpenGL();
+	auto glStatus = InitializeOpenGL();
 	if(glStatus != InitStatus::Success) 
 	{
 		Logger::Err("Failed to initialize OpenGL");
@@ -36,7 +36,7 @@ InitStatus NGApplication::Init()
 	return InitStatus::Success;
 }
 
-InitStatus NGApplication::InitGLFW()
+InitStatus NGApplication::InitializeGLFW()
 {
 	if(!glfwInit())
 	{
@@ -67,7 +67,7 @@ InitStatus NGApplication::InitGLFW()
 	return InitStatus::Success;
 }
 
-InitStatus NGApplication::InitOpenGL() 
+InitStatus NGApplication::InitializeOpenGL() 
 {
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
 	{
@@ -93,7 +93,7 @@ void NGApplication::LogGraphicsInfo()
 	Logger::Log("GL Renderer       : " + std::string((const char*)glGetString(GL_RENDERER)));
 }
 
-std::string NGApplication::StatusToString(InitStatus status)
+std::string NGApplication::GetInitStatus(InitStatus status)
 {
 	switch(status)
 	{
@@ -106,7 +106,7 @@ std::string NGApplication::StatusToString(InitStatus status)
 	}
 }
 
-void NGApplication::Run() 
+void NGApplication::RunApplication()
 {
 	while(!glfwWindowShouldClose(window)) 
 	{
