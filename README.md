@@ -66,4 +66,8 @@ Internet connection (for dependency fetching)
 - [ ] Export to .bmp / .jpg - DONE !!! 
 - [ ] Multi-threaded tile-based noise generation
 - [ ] Native File Dialog for save image - DONE !!!
-- [ ] Saving Layout's 
+- [ ] Saving Layout's
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
