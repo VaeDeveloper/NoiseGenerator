@@ -1,8 +1,10 @@
 #include "ImageExporter.h"
 #include <vector>
 #include <glad/glad.h>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <ThirdParty/stb_image_write.h>
+
 #include "Logger/LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogExport);
@@ -73,7 +75,15 @@ bool ImageExporter::SaveBMP(const std::string& filename, unsigned int textureId,
 		rgb[i * 3 + 2] = pixels[i];
 	}
 
-	return stbi_write_bmp(filename.c_str(), width, height, 3, rgb.data());
+	if(stbi_write_bmp(filename.c_str(), width, height, 3, rgb.data()))
+	{
+		NGLOG(LogExport, Info, "Saved BMP: " + filename);
+		return true;
+	}
+	else
+	{
+		NGLOG(LogExport, Error, "Failed to save BMP: " + filename);
+	}
 }
 
 bool ImageExporter::SaveJPG(const std::string& filename, unsigned int textureId, int width, int height, int quality)
@@ -89,5 +99,13 @@ bool ImageExporter::SaveJPG(const std::string& filename, unsigned int textureId,
 		rgb[i * 3 + 2] = pixels[i];
 	}
 
-	return stbi_write_jpg(filename.c_str(), width, height, 3, rgb.data(), quality);
+	if(stbi_write_jpg(filename.c_str(), width, height, 3, rgb.data(), quality))
+	{
+		NGLOG(LogExport, Info, "Saved JPG: " + filename);
+		return true;
+	}
+	else
+	{
+		NGLOG(LogExport, Error, "Failed to save JPG: " + filename);
+	}
 }
