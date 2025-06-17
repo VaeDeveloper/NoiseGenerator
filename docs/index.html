@@ -16,30 +16,26 @@
       color: white;
       overflow: hidden;
     }
+
     .glitch {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      animation: glitchAnim 1s infinite;
     }
-    @keyframes glitchAnim {
-      0% { text-shadow: 2px 0 red, -2px 0 cyan; }
-      20% { text-shadow: -2px 0 red, 2px 0 cyan; }
-      40% { text-shadow: 2px 2px red, -2px -2px cyan; }
-      60% { text-shadow: -2px 2px red, 2px -2px cyan; }
-      80% { text-shadow: 2px -2px red, -2px 2px cyan; }
-      100% { text-shadow: 0 0 red, 0 0 cyan; }
-    }
+
     h1 {
       font-size: 3em;
       margin: 0.5em 0;
     }
-    p {
+
+    .glitch-text {
       font-size: 1.2em;
       margin-bottom: 2em;
+      animation: glitchAnim 1s infinite;
     }
+
     .button {
       display: inline-block;
       margin: 0 10px;
@@ -50,10 +46,29 @@
       border-radius: 6px;
       font-weight: bold;
       transition: 0.3s;
+      position: relative;
     }
+
     .button:hover {
+      animation: glitchHover 0.5s infinite;
       background: #00cccc;
     }
+
+    @keyframes glitchAnim {
+      0% { text-shadow: 2px 0 red, -2px 0 cyan; }
+      20% { text-shadow: -2px 0 red, 2px 0 cyan; }
+      40% { text-shadow: 2px 2px red, -2px -2px cyan; }
+      60% { text-shadow: -2px 2px red, 2px -2px cyan; }
+      80% { text-shadow: 2px -2px red, -2px 2px cyan; }
+      100% { text-shadow: 0 0 red, 0 0 cyan; }
+    }
+
+    @keyframes glitchHover {
+      0% { text-shadow: 1px 0 red, -1px 0 cyan; }
+      50% { text-shadow: -1px 1px red, 1px -1px cyan; }
+      100% { text-shadow: 0 0 red, 0 0 cyan; }
+    }
+
     .preview {
       margin-top: 2em;
       max-width: 95vw;
@@ -67,7 +82,7 @@
 <body>
   <div class="glitch">
     <h1>Noise Generator</h1>
-    <p>Procedural 2D noise with C++17, OpenGL and ImGui</p>
+    <p class="glitch-text">Procedural 2D Noise Generator built in C++ with OpenGL and ImGui.</p>
     <div>
       <a class="button" href="https://github.com/VaeDeveloper/NoiseGenerator" target="_blank">GitHub</a>
       <a class="button" href="https://github.com/VaeDeveloper/NoiseGenerator/releases" target="_blank">Download</a>
