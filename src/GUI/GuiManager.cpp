@@ -4,6 +4,7 @@
 #include "Logger/LoggerUI.h"
 #include "Logger/Logger.h"
 #include "GUI/GuiUtils.h"
+#include "Utils/StringUtils.h"
 #include "IconRegistry.h"
 
 #include <backends/imgui_impl_glfw.h>
@@ -20,23 +21,11 @@
 
 namespace fs = std::filesystem;
 
-inline std::string ToUpper(const std::string& str) 
-{
-	std::string result = str;
-	std::transform(result.begin(), result.end(), result.begin(),
-		[] (unsigned char c) { return std::toupper(c); });
-	return result;
-}
 
-inline bool EndsWith(const std::string& str, const std::string& suffix) 
-{
-	return str.size() >= suffix.size() &&
-		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
 
 std::string EnsureExtension(const std::string& path, const std::string& ext) 
 {
-	if(!EndsWith(path, ext) && !EndsWith(path, ToUpper(ext))) 
+	if(!NG::StringUtils::EndsWith(path, ext) && !NG::StringUtils::EndsWith(path, NG::StringUtils::ToUpper(ext))) 
 	{
 		return path + ext;
 	}
@@ -88,8 +77,6 @@ namespace NG
 			Logger::Log(std::string(label) + " = " + NG::StringUtils::ToString(*value));
 		}
 	}
-
-
 }
 
 void GuiManager::Init(GLFWwindow* window)
@@ -105,7 +92,7 @@ void GuiManager::Init(GLFWwindow* window)
 	ImGui_ImplOpenGL3_Init("#version 330");
 	Logger::Log("ImGui initialized");
 
-	noisePreview.Init();
+	noisePreview.Initialize();
 }
 
 void GuiManager::InitStyleConfig(const ImGuiIO& io)
@@ -654,7 +641,7 @@ void GuiManager::DrawUI()
 	if(ImGui::Button(WITH_ICON("Play", "Generate 2D Noise"), ImVec2(200, 30)) && !isGenerating)
 	{
 		int res = 8 << resolutionIndex;
-		noise_properties props = {};
+		NoiseProperties props = {};
 		props.seed = std::random_device{}();
 		props.res = resolutionIndex;
 		props.roughness = roughness;

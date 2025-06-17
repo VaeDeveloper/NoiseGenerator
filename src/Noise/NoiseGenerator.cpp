@@ -1,12 +1,14 @@
 #include "NoiseGenerator.h"
-#include "Math/vector.h"
 #include "Noise/NoiseMath.h"
 #include "Logger/Logger.h"
-#include "Utils/RandomUtils.h"
+#include "Utils/RandomGenerator.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
+#define PI      3.14159265358979323846264338327950f
+#define PI2     6.28318530717958647692528676655901f
+#define EPSILON 0.00000001000000000000000000000000f
 
 namespace NG
 {
@@ -117,7 +119,7 @@ namespace NG
 		return data2;
 	}
 
-	float* PerlinNoise2D(int res, const noise_properties* in_props, std::function<bool(float)> onProgress)
+	float* PerlinNoise2D(int res, const NoiseProperties* in_props, std::function<bool(float)> onProgress)
 	{
 		float* data = nullptr;
 		float scale = 1.0f;
@@ -151,7 +153,7 @@ namespace NG
 
 		// === Turbulence Pass ===
 		if(in_props->turbulence != 0.0f) {
-			noise_properties prop = *in_props;
+			NoiseProperties prop = *in_props;
 			prop.turbulence = 0.0f;
 			prop.roughness = in_props->turbulence_roughness;
 			prop.low_freq_skip = in_props->turbulence_low_freq_skip;

@@ -4,11 +4,11 @@
 class NoisePreviewPanel
 {
 public:
-	void Init();
+	void Initialize();
 	void UpdateTexture(const float* data, int width, int height);
 	void Draw();
 
-	bool IsInitialized() const { return textureInitialized; }
+	bool IsInitialized() const { return bTextureInitialized; }
 	GLuint GetTextureId() const { return textureId; }
 	float GetWidth() const { return texWidth; }
 	float GetHeight() const { return texHeight; }
@@ -18,7 +18,7 @@ public:
 	void SetPreviewWidth(float Width) { previewWidht = Width; }
 	void SetPreviewHeight(float Height) { previewHeight = Height; }
 private:
-	bool textureInitialized = false;
+	bool bTextureInitialized = false;
 	bool showInfoPanel = true;
 	float texWidth = 0;
 	float texHeight = 0;

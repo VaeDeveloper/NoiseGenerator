@@ -1,7 +1,7 @@
 
 #pragma once
 
-struct noise_properties
+struct NoiseProperties
 {
 	long seed;
 	int res;

@@ -74,7 +74,7 @@ void RunPerlinCompute(GLuint textureId, int width, int height, float seed, float
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void NoisePreviewPanel::Init()
+void NoisePreviewPanel::Initialize()
 {
 	glGenTextures(1, &textureId);
 	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, 1024, 1024);
@@ -84,7 +84,7 @@ void NoisePreviewPanel::Init()
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
-	textureInitialized = true;
+	bTextureInitialized = true;
 	SetPreviewWidth(1024.0f);
 	SetPreviewHeight(1024.0f);
 }
@@ -129,7 +129,11 @@ void NoisePreviewPanel::UpdateTexture(const float* data, int width, int height)
 
 void NoisePreviewPanel::Draw()
 {
-	if(!textureInitialized) return;
+	if(!bTextureInitialized) 
+	{
+		Logger::Warn(" Texture Initialized ");
+		return;
+	}
 
 	ImGui::Begin("Noise Preview", nullptr, ImGuiWindowFlags_NoTitleBar);
 	SHOW_HIDDEN_TAB_BAR(ImGui::GetWindowDockID());
@@ -148,8 +152,7 @@ void NoisePreviewPanel::Draw()
 	int previewHeight = previewSizes[previewSize];
 	SetPreviewWidth(previewWidth);
 	SetPreviewHeight(previewHeight);
-	ImGui::BeginGroup(); // Start preview block
-
+	ImGui::BeginGroup(); 
 	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(previewWidht, previewHeight));
 	ImGui::EndGroup();
 

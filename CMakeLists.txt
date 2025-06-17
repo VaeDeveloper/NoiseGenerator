@@ -138,6 +138,7 @@ add_executable(NoiseGenerator
   src/Image/ImageExporter.h
 
   src/Utils/RandomGenerator.h
+  src/Utils/StringUtils.h
 
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
@@ -175,10 +176,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     src/Noise/NoiseTypes.h
     
     src/Utils/RandomGenerator.h
+    src/Utils/StringUtils.h
 
     src/Config/SettingsManager.cpp
     src/Config/SettingsManager.h
     
+    src/ThirdParty/stb_image.h
     src/ThirdParty/stb_image_write.h
     src/ThirdParty/IconsFontAwesome5.h
 
