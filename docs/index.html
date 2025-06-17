@@ -14,14 +14,13 @@
       background: #0d0d0d;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
-      overflow: hidden;
+      overflow-y: auto;
     }
 
     .glitch {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      max-width: 1000px;
+      margin: 4em auto 2em;
+      padding: 0 20px;
       text-align: center;
     }
 
@@ -71,11 +70,19 @@
 
     .preview {
       margin-top: 2em;
-      max-width: 95vw;
-      max-height: 80vh;
-      width: 800px;
-      height: auto;
+      width: 100%;
+      max-width: 960px;
+      max-height: 600px;
+      object-fit: contain;
       border-radius: 12px;
+    }
+
+    .description {
+      margin-top: 1.5em;
+      font-size: 1.1em;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
@@ -88,9 +95,9 @@
       <a class="button" href="https://github.com/VaeDeveloper/NoiseGenerator/releases" target="_blank">Download</a>
     </div>
     <img src="noise_generator2.gif" alt="Noise Preview" class="preview" />
-    <p style="margin-top: 1.5em; font-size: 1.1em; max-width: 800px; margin-left: auto; margin-right: auto;">
-  This tool lets you generate procedural noise textures with adjustable parameters like resolution, turbulence, marbling, and more. Easily preview changes in real-time and export results as PNG or TGA images.
-</p>
+    <p class="description">
+      This tool lets you generate procedural noise textures with adjustable parameters like resolution, turbulence, marbling, and more. Easily preview changes in real-time and export results as PNG, TGA, BMP, JPG images.
+    </p>
   </div>
 </body>
 </html>
