@@ -113,16 +113,19 @@ target_compile_definitions(
 # Main executable
 add_executable(NoiseGenerator
   src/main.cpp
-  src/Math/vector.h 
+ 
   src/Logger/Logger.h
   src/Logger/Logger.cpp
   src/Logger/LoggerUI.h
+
   src/Application/NGApplication.cpp
   src/Application/NGApplication.h
+
   src/GUI/GuiManager.cpp
   src/GUI/GuiManager.h
   src/GUI/GuiUtils.h
   src/GUI/IconRegistry.h
+
   src/Noise/NoiseGenerator.cpp
   src/Noise/NoiseGenerator.h
   src/Noise/NoiseMath.cpp
@@ -130,11 +133,15 @@ add_executable(NoiseGenerator
   src/Noise/NoiseTypes.h
   src/Noise/NoisePreviewPanel.cpp
   src/Noise/NoisePreviewPanel.h
+
   src/Image/ImageExporter.cpp
   src/Image/ImageExporter.h
-  src/Utils/RandomUtils.h
+
+  src/Utils/RandomGenerator.h
+
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
+
   src/ThirdParty/stb_image_write.h
   src/ThirdParty/stb_image.h
   src/ThirdParty/IconsFontAwesome5.h
@@ -159,8 +166,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     src/Logger/Logger.h
     src/Logger/LoggerUI.h
     
-    src/Math/vector.h
-    
     src/Noise/NoiseGenerator.cpp
     src/Noise/NoiseGenerator.h
     src/Noise/NoiseMath.cpp
@@ -169,7 +174,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     src/Noise/NoisePreviewPanel.h
     src/Noise/NoiseTypes.h
     
-    src/Utils/RandomUtils.h
+    src/Utils/RandomGenerator.h
 
     src/Config/SettingsManager.cpp
     src/Config/SettingsManager.h

@@ -21,6 +21,7 @@ public:
 	InitStatus InitializeApplication();
 	void RunApplication();
 	void Shutdown();
+	bool IsInitialized() const;
 
 	static std::string GetInitStatus(InitStatus status);
 private:
@@ -33,7 +34,7 @@ private:
 	InitStatus InitializeGLFW();
 	InitStatus InitializeOpenGL();
 	void RenderScene();
-
 	void LogGraphicsInfo();
 
+	bool bIsInitialized = false;
 };

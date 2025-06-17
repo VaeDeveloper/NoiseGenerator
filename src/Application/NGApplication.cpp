@@ -11,6 +11,11 @@ NGApplication::~NGApplication()
 
 InitStatus NGApplication::InitializeApplication()
 {
+	if(bIsInitialized)
+	{
+		return InitStatus::Success;
+	}
+
 	SettingsManager::Get().Load();
 	WindowWidth = SettingsManager::Get().GetWindowWidth();
 	WindowHeight = SettingsManager::Get().GetWindowHeight();
@@ -31,8 +36,11 @@ InitStatus NGApplication::InitializeApplication()
 	
 	LogGraphicsInfo();
 
+	assert(window && "GLFW window is null before GUI initialization");
 	GUI.Init(window);
+
 	Logger::Log("Application initialized");
+	bIsInitialized = true;
 	return InitStatus::Success;
 }
 
@@ -47,6 +55,7 @@ InitStatus NGApplication::InitializeGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	assert(WindowWidth > 0 && WindowHeight > 0 && "Invalid window size");
 	window = glfwCreateWindow(WindowWidth, WindowHeight, "Noise Generator", nullptr, nullptr);
 	if(!window) 
 	{
@@ -129,9 +138,15 @@ void NGApplication::Shutdown()
 	GUI.Shutdown();
 	if(window) 
 	{
+		Logger::Log("Destroying window...");
 		glfwDestroyWindow(window);
 		window = nullptr;
 	}
 	glfwTerminate();
 	Logger::Log("Application shutdown");
+}
+
+bool NGApplication::IsInitialized() const
+{
+	return bIsInitialized;
 }
