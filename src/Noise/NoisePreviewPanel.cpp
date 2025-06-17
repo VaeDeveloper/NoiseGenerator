@@ -10,6 +10,9 @@
 #include <string>
 #include <stdexcept>
 #include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
+
+DEFINE_LOG_CATEGORY(LogNoisePanel);
 
 static GLuint LoadComputeShader(const char* path)
 {
@@ -67,7 +70,7 @@ void RunPerlinCompute(GLuint textureId, int width, int height, float seed, float
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
 	{
-		Logger::Err("GL Error after dispatch: 0x");
+		NGLOG(LogNoisePanel, Error, "GL Error after dispatch: 0x");
 		std::cerr << "GL Error after dispatch: 0x" << std::hex << err << std::endl;
 	}
 
@@ -131,7 +134,7 @@ void NoisePreviewPanel::Draw()
 {
 	if(!bTextureInitialized) 
 	{
-		Logger::Warn(" Texture Initialized ");
+		NGLOG(LogNoisePanel, Warning, "Texture Initialize");
 		return;
 	}
 

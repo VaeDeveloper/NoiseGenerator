@@ -1,7 +1,9 @@
 #pragma once
 #include <glad/glad.h>
 #include "GUI/GuiManager.h"
-#include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
+
+
 
 enum class InitStatus
 {
@@ -37,4 +39,7 @@ private:
 	void LogGraphicsInfo();
 
 	bool bIsInitialized = false;
+
+	void LogSystemInfo();
+
 };

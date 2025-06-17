@@ -1,7 +1,7 @@
 #include "Windows.h"
 #include "Application/NGApplication.h"
-#include "Logger/Logger.h"
 
+DEFINE_LOG_CATEGORY(LogTemp);
 
 #ifdef _DEBUG
 #pragma message("Debug build!")
@@ -17,7 +17,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		InitStatus status = app.InitializeApplication();
 		if(status != InitStatus::Success)
 		{
-			Logger::Err("Init failed: " + NGApplication::GetInitStatus(status));
+			NGLOG(LogTemp, Error, std::string("Init failed: ") + NGApplication::GetInitStatus(status));
 			return -1;
 		}
 
@@ -26,12 +26,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	catch(const std::exception& e)
 	{
-		Logger::Err(std::string("Unhandled exception: ") + e.what());
+		NGLOG(LogTemp, Error, std::string("Unhandled exception: ") + e.what());
 		return -2;
 	}
 	catch(...)
 	{
-		Logger::Err("Unknown unhandled exception occurred");
+		NGLOG(LogTemp, Error, "Unknown unhandled exception occurred");
 		return -3;
 	}
 }

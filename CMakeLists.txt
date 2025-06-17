@@ -117,7 +117,9 @@ add_executable(NoiseGenerator
   src/Logger/Logger.h
   src/Logger/Logger.cpp
   src/Logger/LoggerUI.h
-
+  src/Logger/LogCategory.h
+  src/Logger/LoggerMacro.h
+  
   src/Application/NGApplication.cpp
   src/Application/NGApplication.h
 
@@ -136,9 +138,11 @@ add_executable(NoiseGenerator
 
   src/Image/ImageExporter.cpp
   src/Image/ImageExporter.h
-
+  
+  src/Utils/Constants.h
   src/Utils/RandomGenerator.h
   src/Utils/StringUtils.h
+  src/Utils/UIUtils.h
 
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
@@ -166,7 +170,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     src/Logger/Logger.cpp
     src/Logger/Logger.h
     src/Logger/LoggerUI.h
-    
+    src/Logger/LogCategory.h
+    src/Logger/LoggerMacro.h
+
     src/Noise/NoiseGenerator.cpp
     src/Noise/NoiseGenerator.h
     src/Noise/NoiseMath.cpp
@@ -175,8 +181,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
     src/Noise/NoisePreviewPanel.h
     src/Noise/NoiseTypes.h
     
+    src/Utils/Constants.h
     src/Utils/RandomGenerator.h
     src/Utils/StringUtils.h
+    src/Utils/UIUtils.h
 
     src/Config/SettingsManager.cpp
     src/Config/SettingsManager.h

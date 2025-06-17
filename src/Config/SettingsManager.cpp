@@ -1,6 +1,7 @@
 #include "SettingsManager.h"
-#include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
 
+DEFINE_LOG_CATEGORY(LogSettings);
 
 SettingsManager& SettingsManager::Get()
 {
@@ -13,11 +14,11 @@ bool SettingsManager::Load(const std::string& path)
 	reader = INIReader(path);
 	if(reader.ParseError() < 0) 
 	{
-		Logger::Err("Failed to load config file: " + path);
+		NGLOG(LogSettings, Error, "Failed to load config file: " + path);
 		return false;
 	}
 
-	Logger::Log("Loaded config: " + path);
+	NGLOG(LogSettings, Info, "Loaded config: " + path);
 	return true;
 }
 

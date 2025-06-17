@@ -2,10 +2,12 @@
 #include "GuiManager.h"
 #include <windows.h>
 #include "Logger/LoggerUI.h"
-#include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
 #include "GUI/GuiUtils.h"
 #include "Utils/StringUtils.h"
 #include "IconRegistry.h"
+#include "Utils/Constants.h"
+#include "Utils/UIUtils.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -21,6 +23,7 @@
 
 namespace fs = std::filesystem;
 
+DEFINE_LOG_CATEGORY(LogGUI);
 
 
 std::string EnsureExtension(const std::string& path, const std::string& ext) 
@@ -36,47 +39,6 @@ std::string EnsureExtension(const std::string& path, const std::string& ext)
 namespace NG
 {
 	constexpr int spaceOffset = 24;
-	constexpr const char* GitURL = "https://github.com/VaeDeveloper/NoiseGenerator";
-	constexpr const int Full_Width = 2000;
-	constexpr const int Full_Height = 1120;
-
-	template<typename WidgetFunc>
-	void LabeledWidgetWithLock(const char* lockID, bool* lockState, WidgetFunc widget)
-	{
-		ImVec2 originalPadding = ImGui::GetStyle().FramePadding;
-		float targetHeight = 22.0f;
-		float lineHeight = ImGui::GetTextLineHeight();
-		float newPaddingY = (targetHeight - lineHeight) * 0.5f;
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(originalPadding.x, newPaddingY));
-
-		if(*lockState) ImGui::BeginDisabled(true);
-		widget();
-		if(*lockState) ImGui::EndDisabled();
-
-		ImGui::PopStyleVar();
-		ImGui::SameLine();
-		float space = ImGui::GetContentRegionAvail().x;
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - spaceOffset);
-
-		
-
-		ImGui::PushID(lockID);
-		if(ImGui::Button(*lockState ? ICON_FA_LOCK : ICON_FA_LOCK_OPEN, ImVec2(24, 22)))
-		{
-			*lockState = !*lockState;
-			Logger::Log(std::string("Lock toggled: ") + lockID + " = " + (*lockState ? "true" : "false"));
-		}
-		ImGui::PopID();
-	}
-
-	template<typename T>
-	void LogWidget(const char* label, T* value, std::function<bool()> widget)
-	{
-		if(widget())
-		{
-			Logger::Log(std::string(label) + " = " + NG::StringUtils::ToString(*value));
-		}
-	}
 }
 
 void GuiManager::Init(GLFWwindow* window)
@@ -85,12 +47,13 @@ void GuiManager::Init(GLFWwindow* window)
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	
+
 	InitStyleConfig(io);
 	InitFontConfig(io);
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
-	Logger::Log("ImGui initialized");
+
+	NGLOG(LogGUI, Info, "ImGui initialized");
 
 	noisePreview.Initialize();
 }
@@ -119,11 +82,11 @@ void GuiManager::InitFontConfig(const ImGuiIO& io)
 	config.PixelSnapH = true;
 	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
-	std::vector<fs::path> fontSearchPaths = 
+	std::vector<fs::path> fontSearchPaths =
 	{
 		fs::current_path() / "fonts" / "fa-solid-900.ttf",
 		fs::current_path() / ".." / "fonts" / "fa-solid-900.ttf",
-		fs::current_path() / ".." / ".." / "fonts" / "fa-solid-900.ttf" 
+		fs::current_path() / ".." / ".." / "fonts" / "fa-solid-900.ttf"
 	};
 
 	fs::path fontPath;
@@ -138,25 +101,23 @@ void GuiManager::InitFontConfig(const ImGuiIO& io)
 
 	if(fontPath.empty())
 	{
-		Logger::Err("Font Awesome not found in known paths!");
-		Logger::Log("Working directory: " + fs::current_path().string());
+		NGLOG(LogGUI, Error, "Font Awesome not found in known paths!");
+		NGLOG(LogGUI, Info, "Working directory: " + fs::current_path().string());
 		return;
 	}
 
 	float fontSize = SettingsManager::Get().GetFontSize();
-	Logger::Log("Font size: " + NG::StringUtils::ToString(fontSize));
+	NGLOG(LogGUI, Info, "Font size: " + NG::StringUtils::ToString(fontSize));
 
 	if(!io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, &config, icon_ranges))
 	{
-		Logger::Err("Failed to load Font Awesome font from: " + fontPath.string());
+		NGLOG(LogGUI, Error, "Failed to load Font Awesome font from: " + fontPath.string());
 	}
 	else
 	{
-		Logger::Log("Font Awesome loaded from: " + fontPath.string());
+		NGLOG(LogGUI, Info, "Font Awesome loaded from: " + fontPath.string());
 	}
-
 }
-
 void GuiManager::InitThemeStyle()
 {
 	std::string theme = SettingsManager::Get().GetTheme();
@@ -206,22 +167,22 @@ void GuiManager::DrawMenuBar()
 
 							if(ok)
 							{
-								Logger::Log("Saved PNG: " + pathStr);
+								NGLOG(LogGUI, Info, "Saved PNG: " + pathStr);
 							}
 							else
 							{
-								Logger::Err("Failed to save PNG: " + pathStr);
+								NGLOG(LogGUI, Error, "Failed to save PNG: " + pathStr);
 							}
 
 							free(outPath);
 						}
 						else if(result == NFD_CANCEL)
 						{
-							Logger::Log("Save dialog canceled.");
+							NGLOG(LogGUI, Info, "Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err("NFD Error: " + std::string(NFD_GetError()));
+							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
 						}
 					}
 				}
@@ -242,21 +203,21 @@ void GuiManager::DrawMenuBar()
 
 							if(ok)
 							{
-								Logger::Log("Saved TGA: " + pathStr);
+								NGLOG(LogGUI, Info, "Saved TGA: " + pathStr);
 							}
 							else
 							{
-								Logger::Err("Failed to save TGA: " + pathStr);
+								NGLOG(LogGUI, Error, "Failed to save TGA: " + pathStr);
 							}
 							free(outPath);
 						}
-						else if(result == NFD_CANCEL) 
+						else if(result == NFD_CANCEL)
 						{
-							Logger::Log("Save dialog canceled.");
+							NGLOG(LogGUI, Info, "Save dialog canceled.");
 						}
-						else 
+						else
 						{
-							Logger::Err("NFD Error: " + std::string(NFD_GetError()));
+							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
 						}
 					}
 				}
@@ -279,22 +240,22 @@ void GuiManager::DrawMenuBar()
 
 							if(ok)
 							{
-								Logger::Log("Saved BMP: " + pathStr);
+								NGLOG(LogGUI, Info, "Saved BMP: " + pathStr);
 							}
 							else
 							{
-								Logger::Err("Failed to save BMP: " + pathStr);
+								NGLOG(LogGUI, Error, "Failed to save BMP: " + pathStr);
 							}
 
 							free(outPath);
 						}
 						else if(result == NFD_CANCEL)
 						{
-							Logger::Log("Save dialog canceled.");
+							NGLOG(LogGUI, Info, "Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err(std::string("NFD Error: ") + NFD_GetError());
+							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
 						}
 					}
 				}
@@ -319,22 +280,22 @@ void GuiManager::DrawMenuBar()
 
 							if(ok)
 							{
-								Logger::Log("Saved JPG: " + pathStr);
+								NGLOG(LogGUI, Info, "Saved JPG: " + pathStr);
 							}
 							else
 							{
-								Logger::Err("Failed to save JPG: " + pathStr);
+								NGLOG(LogGUI, Error, "Failed to save JPG: " + pathStr);
 							}
 
 							free(outPath);
 						}
 						else if(result == NFD_CANCEL)
 						{
-							Logger::Log("Save dialog canceled.");
+							NGLOG(LogGUI, Info, "Save dialog canceled.");
 						}
 						else
 						{
-							Logger::Err(std::string("NFD Error: ") + NFD_GetError());
+							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
 						}
 					}
 				}
@@ -354,11 +315,11 @@ void GuiManager::DrawMenuBar()
 
 		if(ImGui::BeginMenu(WITH_ICON("Eye", "View")))
 		{
-			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &showOutputLog);
-			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &fullscreen))
+			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &bShowOutputLog);
+			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &bFullscreen))
 			{
 				GLFWwindow* window = glfwGetCurrentContext();
-				if(fullscreen)
+				if(bFullscreen)
 				{
 					const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 					glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
@@ -398,7 +359,7 @@ void GuiManager::DrawMenuBar()
 
 void GuiManager::DrawOutputLog()
 {
-	if(showOutputLog)
+	if(bShowOutputLog)
 	{
 		ImGui::Begin("Output Log", nullptr, ImGuiWindowFlags_NoTitleBar);
 		SHOW_HIDDEN_TAB_BAR(ImGui::GetWindowDockID());
@@ -502,8 +463,7 @@ void GuiManager::RandomizeNoise()
 	if(!lockExpShift) turbulence_expshift = ImLerp(-4.0f, 4.0f, static_cast<float>(rand()) / RAND_MAX);
 	if(!lockOffsetX) turbulence_offset_x = ImLerp(-1.0f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
 	if(!lockOffsetY) turbulence_offset_y = ImLerp(-1.0f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
-	Logger::Log("Randomize noise settings");
-
+	NGLOG(LogGUI, Info, "Randomized noise settings");
 }
 
 void GuiManager::OpenURL(const char* url)
@@ -519,7 +479,7 @@ void GuiManager::OpenURL(const char* url)
 	command += url;
 	system(command.c_str());
 #endif
-	Logger::Log(std::string("Opened URL: ") + url);
+	NGLOG(LogGUI, Info, std::string("Opened URL: ") + url);
 }
 
 void GuiManager::DrawResolutionComboWithLock()
@@ -544,7 +504,7 @@ void GuiManager::DrawResolutionComboWithLock()
 	{
 		allLocked = !allLocked;
 		SetAllLock(allLocked);
-		Logger::Log(std::string(allLocked ? "All parameters locked" : "All parameters unlocked"));
+		NGLOG(LogGUI, Info, std::string(allLocked ? "All parameters locked" : "All parameters unlocked"));
 
 	}
 	ImGui::PopID();
@@ -594,7 +554,7 @@ void GuiManager::DrawUI()
 {
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
-	if(!dockBuilt)
+	if(!bDockBuilt)
 	{
 		ImGui::DockBuilderRemoveNode(dockspace_id); // clear any previous layout
 		ImGui::DockBuilderAddNode(dockspace_id,
@@ -615,7 +575,7 @@ void GuiManager::DrawUI()
 		ImGui::DockBuilderDockWindow("Output Log", dock_bottom);
 
 		ImGui::DockBuilderFinish(dockspace_id);
-		dockBuilt = true;
+		bDockBuilt = true;
 	}
 
 	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -675,7 +635,7 @@ void GuiManager::DrawUI()
 					this->QueueUITask([this, noise, res] () 
 						{
 							this->SetNoiseData(noise, res, res);
-							Logger::Log("Generated 2D noise preview");
+							//Logger::Log("Generated 2D noise preview");
 							free(noise);
 							this->generationProgress = -1.0f;
 							this->isGenerating = false;
@@ -685,7 +645,7 @@ void GuiManager::DrawUI()
 				{
 					this->QueueUITask([this] () 
 						{
-							Logger::Warn("Noise generation cancelled.");
+							NGLOG(LogGUI, Warning, "Noise generation cancelled.");
 							this->SetNoiseData(nullptr, 0, 0);
 							this->generationProgress = -1.0f;
 							this->isGenerating = false;
@@ -700,7 +660,7 @@ void GuiManager::DrawUI()
 
 	if(ImGui::Button(WITH_ICON("TimesCircle", "Cancel"), ImVec2(120, 30))) {
 		cancelRequested = true;
-		Logger::Warn("Cancel requested by user");
+		NGLOG(LogGUI, Warning, "Cancel requested by user");
 	}
 
 
@@ -710,7 +670,7 @@ void GuiManager::DrawUI()
 	if(ImGui::Button(WITH_ICON("Trash", "Clear"), ImVec2(120, 30)))
 	{
 		this->SetNoiseData(nullptr, 0, 0);
-		Logger::Warn("Preview cleared");
+		NGLOG(LogGUI, Warning, "Preview cleared");
 	}
 	ImGui::EndDisabled();
 
@@ -726,7 +686,7 @@ void GuiManager::DrawUI()
 	if(ImGui::Button(WITH_ICON("Flask", "Mutate")))
 	{
 		MutateNoiseStyle(randomStyle);
-		Logger::Log("Mutated noise settings using style: " + std::string(randomStyles[randomStyle]));
+		NGLOG(LogGUI, Info, "Mutated noise settings using style: " + std::string(randomStyles[randomStyle]));
 	}
 
 	ImGui::SameLine();
@@ -848,16 +808,18 @@ void GuiManager::DrawUI()
 
 	if(ImGui::IsKeyPressed(ImGuiKey_F11, false))
 	{
-		fullscreen = !fullscreen;
+		bFullscreen = !bFullscreen;
 		GLFWwindow* window = glfwGetCurrentContext();
-		if(fullscreen)
+		if(bFullscreen)
 		{
 			const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 			glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
 		}
 		else
 		{
-			glfwSetWindowMonitor(window, nullptr, 100, 100, NG::Full_Width, NG::Full_Height, 0);
+			float Width = SettingsManager::Get().GetWindowWidth();
+			float Height = SettingsManager::Get().GetWindowHeight();
+			glfwSetWindowMonitor(window, nullptr, 100, 100, Width, Height, 0);
 		}
 	}
 

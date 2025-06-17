@@ -1,6 +1,7 @@
 #include "NoiseGenerator.h"
 #include "Noise/NoiseMath.h"
 #include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
 #include "Utils/RandomGenerator.h"
 #include <cmath>
 #include <cstdlib>
@@ -10,6 +11,8 @@
 #define PI2     6.28318530717958647692528676655901f
 #define EPSILON 0.00000001000000000000000000000000f
 
+DEFINE_LOG_CATEGORY(LogNoise);
+
 namespace NG
 {
 	float* StupidNoise1D(int res, int freq, float* data2, float scale, unsigned int seed)
@@ -17,7 +20,7 @@ namespace NG
 		float* data1 = (float*)calloc(sizeof(float), freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res);
 		if(!data1 || !data2) {
-			Logger::Err("Out of memory");
+			NGLOG(LogNoise, Error, "Out of memory");
 			throw std::runtime_error("Out of memory");
 		}
 
@@ -47,7 +50,7 @@ namespace NG
 		float* data1 = (float*)calloc(sizeof(float), freq * freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res * res);
 		if(!data1 || !data2) {
-			Logger::Err("Out of memory");
+			NGLOG(LogNoise, Error, "Out of memory");
 			throw std::runtime_error("Out of memory");
 		}
 
@@ -82,8 +85,9 @@ namespace NG
 	{
 		float* data1 = (float*)calloc(sizeof(float), freq * freq * freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res * res * res);
-		if(!data1 || !data2) {
-			Logger::Err("Out of memory");
+		if(!data1 || !data2) 
+		{
+			NGLOG(LogNoise, Error, "Out of memory");
 			throw std::runtime_error("Out of memory");
 		}
 
@@ -144,8 +148,9 @@ namespace NG
 
 		if(!data) {
 			data = (float*)calloc(sizeof(float), res * res);
-			if(!data) {
-				Logger::Err("Out of memory");
+			if(!data) 
+			{
+				NGLOG(LogNoise, Error, "Out of memory");
 				throw std::runtime_error("Out of memory");
 			}
 			return data;
@@ -168,19 +173,22 @@ namespace NG
 			prop.seed = in_props->seed + 200;
 			float* dy = PerlinNoise2D(turbulence_res, &prop, [] (float) { return true; });
 
-			if(!dx || !dy) {
+			if(!dx || !dy) 
+			{
 				if(data) free(data);
 				if(dx) free(dx);
 				if(dy) free(dy);
-				Logger::Err("Turbulence sub-pass canceled or failed");
+				NGLOG(LogNoise, Error, "Turbulence sub-pass canceled or failed");
 				return nullptr;
 			}
 
 			float* temp = new float[res * res];
 			memcpy(temp, data, res * res * sizeof(float));
 
-			for(int j = 0; j < res; j++) {
-				for(int i = 0; i < res; i++) {
+			for(int j = 0; j < res; j++) 
+			{
+				for(int i = 0; i < res; i++) 
+				{
 					float x = Sample2D(dx, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 					float y = Sample2D(dy, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 
@@ -198,7 +206,8 @@ namespace NG
 					data[i + j * res] = Sample2D(temp, res, res, x, y);
 				}
 
-				if(onProgress && !onProgress(0.4f + (float)j / res * 0.5f)) {
+				if(onProgress && !onProgress(0.4f + (float)j / res * 0.5f)) 
+				{
 					delete[] temp;
 					free(data);
 					free(dx);
@@ -214,11 +223,13 @@ namespace NG
 
 		// === Normalize ===
 		float min_v = data[0], max_v = data[0];
-		for(int i = 1; i < res * res; i++) {
+		for(int i = 1; i < res * res; i++) 
+		{
 			if(data[i] < min_v) min_v = data[i];
 			if(data[i] > max_v) max_v = data[i];
 		}
-		for(int i = 0; i < res * res; i++) {
+		for(int i = 0; i < res * res; i++) 
+		{
 			data[i] = (data[i] - min_v) / (max_v - min_v);
 		}
 

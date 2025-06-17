@@ -3,7 +3,9 @@
 #include <glad/glad.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <ThirdParty/stb_image_write.h>
-#include "Logger/Logger.h"
+#include "Logger/LoggerMacro.h"
+
+DEFINE_LOG_CATEGORY(LogExport);
 
 bool ImageExporter::SavePNG(const std::string& filename, unsigned int textureId, int width, int height) 
 {
@@ -19,14 +21,14 @@ bool ImageExporter::SavePNG(const std::string& filename, unsigned int textureId,
 		rgbPixels[i * 3 + 2] = pixels[i];
 	}
 
-	if(stbi_write_png(filename.c_str(), width, height, 3, rgbPixels.data(), width * 3)) 
+	if(stbi_write_png(filename.c_str(), width, height, 3, rgbPixels.data(), width * 3))
 	{
-		Logger::Log("Saved PNG: " + filename);
+		NGLOG(LogExport, Error, "Saved PNG: " + filename);
 		return true;
 	}
-	else 
+	else
 	{
-		Logger::Err("Failed to save PNG: " + filename);
+		NGLOG(LogExport, Error, "Failed to save PNG: " + filename);
 		return false;
 	}
 }
@@ -46,14 +48,14 @@ bool ImageExporter::SaveTGA(const std::string& filename, unsigned int textureId,
 		grayPixels[i * 3 + 2] = pixels[i];
 	}
 
-	if(stbi_write_tga(filename.c_str(), width, height, 3, grayPixels.data())) 
+	if(stbi_write_tga(filename.c_str(), width, height, 3, grayPixels.data()))
 	{
-		Logger::Log("Saved TGA: " + filename);
+		NGLOG(LogExport, Info, "Saved TGA: " + filename);
 		return true;
 	}
-	else 
+	else
 	{
-		Logger::Err("Failed to save TGA: " + filename);
+		NGLOG(LogExport, Error, "Failed to save TGA: " + filename);
 		return false;
 	}
 }

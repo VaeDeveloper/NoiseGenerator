@@ -41,9 +41,9 @@ private:
 	void DrawResolutionComboWithLock();
 
 private:
-	bool fullscreen = false;
-	bool dockBuilt = false;
-	bool showOutputLog = true;
+	bool bFullscreen = false;
+	bool bDockBuilt = false;
+	bool bShowOutputLog = true;
 	NoisePreviewPanel noisePreview;
 
 	std::thread generationThread;

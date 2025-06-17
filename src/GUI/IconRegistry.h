@@ -3,8 +3,9 @@
 #include <map>
 #include <string>
 #include "ThirdParty/IconsFontAwesome5.h"
+#include "Logger/LoggerMacro.h"
 
-
+DEFINE_LOG_CATEGORY(LogIcon);
 
 class IconRegistry
 {
@@ -15,7 +16,7 @@ public:
 		auto it = Map.find(Name);
 		if(it != Map.end()) return it->second;
 
-		Logger::Err("Icon not found: " + Name);
+		NGLOG(LogIcon, Warning, "Icon not found: " + Name);
 		return "";
 	}
 
