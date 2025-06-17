@@ -19,7 +19,7 @@ namespace NG
 			throw std::runtime_error("Out of memory");
 		}
 
-		RandomUtil rng(seed);
+		RandomGenerator rng(seed);
 		for(int i = 0; i < freq; i++)
 			data1[i] = rng.NextFloat();
 
@@ -49,7 +49,7 @@ namespace NG
 			throw std::runtime_error("Out of memory");
 		}
 
-		RandomUtil rng(seed);
+		RandomGenerator rng(seed);
 		for(int i = 0; i < freq * freq; i++)
 			data1[i] = rng.NextFloat();
 
@@ -85,7 +85,7 @@ namespace NG
 			throw std::runtime_error("Out of memory");
 		}
 
-		RandomUtil rng(seed);
+		RandomGenerator rng(seed);
 		for(int i = 0; i < freq * freq * freq; i++)
 			data1[i] = rng.NextFloat();
 
@@ -221,13 +221,16 @@ namespace NG
 		}
 
 		// === Marbling ===
-		if(in_props->marbling != 0.0f) {
-			for(int i = 0; i < res * res; i++) {
+		if(in_props->marbling != 0.0f)
+		{
+			for(int i = 0; i < res * res; i++) 
+			{
 				data[i] = sinf(PI2 * data[i] * in_props->marbling) * 0.5f + 0.5f;
 			}
 		}
 
-		if(onProgress && !onProgress(1.0f)) {
+		if(onProgress && !onProgress(1.0f)) 
+		{
 			free(data);
 			return nullptr;
 		}
