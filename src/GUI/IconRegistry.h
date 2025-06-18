@@ -2,10 +2,13 @@
 
 #include <map>
 #include <string>
+#include <filesystem>  
 #include "ThirdParty/IconsFontAwesome5.h"
 #include "Logger/LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogIcon);
+
+
 
 class IconRegistry
 {
@@ -14,13 +17,60 @@ public:
 	{
 		const auto& Map = GetMap();
 		auto it = Map.find(Name);
-		if(it != Map.end()) return it->second;
+		if(it != Map.end())
+		{
+			return it->second;
+		}
 
 		NGLOG(LogIcon, Warning, "Icon not found: " + Name);
 		return "";
 	}
 
+	static void InitializeIcons(const ImGuiIO& io, float fontSize = 12.0f) 
+	{
+		ImFontConfig config;
+		config.MergeMode = true;
+		config.PixelSnapH = true;
+
+		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+
+		std::string fontPath = FindFontAwesomePath();
+		if(fontPath.empty()) 
+		{
+			NGLOG(LogIcon, Error, "Font Awesome not found!");
+			return;
+		}
+
+		if(!io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, &config, icon_ranges)) 
+		{
+			NGLOG(LogIcon, Error, "Failed to load Font Awesome: " + fontPath);
+		}
+		else 
+		{
+			NGLOG(LogIcon, Info, "Font Awesome loaded from: " + fontPath);
+		}
+	}
+
+
+
 private:
+	static std::string FindFontAwesomePath() 
+	{
+		std::vector<std::string> paths = 
+		{
+			"fonts/fa-solid-900.ttf",
+			"../fonts/fa-solid-900.ttf",
+			"../../fonts/fa-solid-900.ttf"
+		};
+		for(const auto& p : paths) 
+		{
+			if(std::filesystem::exists(p))
+			{
+				return std::filesystem::weakly_canonical(p).string();
+			}
+		}
+		return {};
+	}
 
 	inline static const std::map<std::string, const char*>& GetMap() 
 	{

@@ -80,7 +80,7 @@ void GuiManager::Init(GLFWwindow* window)
 	props.turbulence_expshift = turbulence_expshift;
 	props.turbulence_offset_x = turbulence_offset_x;
 	props.turbulence_offset_y = turbulence_offset_y;
-	float* noise = NG::PerlinNoise2D(res, &props, [this] (float progress)
+	float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
 		{
 			this->generationProgress = progress;
 			return !this->cancelRequested;
@@ -110,51 +110,12 @@ void GuiManager::InitStyleConfig(const ImGuiIO& io)
 
 void GuiManager::InitFontConfig(const ImGuiIO& io)
 {
-	ImFontConfig config;
-	config.MergeMode = true;
-	config.PixelSnapH = true;
-	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-
-	std::vector<fs::path> fontSearchPaths =
-	{
-		fs::current_path() / "fonts" / "fa-solid-900.ttf",
-		fs::current_path() / ".." / "fonts" / "fa-solid-900.ttf",
-		fs::current_path() / ".." / ".." / "fonts" / "fa-solid-900.ttf"
-	};
-
-	fs::path fontPath;
-	for(const auto& path : fontSearchPaths)
-	{
-		if(fs::exists(path))
-		{
-			fontPath = fs::weakly_canonical(path);
-			break;
-		}
-	}
-
-	if(fontPath.empty())
-	{
-		NGLOG(LogGUI, Error, "Font Awesome not found in known paths!");
-		NGLOG(LogGUI, Info, "Working directory: " + fs::current_path().string());
-		return;
-	}
-
 	float fontSize = SettingsManager::Get().GetFontSize();
-	NGLOG(LogGUI, Info, "Font size: " + NG::StringUtils::ToString(fontSize));
-
-	if(!io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, &config, icon_ranges))
-	{
-		NGLOG(LogGUI, Error, "Failed to load Font Awesome font from: " + fontPath.string());
-	}
-	else
-	{
-		NGLOG(LogGUI, Info, "Font Awesome loaded from: " + fontPath.string());
-	}
+	IconRegistry::InitializeIcons(io, fontSize);
 }
 void GuiManager::InitThemeStyle()
 {
 	std::string theme = SettingsManager::Get().GetTheme();
-
 	if(theme == "dark")
 	{
 		ImGui::StyleColorsDark();
@@ -633,6 +594,8 @@ void GuiManager::DrawUI()
 	ImGui::BeginDisabled(isGenerating);
 	if(ImGui::Button(WITH_ICON("Play", "Generate 2D Noise"), ImVec2(200, 30)) && !isGenerating)
 	{
+		NGLOG(LogGUI, Warning, "Generated 2D noise preview");
+
 		int res = 8 << resolutionIndex;
 		NoiseProperties props = {};
 		props.seed = std::random_device{}();
@@ -657,7 +620,7 @@ void GuiManager::DrawUI()
 		cancelRequested = false;
 		generationThread = std::thread([this, res, props] () 
 			{
-				float* noise = NG::PerlinNoise2D(res, &props, [this] (float progress) 
+				float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
 					{
 						this->generationProgress = progress;
 						return !this->cancelRequested; 
@@ -668,7 +631,6 @@ void GuiManager::DrawUI()
 					this->QueueUITask([this, noise, res] () 
 						{
 							this->SetNoiseData(noise, res, res);
-							//Logger::Log("Generated 2D noise preview");
 							free(noise);
 							this->generationProgress = -1.0f;
 							this->isGenerating = false;
@@ -678,7 +640,6 @@ void GuiManager::DrawUI()
 				{
 					this->QueueUITask([this] () 
 						{
-							NGLOG(LogGUI, Warning, "Noise generation cancelled.");
 							this->SetNoiseData(nullptr, 0, 0);
 							this->generationProgress = -1.0f;
 							this->isGenerating = false;
@@ -823,6 +784,11 @@ void GuiManager::DrawUI()
 	if(isGenerating)
 	{
 		ImGui::ProgressBar(generationProgress, ImVec2(-1.0f, 0.0f), generationProgress >= 1.0f ? "Done" : "Generating...");
+		NGLOG(LogGUI, Info, "GenerationProgress -> " + std::to_string(generationProgress));
+		if (generationProgress >= 1.0f)
+		{
+			NGLOG(LogGUI, Info, "Generation Done");
+		}
 	}
 	ImGui::End();
 
@@ -831,14 +797,14 @@ void GuiManager::DrawUI()
 	// Log window
 	DrawOutputLog();
 
+	
+	std::lock_guard<std::mutex> lock(uiMutex);
+	while(!uiTasks.empty())
 	{
-		std::lock_guard<std::mutex> lock(uiMutex);
-		while(!uiTasks.empty())
-		{
-			uiTasks.front()(); // execute
-			uiTasks.pop();
-		}
+		uiTasks.front()(); // execute
+		uiTasks.pop();
 	}
+	
 
 	if(ImGui::IsKeyPressed(ImGuiKey_F11, false))
 	{

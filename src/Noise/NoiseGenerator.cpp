@@ -19,7 +19,8 @@ namespace NG
 	{
 		float* data1 = (float*)calloc(sizeof(float), freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res);
-		if(!data1 || !data2) {
+		if(!data1 || !data2) 
+		{
 			NGLOG(LogNoise, Error, "Out of memory");
 			throw std::runtime_error("Out of memory");
 		}
@@ -123,7 +124,7 @@ namespace NG
 		return data2;
 	}
 
-	float* PerlinNoise2D(int res, const NoiseProperties* in_props, std::function<bool(float)> onProgress)
+	float* FBMNoise2D(int res, const NoiseProperties* in_props, std::function<bool(float)> onProgress)
 	{
 		float* data = nullptr;
 		float scale = 1.0f;
@@ -169,9 +170,9 @@ namespace NG
 			float turbulence_exp = powf(2.0f, in_props->turbulence_expshift);
 
 			prop.seed = in_props->seed + 100;
-			float* dx = PerlinNoise2D(turbulence_res, &prop, [] (float) { return true; });
+			float* dx = FBMNoise2D(turbulence_res, &prop, [] (float) { return true; });
 			prop.seed = in_props->seed + 200;
-			float* dy = PerlinNoise2D(turbulence_res, &prop, [] (float) { return true; });
+			float* dy = FBMNoise2D(turbulence_res, &prop, [] (float) { return true; });
 
 			if(!dx || !dy) 
 			{
@@ -244,6 +245,133 @@ namespace NG
 
 		if(onProgress && !onProgress(1.0f)) 
 		{
+			free(data);
+			return nullptr;
+		}
+
+		return data;
+	}
+	float* WorleyNoise2D(int res, const NoiseProperties* props, std::function<bool(float)> onProgress)
+	{
+		if(!props) return nullptr;
+
+		unsigned int seed = static_cast<unsigned int>(props->seed);
+		int pointCount = std::max(1, 32 << std::max(0, (int)(props->low_freq_skip - props->high_freq_skip)));
+
+		srand(seed);
+		std::vector<std::pair<float, float>> points;
+		points.reserve(pointCount);
+
+		for(int i = 0; i < pointCount; ++i) {
+			points.emplace_back(static_cast<float>(rand()) / RAND_MAX,
+				static_cast<float>(rand()) / RAND_MAX);
+		}
+
+		float* data = (float*)calloc(sizeof(float), res * res);
+		if(!data) {
+			NGLOG(LogNoise, Error, "Out of memory in WorleyNoise2D");
+			return nullptr;
+		}
+
+		for(int y = 0; y < res; ++y) {
+			for(int x = 0; x < res; ++x) {
+				float fx = static_cast<float>(x) / res;
+				float fy = static_cast<float>(y) / res;
+
+				float minDist = 999999.0f;
+				for(const auto& [px, py] : points) {
+					float d = Distance(fx, fy, px, py);
+					if(d < minDist) minDist = d;
+				}
+
+				data[x + y * res] = minDist;
+			}
+
+			if(onProgress && !onProgress((float)y / res * 0.4f)) {
+				free(data);
+				return nullptr;
+			}
+		}
+
+		// === Turbulence Pass ===
+		if(props->turbulence != 0.0f) {
+			NoiseProperties prop = *props;
+			prop.turbulence = 0.0f;
+			prop.roughness = props->turbulence_roughness;
+			prop.low_freq_skip = props->turbulence_low_freq_skip;
+			prop.high_freq_skip = props->turbulence_high_freq_skip;
+			prop.marbling = props->turbulence_marbling;
+
+			int turbulence_res = 8 << props->turbulence_res;
+			float turbulence_exp = powf(2.0f, props->turbulence_expshift);
+
+			prop.seed = props->seed + 100;
+			float* dx = WorleyNoise2D(turbulence_res, &prop, [] (float) { return true; });
+			prop.seed = props->seed + 200;
+			float* dy = WorleyNoise2D(turbulence_res, &prop, [] (float) { return true; });
+
+			if(!dx || !dy) {
+				if(data) free(data);
+				if(dx) free(dx);
+				if(dy) free(dy);
+				NGLOG(LogNoise, Error, "Turbulence sub-pass failed");
+				return nullptr;
+			}
+
+			float* temp = new float[res * res];
+			memcpy(temp, data, res * res * sizeof(float));
+
+			for(int j = 0; j < res; j++) {
+				for(int i = 0; i < res; i++) {
+					float x = Sample2D(dx, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
+					float y = Sample2D(dy, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
+
+					if(turbulence_exp != 1.0f) {
+						x = powf(fabsf(x), turbulence_exp) * (x >= 0.0f ? 1.0f : -1.0f);
+						y = powf(fabsf(y), turbulence_exp) * (y >= 0.0f ? 1.0f : -1.0f);
+					}
+
+					x += props->turbulence_offset_x;
+					y += props->turbulence_offset_y;
+
+					x = x * props->turbulence / 64.0f + (float)i / res;
+					y = y * props->turbulence / 64.0f + (float)j / res;
+
+					data[i + j * res] = Sample2D(temp, res, res, x, y);
+				}
+
+				if(onProgress && !onProgress(0.4f + (float)j / res * 0.4f)) {
+					delete[] temp;
+					free(data);
+					free(dx);
+					free(dy);
+					return nullptr;
+				}
+			}
+
+			delete[] temp;
+			free(dx);
+			free(dy);
+		}
+
+		// Normalize
+		float min_v = data[0], max_v = data[0];
+		for(int i = 1; i < res * res; i++) {
+			if(data[i] < min_v) min_v = data[i];
+			if(data[i] > max_v) max_v = data[i];
+		}
+		for(int i = 0; i < res * res; i++) {
+			data[i] = (data[i] - min_v) / (max_v - min_v);
+		}
+
+		// Optional marbling pass
+		if(props->marbling != 0.0f) {
+			for(int i = 0; i < res * res; i++) {
+				data[i] = sinf(PI2 * data[i] * props->marbling) * 0.5f + 0.5f;
+			}
+		}
+
+		if(onProgress && !onProgress(1.0f)) {
 			free(data);
 			return nullptr;
 		}

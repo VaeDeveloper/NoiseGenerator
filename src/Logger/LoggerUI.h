@@ -37,22 +37,48 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(100);
 	ImGui::Combo("##LogTypeFilter", &currentTypeFilter, typeOptions, IM_ARRAYSIZE(typeOptions));
-
 	ImGui::SameLine();
 
-	// Category filter
-	ImGui::Text("Category:");
-	ImGui::SameLine();
-	ImGui::SetNextItemWidth(150);
-	static int selectedCategoryIndex = 0;
-	std::vector<const char*> categoryCStrs;
-	for(const auto& cat : knownCategories)
-		categoryCStrs.push_back(cat.c_str());
+	// === Category filter with checkboxes inside combo ===
+	static std::unordered_map<std::string, bool> categoryFilterStates;
 
-	if(ImGui::Combo("##CategoryFilter", &selectedCategoryIndex, categoryCStrs.data(), static_cast<int>(categoryCStrs.size())))
+	for(const auto& entry : Logger::GetMessages()) 
 	{
-		currentCategory = knownCategories[selectedCategoryIndex];
+		if(categoryFilterStates.find(entry.category) == categoryFilterStates.end()) 
+		{
+			categoryFilterStates[entry.category] = false; // off default
+		}
 	}
+
+	int selectedCount = 0;
+	for(const auto& [_, enabled] : categoryFilterStates) 
+	{
+		if(enabled) selectedCount++;
+	}
+
+	std::string comboLabel = " -- select --";
+
+	ImGui::Text("Categories:");
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(200);
+	if(ImGui::BeginCombo("##CategoryCombo", comboLabel.c_str())) {
+
+
+		if(ImGui::Button("Reset",ImVec2(110,20)))
+		{
+			for(auto& [_, enabled] : categoryFilterStates) enabled = false;
+		}
+
+		ImGui::Separator();
+
+		for(auto& [category, enabled] : categoryFilterStates) 
+		{
+			ImGui::Checkbox(category.c_str(), &enabled);
+		}
+
+		ImGui::EndCombo();
+	}
+
 
 	// === Text Search ===
 	static char searchBuffer[256] = "";
@@ -73,8 +99,21 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 			continue;
 
 		// Apply category filter
-		if(currentCategory != "All" && entry.category != currentCategory)
-			continue;
+		bool anyCategoryChecked = false;
+		for(const auto& [_, enabled] : categoryFilterStates) 
+		{
+			if(enabled) 
+			{
+				anyCategoryChecked = true;
+				break;
+			}
+		}
+
+		if(anyCategoryChecked) 
+		{
+			if(categoryFilterStates.find(entry.category) != categoryFilterStates.end() && !categoryFilterStates[entry.category])
+				continue;
+		}
 
 		// Apply text filter
 		if(!searchFilter.empty() && entry.message.find(searchFilter) == std::string::npos)
