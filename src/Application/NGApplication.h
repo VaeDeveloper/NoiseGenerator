@@ -1,9 +1,10 @@
 #pragma once
+
+
 #include <glad/glad.h>
+
 #include "GUI/GuiManager.h"
 #include "Logger/LoggerMacro.h"
-
-
 
 enum class InitStatus
 {

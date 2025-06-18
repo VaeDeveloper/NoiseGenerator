@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include <glad/glad.h>
 
 class NoisePreviewPanel
@@ -15,14 +17,14 @@ public:
 	void SetShowInfoPanel(bool value) { showInfoPanel = value; }
 	bool GetShowInfoPanel() const { return showInfoPanel; }
 
-	void SetPreviewWidth(float Width) { previewWidht = Width; }
+	void SetPreviewWidth(float Width) { previewWidth = Width; }
 	void SetPreviewHeight(float Height) { previewHeight = Height; }
 private:
 	bool bTextureInitialized = false;
 	bool showInfoPanel = true;
 	float texWidth = 0;
 	float texHeight = 0;
-	float previewWidht = 0;
+	float previewWidth = 0;
 	float previewHeight = 0;
 	GLuint textureId = 0;
 

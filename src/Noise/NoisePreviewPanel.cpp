@@ -156,7 +156,7 @@ void NoisePreviewPanel::Draw()
 	SetPreviewWidth(previewWidth);
 	SetPreviewHeight(previewHeight);
 	ImGui::BeginGroup(); 
-	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(previewWidht, previewHeight));
+	ImGui::Image((ImTextureID)(intptr_t)textureId, ImVec2(static_cast<int>(previewWidth), static_cast<int>(previewHeight)));
 	ImGui::EndGroup();
 
 	ImGui::SameLine();

@@ -1,6 +1,12 @@
 ﻿
-#include "GuiManager.h"
+
+
+#ifdef APIENTRY
+#undef APIENTRY
+#endif
 #include <windows.h>
+
+#include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/LoggerMacro.h"
 #include "GUI/GuiUtils.h"
@@ -697,7 +703,8 @@ void GuiManager::DrawUI()
 	ImGui::TextUnformatted(WITH_ICON("SlidersH", "Noise Settings"));
 	ImGui::Separator();
 	DrawResolutionComboWithLock();
-
+	
+	/* clang-format off */
 	/* Compact formatting style to improve readability of nested lambdas!!!*/
 	NG::LabeledWidgetWithLock("##lockRough", &lockRoughness, [&] () {
 		NG::LogWidget("Roughness", &roughness, [&] () {

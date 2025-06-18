@@ -2,9 +2,6 @@
 #include "Config/SettingsManager.h"
 
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 DEFINE_LOG_CATEGORY(SystemLog);
 
@@ -25,52 +22,49 @@ NGApplication::~NGApplication()
 
 void NGApplication::LogSystemInfo()
 {
-	NGLOG(SystemLog, Info, "==== System Info ====");
-
-#ifdef _WIN32
-	NGLOG(SystemLog, Info, "Platform          : Windows");
-#elif __APPLE__
-	NGLOG(SystemLog, Info, "Platform          : macOS");
-#elif __linux__
-	NGLOG(SystemLog, Info, "Platform          : Linux");
-#else
-	NGLOG(SystemLog, Info, "Platform          : Unknown");
-#endif
-
-	// CPU Cores
-	unsigned int cores = std::thread::hardware_concurrency();
-	NGLOG(LogApp, Info, "CPU Cores         : " + std::to_string(cores));
-
-
-#ifdef _WIN32
-	// Memory Info
-	MEMORYSTATUSEX memStatus;
-	memStatus.dwLength = sizeof(memStatus);
-	if(GlobalMemoryStatusEx(&memStatus))
-	{
-		auto availMB = memStatus.ullAvailPhys / (1024 * 1024);
-		auto totalMB = memStatus.ullTotalPhys / (1024 * 1024);
-		NGLOG(SystemLog, Info, "Memory Available  : " + std::to_string(availMB) + " MB");
-		NGLOG(SystemLog, Info, "Memory Total      : " + std::to_string(totalMB) + " MB");
-	}
-
-	// Screen Resolution
-	RECT desktop;
-	const HWND hDesktop = GetDesktopWindow();
-	GetWindowRect(hDesktop, &desktop);
-	int screenWidth = desktop.right;
-	int screenHeight = desktop.bottom;
-	NGLOG(SystemLog, Info, "Screen Resolution : " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight));
-#endif
-
-	NGLOG(SystemLog, Info, "=====================");
+//	NGLOG(SystemLog, Info, "==== System Info ====");
+//
+//#ifdef _WIN32
+//	NGLOG(SystemLog, Info, "Platform          : Windows");
+//#elif __APPLE__
+//	NGLOG(SystemLog, Info, "Platform          : macOS");
+//#elif __linux__
+//	NGLOG(SystemLog, Info, "Platform          : Linux");
+//#else
+//	NGLOG(SystemLog, Info, "Platform          : Unknown");
+//#endif
+//
+//	// CPU Cores
+//	unsigned int cores = std::thread::hardware_concurrency();
+//	NGLOG(LogApp, Info, "CPU Cores         : " + std::to_string(cores));
+//
+//#ifdef _WIN32
+//	// Memory Info
+//	MEMORYSTATUSEX memStatus;
+//	memStatus.dwLength = sizeof(memStatus);
+//	if (GlobalMemoryStatusEx(&memStatus))
+//	{
+//		auto availMB = memStatus.ullAvailPhys / (1024 * 1024);
+//		auto totalMB = memStatus.ullTotalPhys / (1024 * 1024);
+//		NGLOG(SystemLog, Info, "Memory Available  : " + std::to_string(availMB) + " MB");
+//		NGLOG(SystemLog, Info, "Memory Total      : " + std::to_string(totalMB) + " MB");
+//	}
+//
+//	// Screen Resolution
+//	RECT desktop;
+//	const HWND hDesktop = GetDesktopWindow();
+//	GetWindowRect(hDesktop, &desktop);
+//	int screenWidth = desktop.right;
+//	int screenHeight = desktop.bottom;
+//	NGLOG(SystemLog, Info, "Screen Resolution : " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight));
+//#endif
+//
+//	NGLOG(SystemLog, Info, "=====================");
 }
-
-
 
 InitStatus NGApplication::InitializeApplication()
 {
-	if(bIsInitialized)
+	if (bIsInitialized)
 	{
 		return InitStatus::Success;
 	}
@@ -80,14 +74,14 @@ InitStatus NGApplication::InitializeApplication()
 	WindowHeight = SettingsManager::Get().GetWindowHeight();
 
 	auto glfwStatus = InitializeGLFW();
-	if(glfwStatus != InitStatus::Success)
+	if (glfwStatus != InitStatus::Success)
 	{
-		NGLOG(LogGLFW, Error , "Failed to initialize GLFW");
+		NGLOG(LogGLFW, Error, "Failed to initialize GLFW");
 		return glfwStatus;
 	}
 
 	auto glStatus = InitializeOpenGL();
-	if(glStatus != InitStatus::Success)
+	if (glStatus != InitStatus::Success)
 	{
 		NGLOG(LogGLFW, Error, "Failed to initialize OpenGL");
 		return glStatus;
@@ -105,7 +99,7 @@ InitStatus NGApplication::InitializeApplication()
 
 InitStatus NGApplication::InitializeGLFW()
 {
-	if(!glfwInit())
+	if (!glfwInit())
 	{
 		NGLOG(LogGLFW, Error, "Failed to initialize GLFW");
 		return InitStatus::GLFW_InitFailed;
@@ -116,7 +110,7 @@ InitStatus NGApplication::InitializeGLFW()
 
 	assert(WindowWidth > 0 && WindowHeight > 0 && "Invalid window size");
 	window = glfwCreateWindow(WindowWidth, WindowHeight, "Noise Generator", nullptr, nullptr);
-	if(!window) 
+	if (!window)
 	{
 		NGLOG(LogApp, Error, "Failed to create GLFW window");
 		glfwTerminate();
@@ -129,16 +123,14 @@ InitStatus NGApplication::InitializeGLFW()
 	int glfwMajor, glfwMinor, glfwRev;
 	glfwGetVersion(&glfwMajor, &glfwMinor, &glfwRev);
 
-	NGLOG(LogGLFW, Info, "GLFW Version      : " + std::to_string(glfwMajor) + "." +
-		std::to_string(glfwMinor) + "." +
-		std::to_string(glfwRev));
+	NGLOG(LogGLFW, Info, "GLFW Version      : " + std::to_string(glfwMajor) + "." + std::to_string(glfwMinor) + "." + std::to_string(glfwRev));
 
 	return InitStatus::Success;
 }
 
-InitStatus NGApplication::InitializeOpenGL() 
+InitStatus NGApplication::InitializeOpenGL()
 {
-	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) 
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		NGLOG(LogApp, Error, "Failed to initialize GLAD");
 		return InitStatus::GLAD_InitFailed;
@@ -147,7 +139,7 @@ InitStatus NGApplication::InitializeOpenGL()
 	return InitStatus::Success;
 }
 
-void NGApplication::RenderScene() 
+void NGApplication::RenderScene()
 {
 	glViewport(0, 0, WindowWidth, WindowHeight);
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -164,20 +156,26 @@ void NGApplication::LogGraphicsInfo()
 
 std::string NGApplication::GetInitStatus(InitStatus status)
 {
-	switch(status)
+	switch (status)
 	{
-	case InitStatus::Success: return "Success";
-	case InitStatus::GLFW_InitFailed: return "GLFW initialization failed";
-	case InitStatus::WindowCreationFailed: return "Window creation failed";
-	case InitStatus::OpenGL_InitFailed: return "OpenGL initialization failed";
-	case InitStatus::GLAD_InitFailed: return "GLAD loading failed";
-	default: return "Unknown error";
+	case InitStatus::Success:
+		return "Success";
+	case InitStatus::GLFW_InitFailed:
+		return "GLFW initialization failed";
+	case InitStatus::WindowCreationFailed:
+		return "Window creation failed";
+	case InitStatus::OpenGL_InitFailed:
+		return "OpenGL initialization failed";
+	case InitStatus::GLAD_InitFailed:
+		return "GLAD loading failed";
+	default:
+		return "Unknown error";
 	}
 }
 
 void NGApplication::RunApplication()
 {
-	while(!glfwWindowShouldClose(window)) 
+	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 
@@ -197,7 +195,7 @@ void NGApplication::Shutdown()
 {
 	GUI.Shutdown();
 
-	if(window)
+	if (window)
 	{
 		NGLOG(LogApp, Info, "Destroying window...");
 		glfwDestroyWindow(window);

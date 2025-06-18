@@ -1,5 +1,9 @@
 #include "ImageExporter.h"
 #include <vector>
+
+#ifdef APIENTRY
+#undef APIENTRY
+#endif
 #include <glad/glad.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -83,6 +87,7 @@ bool ImageExporter::SaveBMP(const std::string& filename, unsigned int textureId,
 	else
 	{
 		NGLOG(LogExport, Error, "Failed to save BMP: " + filename);
+		return false;
 	}
 }
 
@@ -107,5 +112,6 @@ bool ImageExporter::SaveJPG(const std::string& filename, unsigned int textureId,
 	else
 	{
 		NGLOG(LogExport, Error, "Failed to save JPG: " + filename);
+		return false;
 	}
 }
