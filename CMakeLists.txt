@@ -150,7 +150,6 @@ add_executable(NoiseGenerator
   src/Logger/Logger.cpp
   src/Logger/Logger.h
   src/Logger/LoggerUI.h
-  src/Logger/LogCategory.h
   src/Logger/LoggerMacro.h
 
   src/Noise/NoiseGenerator.cpp
@@ -194,7 +193,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Logger/Logger.cpp
   src/Logger/Logger.h
   src/Logger/LoggerUI.h
-  src/Logger/LogCategory.h
   src/Logger/LoggerMacro.h
 
   src/Noise/NoiseGenerator.cpp

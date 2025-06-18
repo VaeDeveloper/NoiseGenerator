@@ -5,7 +5,6 @@
 #undef APIENTRY
 #endif
 #include <windows.h>
-
 #include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/LoggerMacro.h"
@@ -62,6 +61,34 @@ void GuiManager::Init(GLFWwindow* window)
 	NGLOG(LogGUI, Info, "ImGui initialized");
 
 	noisePreview.Initialize();
+
+	int res = 8 << resolutionIndex;
+	NoiseProperties props = {};
+	props.seed = std::random_device{}();
+	props.res = resolutionIndex;
+	props.roughness = roughness;
+	props.marbling = marbling;
+	props.low_freq_skip = low_freq_skip;
+	props.high_freq_skip = high_freq_skip;
+
+	props.turbulence = turbulence;
+	props.turbulence_res = turbulence_res;
+	props.turbulence_roughness = turbulence_roughness;
+	props.turbulence_low_freq_skip = turbulence_low_freq_skip;
+	props.turbulence_high_freq_skip = turbulence_high_freq_skip;
+	props.turbulence_marbling = turbulence_marbling;
+	props.turbulence_expshift = turbulence_expshift;
+	props.turbulence_offset_x = turbulence_offset_x;
+	props.turbulence_offset_y = turbulence_offset_y;
+	float* noise = NG::PerlinNoise2D(res, &props, [this] (float progress)
+		{
+			this->generationProgress = progress;
+			return !this->cancelRequested;
+		});
+	if(noise != nullptr)
+	{
+		this->SetNoiseData(noise, res, res);
+	}
 }
 
 void GuiManager::InitStyleConfig(const ImGuiIO& io)

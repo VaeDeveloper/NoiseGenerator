@@ -54,6 +54,14 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 		currentCategory = knownCategories[selectedCategoryIndex];
 	}
 
+	// === Text Search ===
+	static char searchBuffer[256] = "";
+	ImGui::Text("Search:");
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(200);
+	ImGui::InputText("##SearchFilter", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+	std::string searchFilter = searchBuffer;
+
 	// === Log entries ===
 	const auto& logs = Logger::GetMessages();
 
@@ -66,6 +74,10 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 
 		// Apply category filter
 		if(currentCategory != "All" && entry.category != currentCategory)
+			continue;
+
+		// Apply text filter
+		if(!searchFilter.empty() && entry.message.find(searchFilter) == std::string::npos)
 			continue;
 
 		ImVec4 color;
