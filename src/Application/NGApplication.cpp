@@ -70,6 +70,7 @@ InitStatus NGApplication::InitializeApplication()
 	}
 
 	SettingsManager::Get().Load();
+	
 	WindowWidth = SettingsManager::Get().GetWindowWidth();
 	WindowHeight = SettingsManager::Get().GetWindowHeight();
 
@@ -168,6 +169,8 @@ std::string NGApplication::GetInitStatus(InitStatus status)
 		return "OpenGL initialization failed";
 	case InitStatus::GLAD_InitFailed:
 		return "GLAD loading failed";
+	case InitStatus::Fail:
+		return "failed loaded";
 	default:
 		return "Unknown error";
 	}

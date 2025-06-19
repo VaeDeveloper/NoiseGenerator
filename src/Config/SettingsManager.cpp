@@ -1,7 +1,11 @@
 #include "SettingsManager.h"
 #include "Logger/LoggerMacro.h"
+#include <filesystem>
+#include "Utils/FileUtils.h"
 
 DEFINE_LOG_CATEGORY(LogSettings);
+
+
 
 SettingsManager& SettingsManager::Get()
 {
@@ -11,7 +15,14 @@ SettingsManager& SettingsManager::Get()
 
 bool SettingsManager::Load(const std::string& path) 
 {
-	reader = INIReader(path);
+	auto configPath = NG::FileSystem::FindPath("config/settings.ini");
+	if(configPath.empty()) 
+	{
+		NGLOG(LogSettings, Error, "Config file not found after searching parent folders.");
+		return false;
+	}
+	reader = INIReader(configPath);
+
 	if(reader.ParseError() < 0) 
 	{
 		NGLOG(LogSettings, Error, "Failed to load config file: " + path);

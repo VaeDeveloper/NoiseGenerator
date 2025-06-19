@@ -6,6 +6,8 @@
 #include "ThirdParty/IconsFontAwesome5.h"
 #include "Logger/LoggerMacro.h"
 
+#include "Utils/FileUtils.h"
+
 DEFINE_LOG_CATEGORY(LogIcon);
 
 
@@ -34,7 +36,7 @@ public:
 
 		static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
-		std::string fontPath = FindFontAwesomePath();
+		std::string fontPath = NG::FileSystem::FindPath("fonts/fa-solid-900.ttf");
 		if(fontPath.empty()) 
 		{
 			NGLOG(LogIcon, Error, "Font Awesome not found!");
@@ -54,24 +56,6 @@ public:
 
 
 private:
-	static std::string FindFontAwesomePath() 
-	{
-		std::vector<std::string> paths = 
-		{
-			"fonts/fa-solid-900.ttf",
-			"../fonts/fa-solid-900.ttf",
-			"../../fonts/fa-solid-900.ttf"
-		};
-		for(const auto& p : paths) 
-		{
-			if(std::filesystem::exists(p))
-			{
-				return std::filesystem::weakly_canonical(p).string();
-			}
-		}
-		return {};
-	}
-
 	inline static const std::map<std::string, const char*>& GetMap() 
 	{
 		return IconMap;

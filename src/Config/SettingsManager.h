@@ -9,8 +9,7 @@ class SettingsManager final
 public:
 	static SettingsManager& Get();
 
-	bool Load(const std::string& path = "../config/settings.ini");
-
+	bool Load(const std::string& path = "/config/settings.ini");
 
 	int GetWindowWidth() const;
 	int GetWindowHeight() const;

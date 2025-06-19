@@ -12,7 +12,9 @@ enum class InitStatus
 	GLFW_InitFailed,
 	WindowCreationFailed,
 	OpenGL_InitFailed,
-	GLAD_InitFailed
+	GLAD_InitFailed,
+	Fail
+
 };
 
 class NGApplication
@@ -42,5 +44,4 @@ private:
 	bool bIsInitialized = false;
 
 	void LogSystemInfo();
-
 };

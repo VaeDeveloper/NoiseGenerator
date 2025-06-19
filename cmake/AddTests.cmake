@@ -50,3 +50,10 @@ set_target_properties(NoiseGeneratorTests PROPERTIES
 # -----------------------
 include(GoogleTest)
 gtest_discover_tests(NoiseGeneratorTests)
+
+# -----------------------
+# Visual Studio startup project
+# -----------------------
+if(MSVC)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT NoiseGeneratorTests)
+endif()

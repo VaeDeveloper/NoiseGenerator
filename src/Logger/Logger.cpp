@@ -1,10 +1,13 @@
 #include "Logger.h"
 
+#ifdef _DEBUG
+	#include <iostream>
+#endif
+
 std::vector<LogEntry> Logger::messages;
 std::string Logger::filePath = "log.txt";
 
-std::string
-CenterText(const std::string& text, size_t width)
+std::string CenterText(const std::string& text, size_t width)
 {
 	if (text.length() >= width)
 		return text;
@@ -16,8 +19,7 @@ CenterText(const std::string& text, size_t width)
 	return std::string(padLeft, ' ') + text + std::string(padRight, ' ');
 }
 
-std::string
-Logger::GetTimestamp()
+std::string Logger::GetTimestamp()
 {
 	auto now = std::chrono::system_clock::now();
 	std::time_t now_c = std::chrono::system_clock::to_time_t(now);
@@ -37,8 +39,7 @@ Logger::GetTimestamp()
 	return std::string(buffer);
 }
 
-void
-Logger::Log(const std::string& category, LogVerbosity verbosity, const std::string& message)
+void Logger::Log(const std::string& category, LogVerbosity verbosity, const std::string& message)
 {
 	std::string prefix;
 	switch (verbosity)
@@ -60,6 +61,25 @@ Logger::Log(const std::string& category, LogVerbosity verbosity, const std::stri
 	oss << prefix << ": "
 	    << "[" << centeredCategory << "]    "
 	    << "[" << GetTimestamp() << "] " << message;
+
+	std::string finalMessage = oss.str();
+
+#ifdef _DEBUG
+	const char* colorReset = "\033[0m";
+	const char* color = "";
+
+	switch (verbosity)
+	{
+	case LogVerbosity::Info:    color = "\033[37m"; break; 
+	case LogVerbosity::Warning: color = "\033[33m"; break; 
+	case LogVerbosity::Error:   color = "\033[31m"; break;
+	}
+
+	if (verbosity == LogVerbosity::Info)
+		std::cout << color << finalMessage << colorReset << std::endl;
+	else
+		std::cerr << color << finalMessage << colorReset << std::endl;
+#endif
 
 	messages.emplace_back(LogEntry{ verbosity, category, oss.str() });
 }

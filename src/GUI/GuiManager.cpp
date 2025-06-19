@@ -1,10 +1,4 @@
 ﻿
-
-
-#ifdef APIENTRY
-#undef APIENTRY
-#endif
-#include <windows.h>
 #include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/LoggerMacro.h"
@@ -462,18 +456,28 @@ void GuiManager::RandomizeNoise()
 
 void GuiManager::OpenURL(const char* url)
 {
-#ifdef _WIN32
-	ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
-#elif __APPLE__
-	std::string command = "open ";
-	command += url;
-	system(command.c_str());
+	std::string command;
+
+#if defined(_WIN32)
+	command = "start \"\" \"" + std::string(url) + "\"";
+#elif defined(__APPLE__)
+	command = "open \"" + std::string(url) + "\"";
+#elif defined(__linux__)
+	command = "xdg-open \"" + std::string(url) + "\"";
 #else
-	std::string command = "xdg-open ";
-	command += url;
-	system(command.c_str());
+	NGLOG(LogGUI, Error, "Unsupported platform for opening URLs");
+	return;
 #endif
-	NGLOG(LogGUI, Info, std::string("Opened URL: ") + url);
+
+	int result = std::system(command.c_str());
+	if(result != 0)
+	{
+		NGLOG(LogGUI, Error, "Failed to open URL: " + std::string(url));
+	}
+	else
+	{
+		NGLOG(LogGUI, Info, "Opened URL: " + std::string(url));
+	}
 }
 
 void GuiManager::DrawResolutionComboWithLock()
