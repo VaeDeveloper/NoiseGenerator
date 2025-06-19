@@ -1,10 +1,65 @@
-﻿cmake_minimum_required(VERSION 3.11)
-project(NoiseGenerator)
+﻿cmake_minimum_required(VERSION 3.11...3.27)
+option(USE_UNICODE_MESSAGES "Use emoji in build messages" ON)
+
+message(STATUS "🧾 Supported configs: ${CMAKE_CONFIGURATION_TYPES}")
+message(STATUS "🧾 Current build type: ${CMAKE_BUILD_TYPE}")
+# -----------------------
+# Add Custom Configuration
+# -----------------------
+if(CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo;MinSizeRel;Testing" CACHE STRING "" FORCE)
+  message(STATUS "📦 Added custom configuration: Testing")
+endif()
+
+# -----------------------
+# MSVC Runtime Setup
+# -----------------------
+if(MSVC)
+  if(CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "🧱 [CMake] MSVC detected — multi-config generator (Visual Studio)")
+    if(CMAKE_CFG_INTDIR STREQUAL "Testing")
+      message(STATUS "🧪 MSVC 'Testing' config detected — applying /MDd and test flags")
+      set(CMAKE_CXX_FLAGS_TESTING "/MDd /DTESTING_MODE" CACHE STRING "" FORCE)
+    endif()
+  else()
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL" CACHE STRING "" FORCE)
+      message(STATUS "🧱 [CMake] Runtime: /MDd (Debug)")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Testing")
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL" CACHE STRING "" FORCE)
+      message(STATUS "🧱 [CMake] Runtime: /MDd (Testing)")
+    else()
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" CACHE STRING "" FORCE)
+      message(STATUS "🧱 [CMake] Runtime: /MD (Release or others)")
+    endif()
+  endif()
+
+  if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    message(WARNING "⚠️ CMAKE_MSVC_RUNTIME_LIBRARY is not set explicitly — MSVC will choose default (/MD or /MDd)")
+  endif()
+endif()
 
 
-# --> clang-tidy / clangd
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# -----------------------
+# GoogleTest Runtime Compatibility
+# -----------------------
+if(BUILD_TESTING_ONLY OR (CMAKE_CONFIGURATION_TYPES AND CMAKE_CFG_INTDIR STREQUAL "Testing"))
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  message(STATUS "🔄 [CMake] GoogleTest configured to use shared CRT (/MDd) to match project settings")
+endif()
 
+project(NoiseGenerator VERSION 1.0 LANGUAGES CXX)
+
+# -----------------------
+# Test config 
+# -----------------------
+option(BUILD_TESTING_ONLY "Configure CMake only for tests (no main app)" OFF)
+
+if(BUILD_TESTING_ONLY OR (CMAKE_CONFIGURATION_TYPES AND CMAKE_CFG_INTDIR STREQUAL "Testing"))
+  message(STATUS "🧪 Enabling test-only mode (BUILD_TESTING_ONLY or Testing config)")
+  include(${CMAKE_SOURCE_DIR}/cmake/AddTests.cmake)
+  return()
+endif()
 # -----------------------
 # Compiler settings
 # -----------------------
@@ -252,7 +307,6 @@ endif()
 # -----------------------
 # Build configuration feedback
 # -----------------------
-option(USE_UNICODE_MESSAGES "Use emoji in build messages" ON)
 message(STATUS "🚀 Configuring NoiseGenerator project")
 message(STATUS "🧠 Using C++ standard: ${CMAKE_CXX_STANDARD}")
 

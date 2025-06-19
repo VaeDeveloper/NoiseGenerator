@@ -8,24 +8,33 @@ namespace NG
 {
 	int CalcIndex1D(int x, int res)
 	{
-		x %= res; if(x < 0) x += res;
+		x %= res; 
+		if(x < 0) x += res;
 
 		return x;
 	}
 
 	int CalcIndex2D(int x, int y, int res)
 	{
-		x %= res; if(x < 0) x += res;
-		y %= res; if(y < 0) y += res;
+		x %= res; 
+		if(x < 0) x += res;
+		
+		y %= res; 
+		if(y < 0) y += res;
 
 		return x + y * res;
 	}
 
 	int CalcIndex3D(int x, int y, int z, int res)
 	{
-		x %= res; if(x < 0) x += res;
-		y %= res; if(y < 0) y += res;
-		z %= res; if(z < 0) z += res;
+		x %= res; 
+		if(x < 0) x += res;
+		
+		y %= res; 
+		if(y < 0) y += res;
+		
+		z %= res; 
+		if(z < 0) z += res;
 
 		return x + y * res + z * res * res;
 	}

@@ -19,11 +19,11 @@ REM Generate the project files using CMake
 cmake .. -G "Visual Studio 17 2022"
 
 if %errorlevel% neq 0 (
-    echo ❌ Failed to generate CMake project files.
+    echo Failed to generate CMake project files.
     pause
     exit /b 1
 )
 
-echo ✅ CMake project successfully generated in the build\ folder.
+echo CMake project successfully generated in the build\ folder.
 pause
 exit /b 0
