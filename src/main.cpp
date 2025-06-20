@@ -104,17 +104,24 @@ int RunApplication()
 
 #ifdef _WIN32
 #ifdef _DEBUG
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
+	LogSystemInfo();
 	return RunApplication();
 }
-#  else
-#include <Windows.h>
-int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	return RunApplication();
-}
-#  endif
 #else
-int main(int argc, char** argv) {
+#include <Windows.h>
+int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int) 
+{
+	LogSystemInfo();
 	return RunApplication();
 }
 #endif
+#else
+int main(int argc, char** argv) 
+{
+	return RunApplication();
+}
+#endif
+
+

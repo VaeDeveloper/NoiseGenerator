@@ -153,7 +153,6 @@ inline void DrawLoggerWindow(bool* open = nullptr)
 	}
 
 	ImGui::SameLine();
-
 	if(ImGui::Button(WITH_ICON("Trash", "Clear")))
 	{
 		Logger::Clear();

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Noise/NoisePreviewPanel.h"
+#include "Noise/NoisePreviewPanelUI.h"
 #include <GLFW/glfw3.h>
 #include <imgui_internal.h>
 #include <imgui.h>
@@ -15,7 +15,7 @@
 class GuiManager
 {
 public:
-	void Init(GLFWwindow* window);
+	void Initialize(GLFWwindow* window);
 	void Shutdown();
 	void BeginFrame();
 	void Render();
@@ -44,7 +44,7 @@ private:
 	bool bFullscreen = false;
 	bool bDockBuilt = false;
 	bool bShowOutputLog = true;
-	NoisePreviewPanel noisePreview;
+	NoisePreviewPanelUI noisePreview;
 
 	std::thread generationThread;
 	std::atomic<bool> isGenerating = false;

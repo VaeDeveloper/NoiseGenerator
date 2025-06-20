@@ -91,7 +91,7 @@ InitStatus NGApplication::InitializeApplication()
 	LogGraphicsInfo();
 
 	assert(window && "GLFW window is null before GUI initialization");
-	GUI.Init(window);
+	GUI.Initialize(window);
 
 	NGLOG(LogApp, Info, "Application initialized");
 	bIsInitialized = true;

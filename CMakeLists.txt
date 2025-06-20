@@ -219,8 +219,8 @@ add_executable(NoiseGenerator
   src/Noise/NoiseGenerator.h
   src/Noise/NoiseMath.cpp
   src/Noise/NoiseMath.h
-  src/Noise/NoisePreviewPanel.cpp
-  src/Noise/NoisePreviewPanel.h
+  src/Noise/NoisePreviewPanelUI.cpp
+  src/Noise/NoisePreviewPanelUI.h
   src/Noise/NoiseTypes.h
 
   src/Utils/Constants.h
@@ -231,6 +231,15 @@ add_executable(NoiseGenerator
 
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
+
+  
+  src/Controller/NoisePanelController.cpp
+  src/Controller/NoisePanelController.h
+
+
+
+  src/Model/NoisePanelModel.cpp
+  src/Model/NoisePanelModel.h
 
   src/ThirdParty/stb_image.h
   src/ThirdParty/stb_image_write.h
@@ -263,8 +272,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Noise/NoiseGenerator.h
   src/Noise/NoiseMath.cpp
   src/Noise/NoiseMath.h
-  src/Noise/NoisePreviewPanel.cpp
-  src/Noise/NoisePreviewPanel.h
+  src/Noise/NoisePreviewPanelUI.cpp
+  src/Noise/NoisePreviewPanelUI.h
   src/Noise/NoiseTypes.h
 
   src/Utils/Constants.h
@@ -273,6 +282,13 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Utils/UIUtils.h
   src/Utils/FileUtils.h
 
+  src/Controller/NoisePanelController.cpp
+  src/Controller/NoisePanelController.h
+
+  src/Model/NoisePanelModel.cpp
+  src/Model/NoisePanelModel.h
+  
+  
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
 )

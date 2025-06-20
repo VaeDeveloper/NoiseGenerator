@@ -40,7 +40,9 @@ namespace NG
 	constexpr int spaceOffset = 24;
 }
 
-void GuiManager::Init(GLFWwindow* window)
+
+
+void GuiManager::Initialize(GLFWwindow* window)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -74,6 +76,8 @@ void GuiManager::Init(GLFWwindow* window)
 	props.turbulence_expshift = turbulence_expshift;
 	props.turbulence_offset_x = turbulence_offset_x;
 	props.turbulence_offset_y = turbulence_offset_y;
+
+
 	float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
 		{
 			this->generationProgress = progress;
@@ -87,7 +91,6 @@ void GuiManager::Init(GLFWwindow* window)
 
 void GuiManager::InitStyleConfig(const ImGuiIO& io)
 {
-
 	InitThemeStyle();
 	ImGuiStyle& style = ImGui::GetStyle();
 	io.Fonts->AddFontDefault();
@@ -149,8 +152,8 @@ void GuiManager::DrawMenuBar()
 							bool ok = ImageExporter::SavePNG(
 								pathStr.c_str(),
 								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetWidth()),
-								static_cast<int>(noisePreview.GetHeight())
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight())
 							);
 
 							if(ok)
@@ -186,8 +189,8 @@ void GuiManager::DrawMenuBar()
 							std::string pathStr = EnsureExtension(outPath, ".tga");
 							bool ok = ImageExporter::SaveTGA(pathStr.c_str(),
 								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetWidth()),
-								static_cast<int>(noisePreview.GetHeight()));
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
 
 							if(ok)
 							{
@@ -223,8 +226,8 @@ void GuiManager::DrawMenuBar()
 							bool ok = ImageExporter::SaveBMP(
 								pathStr.c_str(),
 								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetWidth()),
-								static_cast<int>(noisePreview.GetHeight()));
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
 
 							if(ok)
 							{
@@ -261,8 +264,8 @@ void GuiManager::DrawMenuBar()
 							bool ok = ImageExporter::SaveJPG(
 								pathStr.c_str(),
 								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetWidth()),
-								static_cast<int>(noisePreview.GetHeight()),
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()),
 								90 // JPEG quality
 							);
 

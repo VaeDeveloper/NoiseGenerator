@@ -29,7 +29,7 @@ bool ImageExporter::SavePNG(const std::string& filename, unsigned int textureId,
 
 	if(stbi_write_png(filename.c_str(), width, height, 3, rgbPixels.data(), width * 3))
 	{
-		NGLOG(LogExport, Error, "Saved PNG: " + filename);
+		NGLOG(LogExport, Info, "Saved PNG: " + filename);
 		return true;
 	}
 	else
