@@ -12,7 +12,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include "Noise/NoiseTypes.h"
 #include "Noise/NoiseGenerator.h"
-#include "Image/ImageExporter.h"
+#include "Export/ImageExporter.h"
 #include <random>
 #include <type_traits>
 #include <nfd.h>

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class ImageExporter 
 {
@@ -10,4 +11,8 @@ public:
 	static bool SaveTGA(const std::string& filename, unsigned int textureId, int width, int height);
 	static bool SaveBMP(const std::string& filename, unsigned int textureId, int width, int height);
 	static bool SaveJPG(const std::string& filename, unsigned int textureId, int width, int height, int quality = 90);
+
+private:
+	static bool ReadTextureAsRGB(unsigned int textureId, int width, int height, std::vector<unsigned char>& outRGB);
+
 };

@@ -207,8 +207,8 @@ add_executable(NoiseGenerator
   src/GUI/GuiUtils.h
   src/GUI/IconRegistry.h
 
-  src/Image/ImageExporter.cpp
-  src/Image/ImageExporter.h
+  src/Export/ImageExporter.cpp
+  src/Export/ImageExporter.h
 
   src/Logger/Logger.cpp
   src/Logger/Logger.h
@@ -260,8 +260,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/GUI/GuiUtils.h
   src/GUI/IconRegistry.h
 
-  src/Image/ImageExporter.cpp
-  src/Image/ImageExporter.h
+  src/Export/ImageExporter.cpp
+  src/Export/ImageExporter.h
 
   src/Logger/Logger.cpp
   src/Logger/Logger.h
