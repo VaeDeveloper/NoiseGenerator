@@ -10,11 +10,21 @@ DEFINE_LOG_CATEGORY(MenuBarUILog);
 
 void MenuBarUI::Initialize()
 {
-	Controller = std::make_shared<MenuBarController>();
-	if(!Controller)
+	try
 	{
-		NGLOG(MenuBarUILog, Error, "Controller not initialize");
+		Controller = std::make_shared<MenuBarController>();
 	}
+	catch(const std::bad_alloc& e)
+	{
+		NGLOG(MenuBarUILog, Error, std::string("Failed to allocate MenuBarController: ") + e.what());
+		Controller = nullptr;
+	}
+	catch(const std::exception& e)
+	{
+		NGLOG(MenuBarUILog, Error, std::string("Unexpected error during controller creation: ") + e.what());
+		Controller = nullptr;
+	}
+
 }
 void MenuBarUI::Draw()
 {
@@ -30,6 +40,13 @@ void MenuBarUI::Draw()
 void MenuBarUI::SetTextureData(GLuint id, int w, int h)
 {
 	assert(id != 0 && w != 0 && h != 0);
+
+	if(id == 0 || w <= 0 || h <= 0)
+	{
+		NGLOG(MenuBarUILog, Error, "Invalid texture data: id={}, w={}, h={}", id, w, h);
+		return;
+	}
+
 	TextureId = id;
 	TextureWidth = w;
 	TextureHeight = h;
@@ -73,7 +90,6 @@ void MenuBarUI::DrawFileItem()
 			}
 			ShowShiftOnlyTooltip(0.6f, { "Export preview image", "Format: BMP" , "Uncompressed, large file size" });
 
-
 			if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as JPG")))
 			{
 				Controller->ExportAs("jpg", texId, width, height);
@@ -105,18 +121,14 @@ void MenuBarUI::DrawViewItem()
 		}
 		ShowShiftOnlyTooltip(0.6f, { "Toggles fullscreen mode", "Shortcut: F11", "Great for presentations or distraction-free work" });
 
-
-
 		if(ImGui::MenuItem(WITH_ICON("InfoCircle", "Info Panel")))
 		{
 			Controller->ToggleInfoPanel();
 		}
 		ShowShiftOnlyTooltip(0.6f, { "Toggle visibility of Info Panel", "Includes parameter descriptions and tips" });
 
-
 		ImGui::EndMenu();
 	}
-
 }
 
 void MenuBarUI::DrawAboutItem()
