@@ -1,6 +1,5 @@
 #include "ImageExporter.h"
 
-
 #ifdef APIENTRY
 #undef APIENTRY
 #endif
@@ -12,8 +11,6 @@
 #include "Logger/LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogExport);
-
-
 
 bool ImageExporter::SavePNG(const std::string& filename, unsigned int textureId, int width, int height) 
 {
@@ -40,7 +37,7 @@ bool ImageExporter::SaveTGA(const std::string& filename, unsigned int textureId,
 	if(!ReadTextureAsRGB(textureId, width, height, rgb))
 	{
 		NGLOG(LogExport, Warning, "Failed to read texture (ID = "
-			+ std::to_string(textureId) + ") as RGB for export.");
+			+ std::to_string(textureId) + ") as TGA for export.");
 		return false;
 	}
 
@@ -59,7 +56,7 @@ bool ImageExporter::SaveBMP(const std::string& filename, unsigned int textureId,
 	if(!ReadTextureAsRGB(textureId, width, height, rgb))
 	{
 		NGLOG(LogExport, Warning, "Failed to read texture (ID = "
-			+ std::to_string(textureId) + ") as RGB for export.");
+			+ std::to_string(textureId) + ") as BMP for export.");
 		return false;
 	}
 
@@ -78,7 +75,7 @@ bool ImageExporter::SaveJPG(const std::string& filename, unsigned int textureId,
 	if(!ReadTextureAsRGB(textureId, width, height, rgb))
 	{
 		NGLOG(LogExport, Warning, "Failed to read texture (ID = "
-			+ std::to_string(textureId) + ") as RGB for export.");
+			+ std::to_string(textureId) + ") as BMP for export.");
 		return false;
 	}
 
