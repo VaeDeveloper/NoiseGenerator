@@ -2,11 +2,13 @@
 #include "GuiManager.h"
 #include "Logger/LoggerUI.h"
 #include "Logger/LoggerMacro.h"
+
 #include "GUI/GuiUtils.h"
 #include "Utils/StringUtils.h"
 #include "IconRegistry.h"
 #include "Utils/Constants.h"
 #include "Utils/UIUtils.h"
+#include "Controller/MenuBarController.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -25,9 +27,9 @@ namespace fs = std::filesystem;
 DEFINE_LOG_CATEGORY(LogGUI);
 
 
-std::string EnsureExtension(const std::string& path, const std::string& ext) 
+std::string EnsureExtension(const std::string& path, const std::string& ext)
 {
-	if(!NG::StringUtils::EndsWith(path, ext) && !NG::StringUtils::EndsWith(path, NG::StringUtils::ToUpper(ext))) 
+	if(!NG::StringUtils::EndsWith(path, ext) && !NG::StringUtils::EndsWith(path, NG::StringUtils::ToUpper(ext)))
 	{
 		return path + ext;
 	}
@@ -39,8 +41,6 @@ namespace NG
 {
 	constexpr int spaceOffset = 24;
 }
-
-
 
 void GuiManager::Initialize(GLFWwindow* window)
 {
@@ -56,7 +56,25 @@ void GuiManager::Initialize(GLFWwindow* window)
 
 	NGLOG(LogGUI, Info, "ImGui initialized");
 
+	menuBar.Initialize();
 	noisePreview.Initialize();
+
+	menuBar.GetController()->OnInfoPanelToggled.Add(
+		[this] (bool visible)
+		{
+			noisePreview.SetInfoPanelVisible(visible);
+		}
+	);
+
+	// Передаём в MenuBarUI нужные данные для экспорта
+	//auto textureId = noisePreview.GetTextureId();
+	//auto width = noisePreview.GetController()->GetModel()->GetWidth();
+	//auto height = noisePreview.GetController()->GetModel()->GetHeight();
+
+	//menuBar.SetTextureData(textureId, width, height);
+
+
+
 
 	int res = 8 << resolutionIndex;
 	NoiseProperties props = {};
@@ -133,219 +151,226 @@ void GuiManager::InitThemeStyle()
 
 void GuiManager::DrawMenuBar()
 {
-	if(ImGui::BeginMenuBar())
-	{
-		if(ImGui::BeginMenu(WITH_ICON("File", "File")))
-		{
-			if(ImGui::BeginMenu(WITH_ICON("Save", "Save As")))
-			{
+	//	if(ImGui::BeginMenuBar())
+	//	{
+	//		if(ImGui::BeginMenu(WITH_ICON("File", "File")))
+	//		{
+	//			if(ImGui::BeginMenu(WITH_ICON("Save", "Save As")))
+	//			{
+	//
+	//				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as PNG")))
+	//				{
+	//					if(noisePreview.IsInitialized())
+	//					{
+	//						nfdchar_t* outPath = nullptr;
+	//						nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
+	//						if(result == NFD_OKAY)
+	//						{
+	//							std::string pathStr = EnsureExtension(outPath, ".png");
+	//							bool ok = ImageExporter::SavePNG(
+	//								pathStr.c_str(),
+	//								noisePreview.GetTextureId(),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight())
+	//							);
+	//
+	//							if(ok)
+	//							{
+	//								NGLOG(LogGUI, Info, "Saved PNG: " + pathStr);
+	//							}
+	//							else
+	//							{
+	//								NGLOG(LogGUI, Error, "Failed to save PNG: " + pathStr);
+	//							}
+	//
+	//							free(outPath);
+	//						}
+	//						else if(result == NFD_CANCEL)
+	//						{
+	//							NGLOG(LogGUI, Info, "Save dialog canceled.");
+	//						}
+	//						else
+	//						{
+	//							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
+	//						}
+	//					}
+	//				}
+	//
+	//				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as TGA"))) 
+	//				{
+	//					if(noisePreview.IsInitialized()) 
+	//					{
+	//						nfdchar_t* outPath = nullptr;
+	//						nfdresult_t result = NFD_SaveDialog("tga", nullptr, &outPath);
+	//						if(result == NFD_OKAY) 
+	//						{
+	//							std::string pathStr = EnsureExtension(outPath, ".tga");
+	//							bool ok = ImageExporter::SaveTGA(pathStr.c_str(),
+	//								noisePreview.GetTextureId(),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
+	//
+	//							if(ok)
+	//							{
+	//								NGLOG(LogGUI, Info, "Saved TGA: " + pathStr);
+	//							}
+	//							else
+	//							{
+	//								NGLOG(LogGUI, Error, "Failed to save TGA: " + pathStr);
+	//							}
+	//							free(outPath);
+	//						}
+	//						else if(result == NFD_CANCEL)
+	//						{
+	//							NGLOG(LogGUI, Info, "Save dialog canceled.");
+	//						}
+	//						else
+	//						{
+	//							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
+	//						}
+	//					}
+	//				}
+	//
+	//				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as BMP")))
+	//				{
+	//					if(noisePreview.IsInitialized())
+	//					{
+	//						nfdchar_t* outPath = nullptr;
+	//						nfdresult_t result = NFD_SaveDialog("bmp", nullptr, &outPath);
+	//						if(result == NFD_OKAY)
+	//						{
+	//							std::string pathStr = EnsureExtension(outPath, ".bmp");
+	//
+	//							bool ok = ImageExporter::SaveBMP(
+	//								pathStr.c_str(),
+	//								noisePreview.GetTextureId(),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
+	//
+	//							if(ok)
+	//							{
+	//								NGLOG(LogGUI, Info, "Saved BMP: " + pathStr);
+	//							}
+	//							else
+	//							{
+	//								NGLOG(LogGUI, Error, "Failed to save BMP: " + pathStr);
+	//							}
+	//
+	//							free(outPath);
+	//						}
+	//						else if(result == NFD_CANCEL)
+	//						{
+	//							NGLOG(LogGUI, Info, "Save dialog canceled.");
+	//						}
+	//						else
+	//						{
+	//							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
+	//						}
+	//					}
+	//				}
+	//
+	//				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as JPG")))
+	//				{
+	//					if(noisePreview.IsInitialized())
+	//					{
+	//						nfdchar_t* outPath = nullptr;
+	//						nfdresult_t result = NFD_SaveDialog("jpg", nullptr, &outPath);
+	//						if(result == NFD_OKAY)
+	//						{
+	//							std::string pathStr = EnsureExtension(outPath, ".jpg");
+	//
+	//							bool ok = ImageExporter::SaveJPG(
+	//								pathStr.c_str(),
+	//								noisePreview.GetTextureId(),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+	//								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()),
+	//								90 // JPEG quality
+	//							);
+	//
+	//							if(ok)
+	//							{
+	//								NGLOG(LogGUI, Info, "Saved JPG: " + pathStr);
+	//							}
+	//							else
+	//							{
+	//								NGLOG(LogGUI, Error, "Failed to save JPG: " + pathStr);
+	//							}
+	//
+	//							free(outPath);
+	//						}
+	//						else if(result == NFD_CANCEL)
+	//						{
+	//							NGLOG(LogGUI, Info, "Save dialog canceled.");
+	//						}
+	//						else
+	//						{
+	//							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
+	//						}
+	//					}
+	//				}
+	//
+	//				ImGui::EndMenu();
+	//			}
+	//
+	//			ImGui::Separator();
+	//
+	//			if(ImGui::MenuItem(WITH_ICON("DoorOpen", "Exit"), "Alt+F4"))
+	//			{
+	//				exit(0);
+	//			}
+	//
+	//			ImGui::EndMenu();
+	//		}
+	//
+	//		if(ImGui::BeginMenu(WITH_ICON("Eye", "View")))
+	//		{
+	//			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &bShowOutputLog);
+	//			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &bFullscreen))
+	//			{
+	//				GLFWwindow* window = glfwGetCurrentContext();
+	//				if(bFullscreen)
+	//				{
+	//					const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	//					glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+	//				}
+	//				else
+	//				{
+	//					int width = SettingsManager::Get().GetWindowWidth();
+	//					int height = SettingsManager::Get().GetWindowHeight();;
+	//					glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
+	//				}
+	//			}
+	//
+	//			bool showInfo = noisePreview.GetShowInfoPanel();
+	//			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "Info Panel"), nullptr, &showInfo))
+	//			{
+	//				noisePreview.SetShowInfoPanel(showInfo);
+	//			}
+	//
+	//			ImGui::EndMenu();
+	//		}
+	//
+	//#ifdef _DEBUG 
+	//		if(ImGui::BeginMenu(WITH_ICON("QuestionCircle", "Help")))
+	//		{
+	//			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "About")))
+	//			{
+	//				OpenURL(NG::GitURL);
+	//			}
+	//
+	//			ImGui::EndMenu();
+	//		}
+	//#endif // DEBUG
+	//
+	//		ImGui::EndMenuBar();
+	//	}
 
-				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as PNG")))
-				{
-					if(noisePreview.IsInitialized())
-					{
-						nfdchar_t* outPath = nullptr;
-						nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
-						if(result == NFD_OKAY)
-						{
-							std::string pathStr = EnsureExtension(outPath, ".png");
-							bool ok = ImageExporter::SavePNG(
-								pathStr.c_str(),
-								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight())
-							);
 
-							if(ok)
-							{
-								NGLOG(LogGUI, Info, "Saved PNG: " + pathStr);
-							}
-							else
-							{
-								NGLOG(LogGUI, Error, "Failed to save PNG: " + pathStr);
-							}
 
-							free(outPath);
-						}
-						else if(result == NFD_CANCEL)
-						{
-							NGLOG(LogGUI, Info, "Save dialog canceled.");
-						}
-						else
-						{
-							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
-						}
-					}
-				}
-
-				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as TGA"))) 
-				{
-					if(noisePreview.IsInitialized()) 
-					{
-						nfdchar_t* outPath = nullptr;
-						nfdresult_t result = NFD_SaveDialog("tga", nullptr, &outPath);
-						if(result == NFD_OKAY) 
-						{
-							std::string pathStr = EnsureExtension(outPath, ".tga");
-							bool ok = ImageExporter::SaveTGA(pathStr.c_str(),
-								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
-
-							if(ok)
-							{
-								NGLOG(LogGUI, Info, "Saved TGA: " + pathStr);
-							}
-							else
-							{
-								NGLOG(LogGUI, Error, "Failed to save TGA: " + pathStr);
-							}
-							free(outPath);
-						}
-						else if(result == NFD_CANCEL)
-						{
-							NGLOG(LogGUI, Info, "Save dialog canceled.");
-						}
-						else
-						{
-							NGLOG(LogGUI, Error, "NFD Error: " + std::string(NFD_GetError()));
-						}
-					}
-				}
-
-				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as BMP")))
-				{
-					if(noisePreview.IsInitialized())
-					{
-						nfdchar_t* outPath = nullptr;
-						nfdresult_t result = NFD_SaveDialog("bmp", nullptr, &outPath);
-						if(result == NFD_OKAY)
-						{
-							std::string pathStr = EnsureExtension(outPath, ".bmp");
-
-							bool ok = ImageExporter::SaveBMP(
-								pathStr.c_str(),
-								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
-
-							if(ok)
-							{
-								NGLOG(LogGUI, Info, "Saved BMP: " + pathStr);
-							}
-							else
-							{
-								NGLOG(LogGUI, Error, "Failed to save BMP: " + pathStr);
-							}
-
-							free(outPath);
-						}
-						else if(result == NFD_CANCEL)
-						{
-							NGLOG(LogGUI, Info, "Save dialog canceled.");
-						}
-						else
-						{
-							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
-						}
-					}
-				}
-
-				if(ImGui::MenuItem(WITH_ICON("FileImage", "Export as JPG")))
-				{
-					if(noisePreview.IsInitialized())
-					{
-						nfdchar_t* outPath = nullptr;
-						nfdresult_t result = NFD_SaveDialog("jpg", nullptr, &outPath);
-						if(result == NFD_OKAY)
-						{
-							std::string pathStr = EnsureExtension(outPath, ".jpg");
-
-							bool ok = ImageExporter::SaveJPG(
-								pathStr.c_str(),
-								noisePreview.GetTextureId(),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
-								static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()),
-								90 // JPEG quality
-							);
-
-							if(ok)
-							{
-								NGLOG(LogGUI, Info, "Saved JPG: " + pathStr);
-							}
-							else
-							{
-								NGLOG(LogGUI, Error, "Failed to save JPG: " + pathStr);
-							}
-
-							free(outPath);
-						}
-						else if(result == NFD_CANCEL)
-						{
-							NGLOG(LogGUI, Info, "Save dialog canceled.");
-						}
-						else
-						{
-							NGLOG(LogGUI, Error, std::string("NFD Error: ") + NFD_GetError());
-						}
-					}
-				}
-
-				ImGui::EndMenu();
-			}
-
-			ImGui::Separator();
-
-			if(ImGui::MenuItem(WITH_ICON("DoorOpen", "Exit"), "Alt+F4"))
-			{
-				exit(0);
-			}
-
-			ImGui::EndMenu();
-		}
-
-		if(ImGui::BeginMenu(WITH_ICON("Eye", "View")))
-		{
-			ImGui::MenuItem(WITH_ICON("Terminal", "Output Log"), nullptr, &bShowOutputLog);
-			if(ImGui::MenuItem(WITH_ICON("Expand", "Fullscreen"), "F11", &bFullscreen))
-			{
-				GLFWwindow* window = glfwGetCurrentContext();
-				if(bFullscreen)
-				{
-					const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-					glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
-				}
-				else
-				{
-					int width = SettingsManager::Get().GetWindowWidth();
-					int height = SettingsManager::Get().GetWindowHeight();;
-					glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
-				}
-			}
-
-			bool showInfo = noisePreview.GetShowInfoPanel();
-			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "Info Panel"), nullptr, &showInfo))
-			{
-				noisePreview.SetShowInfoPanel(showInfo);
-			}
-
-			ImGui::EndMenu();
-		}
-
-#ifdef _DEBUG 
-		if(ImGui::BeginMenu(WITH_ICON("QuestionCircle", "Help")))
-		{
-			if(ImGui::MenuItem(WITH_ICON("InfoCircle", "About")))
-			{
-				OpenURL(NG::GitURL);
-			}
-
-			ImGui::EndMenu();
-		}
-#endif // DEBUG
-
-		ImGui::EndMenuBar();
-	}
+	menuBar.Draw();
+	menuBar.SetTextureData(noisePreview.GetTextureId(), 
+		static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()), 
+			static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
 }
 
 void GuiManager::DrawOutputLog()
@@ -536,7 +561,7 @@ void GuiManager::BeginFrame()
 	ImGui::NewFrame();
 }
 
-void GuiManager::Render() 
+void GuiManager::Render()
 {
 	ImGui::Render();
 	ImGuiIO& io = ImGui::GetIO();
@@ -546,7 +571,7 @@ void GuiManager::Render()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GuiManager::SetNoiseData(float* data, int width, int height) 
+void GuiManager::SetNoiseData(float* data, int width, int height)
 {
 	noisePreview.UpdateTexture(data, width, height);
 }
@@ -625,17 +650,17 @@ void GuiManager::DrawUI()
 		isGenerating = true;
 		generationProgress = 0.0f;
 		cancelRequested = false;
-		generationThread = std::thread([this, res, props] () 
+		generationThread = std::thread([this, res, props] ()
 			{
 				float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
 					{
 						this->generationProgress = progress;
-						return !this->cancelRequested; 
+						return !this->cancelRequested;
 					});
 
-				if(noise != nullptr) 
+				if(noise != nullptr)
 				{
-					this->QueueUITask([this, noise, res] () 
+					this->QueueUITask([this, noise, res] ()
 						{
 							this->SetNoiseData(noise, res, res);
 							free(noise);
@@ -643,9 +668,9 @@ void GuiManager::DrawUI()
 							this->isGenerating = false;
 						});
 				}
-				else 
+				else
 				{
-					this->QueueUITask([this] () 
+					this->QueueUITask([this] ()
 						{
 							this->SetNoiseData(nullptr, 0, 0);
 							this->generationProgress = -1.0f;
@@ -698,7 +723,7 @@ void GuiManager::DrawUI()
 	ImGui::TextUnformatted(WITH_ICON("SlidersH", "Noise Settings"));
 	ImGui::Separator();
 	DrawResolutionComboWithLock();
-	
+
 	/* clang-format off */
 	/* Compact formatting style to improve readability of nested lambdas!!!*/
 	NG::LabeledWidgetWithLock("##lockRough", &lockRoughness, [&] () {
@@ -792,7 +817,7 @@ void GuiManager::DrawUI()
 	{
 		ImGui::ProgressBar(generationProgress, ImVec2(-1.0f, 0.0f), generationProgress >= 1.0f ? "Done" : "Generating...");
 		NGLOG(LogGUI, Info, "GenerationProgress -> " + std::to_string(generationProgress));
-		if (generationProgress >= 1.0f)
+		if(generationProgress >= 1.0f)
 		{
 			NGLOG(LogGUI, Info, "Generation Done");
 		}
@@ -804,14 +829,14 @@ void GuiManager::DrawUI()
 	// Log window
 	DrawOutputLog();
 
-	
+
 	std::lock_guard<std::mutex> lock(uiMutex);
 	while(!uiTasks.empty())
 	{
 		uiTasks.front()(); // execute
 		uiTasks.pop();
 	}
-	
+
 
 	if(ImGui::IsKeyPressed(ImGuiKey_F11, false))
 	{

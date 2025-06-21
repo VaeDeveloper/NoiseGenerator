@@ -4,6 +4,7 @@
 
 /**
  * Represents a named logging category (like in Unreal Engine).
+ * 
  * Used with DEFINE_LOG_CATEGORY and LOG() macros.
  */
 struct LogCategory

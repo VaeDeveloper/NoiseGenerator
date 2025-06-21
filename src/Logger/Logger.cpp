@@ -1,7 +1,7 @@
 #include "Logger.h"
 
 #ifdef _DEBUG
-	#include <iostream>
+#include <iostream>
 #endif
 
 std::vector<LogEntry> Logger::messages;
@@ -9,7 +9,7 @@ std::string Logger::filePath = "log.txt";
 
 std::string CenterText(const std::string& text, size_t width)
 {
-	if (text.length() >= width)
+	if(text.length() >= width)
 		return text;
 
 	size_t totalPadding = width - text.length();
@@ -32,7 +32,7 @@ std::string Logger::GetTimestamp()
 #endif
 
 	char buffer[30];
-	if (std::strftime(buffer, sizeof(buffer), "%d-%b-%Y %H:%M:%S", &local_tm) == 0)
+	if(std::strftime(buffer, sizeof(buffer), "%d-%b-%Y %H:%M:%S", &local_tm) == 0)
 	{
 		return "??-???-???? ??:??:??";
 	}
@@ -42,7 +42,7 @@ std::string Logger::GetTimestamp()
 void Logger::Log(const std::string& category, LogVerbosity verbosity, const std::string& message)
 {
 	std::string prefix;
-	switch (verbosity)
+	switch(verbosity)
 	{
 	case LogVerbosity::Info:
 		prefix = "LOGGING";
@@ -59,8 +59,8 @@ void Logger::Log(const std::string& category, LogVerbosity verbosity, const std:
 	std::string centeredCategory = CenterText(category, 16);
 
 	oss << prefix << ": "
-	    << "[" << centeredCategory << "]    "
-	    << "[" << GetTimestamp() << "] " << message;
+		<< "[" << centeredCategory << "]    "
+		<< "[" << GetTimestamp() << "] " << message;
 
 	std::string finalMessage = oss.str();
 
@@ -68,14 +68,14 @@ void Logger::Log(const std::string& category, LogVerbosity verbosity, const std:
 	const char* colorReset = "\033[0m";
 	const char* color = "";
 
-	switch (verbosity)
+	switch(verbosity)
 	{
-	case LogVerbosity::Info:    color = "\033[37m"; break; 
-	case LogVerbosity::Warning: color = "\033[33m"; break; 
+	case LogVerbosity::Info:    color = "\033[37m"; break;
+	case LogVerbosity::Warning: color = "\033[33m"; break;
 	case LogVerbosity::Error:   color = "\033[31m"; break;
 	}
 
-	if (verbosity == LogVerbosity::Info)
+	if(verbosity == LogVerbosity::Info)
 		std::cout << color << finalMessage << colorReset << std::endl;
 	else
 		std::cerr << color << finalMessage << colorReset << std::endl;
@@ -84,41 +84,37 @@ void Logger::Log(const std::string& category, LogVerbosity verbosity, const std:
 	messages.emplace_back(LogEntry{ verbosity, category, oss.str() });
 }
 
-void
-Logger::SaveLogToFile()
+void Logger::SaveLogToFile()
 {
 	std::ofstream file(filePath, std::ios::trunc);
-	if (!file.is_open())
+	if(!file.is_open())
 	{
 		Logger::Log("Logger", LogVerbosity::Error, "Failed to open log file: " + filePath);
 		throw std::runtime_error("Failed to open log file: " + filePath);
 	}
 
-	for (const auto& entry : messages)
+	for(const auto& entry : messages)
 	{
 		file << entry.message << "\n";
 	}
 }
 
-void
-Logger::Clear()
+void Logger::Clear()
 {
 	messages.clear();
 }
 
-const std::vector<LogEntry>&
-Logger::GetMessages()
+const std::vector<LogEntry>& Logger::GetMessages()
 {
 	return messages;
 }
 
-std::vector<LogEntry>
-Logger::GetMessagesByVerbosity(LogVerbosity verbosity)
+std::vector<LogEntry> Logger::GetMessagesByVerbosity(LogVerbosity verbosity)
 {
 	std::vector<LogEntry> result;
-	for (const auto& entry : messages)
+	for(const auto& entry : messages)
 	{
-		if (entry.verbosity == verbosity)
+		if(entry.verbosity == verbosity)
 			result.push_back(entry);
 	}
 	return result;

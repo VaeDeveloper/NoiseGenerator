@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "Logger/LoggerMacro.h"
+#include <unordered_map>
 
 DECLARE_LOG_CATEGORY_EXTERN(LogGUI);
 
@@ -39,6 +40,30 @@ namespace NG
 		if(widget())
 		{
 			NGLOG(LogGUI, Info, std::string(label) + " = " + NG::StringUtils::ToString(*value));
+		}
+	}
+
+
+	inline void ShowCustomTooltipWithDelay(float delaySeconds, std::function<void()> content)
+	{
+		static std::unordered_map<ImGuiID, float> hoverTimers;
+
+		ImGuiID itemId = ImGui::GetItemID();
+		if(itemId == 0) return;
+
+		if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+		{
+			hoverTimers[itemId] += ImGui::GetIO().DeltaTime;
+			if(hoverTimers[itemId] >= delaySeconds)
+			{
+				ImGui::BeginTooltip();
+				content();
+				ImGui::EndTooltip();
+			}
+		}
+		else
+		{
+			hoverTimers[itemId] = 0.0f;
 		}
 	}
 }

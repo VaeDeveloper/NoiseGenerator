@@ -1,14 +1,10 @@
 ﻿#include <imgui.h>
 #include <imgui_internal.h>
-
-#include "GUI/GuiUtils.h"
 #include "NoisePreviewPanelUI.h"
 
+#include "GUI/GuiUtils.h"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <stdexcept>
+
 #include "Logger/Logger.h"
 #include "Logger/LoggerMacro.h"
 

@@ -1,7 +1,8 @@
 #pragma once
 
 
-#include "Noise/NoisePreviewPanelUI.h"
+#include "View/NoisePreviewPanelUI.h"
+#include "View/MenuBarUI.h"
 #include <GLFW/glfw3.h>
 #include <imgui_internal.h>
 #include <imgui.h>
@@ -44,6 +45,7 @@ private:
 	bool bFullscreen = false;
 	bool bDockBuilt = false;
 	bool bShowOutputLog = true;
+	MenuBarUI menuBar;
 	NoisePreviewPanelUI noisePreview;
 
 	std::thread generationThread;

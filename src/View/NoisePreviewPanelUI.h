@@ -23,16 +23,24 @@ public:
 	void SetPreviewWidth(float Width) { previewWidth = Width; }
 	void SetPreviewHeight(float Height) { previewHeight = Height; }
 
-	GLuint GetTextureId() const {
+	GLuint GetTextureId() const 
+	{
 		return controller ? controller->GetModel()->GetTextureId() : 0;
 	}
 	
-	bool IsInitialized() const {
+	bool IsInitialized() const 
+	{
 		return controller && controller->GetModel()->IsInitialized();
 	}
 
-	NoisePanelController* GetController() const {
+	NoisePanelController* GetController() const 
+	{
 		return controller.get();
+	}
+
+	void SetInfoPanelVisible(bool visible)
+	{
+		showInfoPanel = visible;
 	}
 private:
 
