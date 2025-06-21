@@ -1,8 +1,8 @@
 #pragma once 
 
-#include "Model/MenuBarModel.h"
+#include "MVC/Model/MenuBarModel.h"
 #include "Logger/LoggerMacro.h"
-#include "Controller/NoisePanelController.h"
+#include "MVC/Controller/NoisePanelController.h"
 #include "GLFW/glfw3.h"
 #include "Export/ImageExporter.h"
 #include "Utils/StringUtils.h"
@@ -14,7 +14,7 @@
 
 
 
-using FOnInfoPanelToggled = MulticastDelegate<bool>; // параметр — показать/скрыть
+using FOnInfoPanelToggled = MulticastDelegate<bool>; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅ
 
 namespace NG
 {

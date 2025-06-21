@@ -8,7 +8,7 @@
 #include "IconRegistry.h"
 #include "Utils/Constants.h"
 #include "Utils/UIUtils.h"
-#include "Controller/MenuBarController.h"
+#include "MVC/Controller/MenuBarController.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>

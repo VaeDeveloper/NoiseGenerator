@@ -1,9 +1,5 @@
 #pragma once
 
-
-#include "View/NoisePreviewPanelUI.h"
-#include "View/MenuBarUI.h"
-#include <GLFW/glfw3.h>
 #include <imgui_internal.h>
 #include <imgui.h>
 #include <thread>
@@ -11,6 +7,12 @@
 #include <functional>
 #include <queue>
 #include <mutex>
+
+
+#include "MVC/View/NoisePreviewPanelUI.h"
+#include "MVC/View/MenuBarUI.h"
+
+#include <GLFW/glfw3.h>
 
 
 class GuiManager

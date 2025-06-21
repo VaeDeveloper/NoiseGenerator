@@ -207,7 +207,7 @@ add_executable(NoiseGenerator
   src/GUI/GuiUtils.h
   src/GUI/IconRegistry.h
   src/Gui/IconRegistry.cpp
-  
+
   src/Export/ImageExporter.cpp
   src/Export/ImageExporter.h
 
@@ -232,20 +232,20 @@ add_executable(NoiseGenerator
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
 
-  src/Controller/NoisePanelController.cpp
-  src/Controller/NoisePanelController.h
-  src/Controller/MenuBarController.cpp
-  src/Controller/MenuBarController.h
+  src/MVC/Controller/NoisePanelController.cpp
+  src/MVC/Controller/NoisePanelController.h
+  src/MVC/Controller/MenuBarController.cpp
+  src/MVC/Controller/MenuBarController.h
 
-  src/View/NoisePreviewPanelUI.cpp
-  src/View/NoisePreviewPanelUI.h
-  src/View/MenuBarUI.cpp
-  src/View/MenuBarUI.h
+  src/MVC/View/NoisePreviewPanelUI.cpp
+  src/MVC/View/NoisePreviewPanelUI.h
+  src/MVC/View/MenuBarUI.cpp
+  src/MVC/View/MenuBarUI.h
 
-  src/Model/NoisePanelModel.cpp
-  src/Model/NoisePanelModel.h
-  src/Model/MenuBarModel.cpp
-  src/Model/MenuBarModel.h
+  src/MVC/Model/NoisePanelModel.cpp
+  src/MVC/Model/NoisePanelModel.h
+  src/MVC/Model/MenuBarModel.cpp
+  src/MVC/Model/MenuBarModel.h
 
   src/ThirdParty/stb_image.h
   src/ThirdParty/stb_image_write.h
@@ -288,20 +288,20 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Utils/FileUtils.h
   src/Utils/Delegates.h
   
-  src/Controller/NoisePanelController.cpp
-  src/Controller/NoisePanelController.h
-  src/Controller/MenuBarController.cpp
-  src/Controller/MenuBarController.h
-  
-  src/View/NoisePreviewPanelUI.cpp
-  src/View/NoisePreviewPanelUI.h
-  src/View/MenuBarUI.cpp
-  src/View/MenuBarUI.h
+  src/MVC/Controller/NoisePanelController.cpp
+  src/MVC/Controller/NoisePanelController.h
+  src/MVC/Controller/MenuBarController.cpp
+  src/MVC/Controller/MenuBarController.h
 
-  src/Model/NoisePanelModel.cpp
-  src/Model/NoisePanelModel.h
-  src/Model/MenuBarModel.cpp
-  src/Model/MenuBarModel.h
+  src/MVC/View/NoisePreviewPanelUI.cpp
+  src/MVC/View/NoisePreviewPanelUI.h
+  src/MVC/View/MenuBarUI.cpp
+  src/MVC/View/MenuBarUI.h
+
+  src/MVC/Model/NoisePanelModel.cpp
+  src/MVC/Model/NoisePanelModel.h
+  src/MVC/Model/MenuBarModel.cpp
+  src/MVC/Model/MenuBarModel.h
   
   
   src/Config/SettingsManager.cpp

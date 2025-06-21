@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "Model/NoisePanelModel.h"
+#include "MVC/Model/NoisePanelModel.h"
 #include <memory>
 
 

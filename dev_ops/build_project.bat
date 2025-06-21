@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 
 REM Prompt user for configuration
-echo ===============================
+echo =================================================================
 echo Select build configuration:
 echo [1] Debug
 echo [2] Release
 echo [3] Testing (test-only mode)
-echo ===============================
+echo =================================================================
 set /p choice=Enter your choice (1, 2 or 3): 
 
 REM Determine config and optional flags

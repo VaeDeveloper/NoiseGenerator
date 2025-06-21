@@ -23,6 +23,7 @@ enable_testing()
 # -----------------------
 add_executable(NoiseGeneratorTests
   ${CMAKE_SOURCE_DIR}/tests/test_noise_math.cpp
+  ${CMAKE_SOURCE_DIR}/tests/test_noise_generator.cpp
 )
 
 target_include_directories(NoiseGeneratorTests PRIVATE
@@ -36,9 +37,15 @@ target_link_libraries(NoiseGeneratorTests PRIVATE
 
 target_sources(NoiseGeneratorTests PRIVATE
   ${CMAKE_SOURCE_DIR}/src/Noise/NoiseMath.cpp
+  ${CMAKE_SOURCE_DIR}/src/Noise/NoiseGenerator.cpp
+  ${CMAKE_SOURCE_DIR}/src/Noise/NoiseGenerator.h
+  ${CMAKE_SOURCE_DIR}/src/Noise/NoiseTypes.h
+
+  ${CMAKE_SOURCE_DIR}/src/Logger/Logger.cpp
+  ${CMAKE_SOURCE_DIR}/src/Logger/Logger.h
+  
 )
 
-# ✅ Теперь здесь — OK
 set_target_properties(NoiseGeneratorTests PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON

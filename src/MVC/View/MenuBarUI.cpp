@@ -1,5 +1,5 @@
 #include "imgui.h"
-#include "Controller/MenuBarController.h"
+#include "MVC/Controller/MenuBarController.h"
 #include "MenuBarUI.h"
 #include "GUI/IconRegistry.h"
 #include "Utils/Constants.h"
@@ -43,7 +43,10 @@ void MenuBarUI::SetTextureData(GLuint id, int w, int h)
 
 	if(id == 0 || w <= 0 || h <= 0)
 	{
-		NGLOG(MenuBarUILog, Error, "Invalid texture data: id={}, w={}, h={}", id, w, h);
+		NGLOG(MenuBarUILog, Warning,
+			std::string("Attempt to export with uninitialized texture: id=") +
+			std::to_string(TextureId) + ", w=" + std::to_string(TextureWidth) + ", h=" + 
+			std::to_string(TextureHeight));
 		return;
 	}
 

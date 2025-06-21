@@ -48,9 +48,22 @@ namespace NG
 
 	float* StupidNoise2D(int res, int freq, float* data2, float scale, unsigned int seed)
 	{
+		if(res <= 0 || freq <= 0)
+		{
+			NGLOG(LogNoise, Error, "Invalid resolution or frequency in StupidNoise2D");
+			throw std::invalid_argument("Resolution and frequency must be > 0");
+		} 
+
+		if(res <= 0 || freq <= 0)
+		{
+			NGLOG(LogNoise, Error, "Invalid resolution or frequency in StupidNoise2D");
+			throw std::invalid_argument("Resolution and frequency must be > 0");
+		}
+
 		float* data1 = (float*)calloc(sizeof(float), freq * freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res * res);
-		if(!data1 || !data2) {
+		if(!data1 || !data2) 
+		{
 			NGLOG(LogNoise, Error, "Out of memory");
 			throw std::runtime_error("Out of memory");
 		}
@@ -84,6 +97,7 @@ namespace NG
 
 	float* StupidNoise3D(int res, int freq, float* data2, float scale, unsigned int seed)
 	{
+
 		float* data1 = (float*)calloc(sizeof(float), freq * freq * freq);
 		if(!data2) data2 = (float*)calloc(sizeof(float), res * res * res);
 		if(!data1 || !data2) 
@@ -126,6 +140,8 @@ namespace NG
 
 	float* FBMNoise2D(int res, const NoiseProperties* in_props, std::function<bool(float)> onProgress)
 	{
+		if(!in_props) return nullptr;
+
 		float* data = nullptr;
 		float scale = 1.0f;
 		int freq = 2;

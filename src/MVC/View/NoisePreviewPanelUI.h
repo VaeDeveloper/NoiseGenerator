@@ -1,5 +1,5 @@
 #pragma once
-#include "Controller/NoisePanelController.h"
+#include "MVC/Controller/NoisePanelController.h"
 
 
 
