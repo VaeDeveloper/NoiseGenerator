@@ -3,7 +3,7 @@
 
 struct NoiseProperties
 {
-	long seed;
+	int seed = 42;
 	int res;
 	float roughness;
 	int low_freq_skip;
