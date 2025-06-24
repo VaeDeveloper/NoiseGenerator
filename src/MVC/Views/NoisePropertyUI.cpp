@@ -10,7 +10,7 @@ DEFINE_LOG_CATEGORY(NoisePropertyUILog);
 
 NoisePropertyUI::NoisePropertyUI()
 {
-	�ontroller_ = std::make_shared<NoisePropertyController>();
+	Сontroller_ = std::make_shared<NoisePropertyController>();
 }
 
 void NoisePropertyUI::Initialize()
@@ -20,9 +20,9 @@ void NoisePropertyUI::Initialize()
 
 NoisePropertyController* NoisePropertyUI::GetController() const
 {
-	if(�ontroller_)
+	if(Сontroller_)
 	{
-		return �ontroller_.get();
+		return Сontroller_.get();
 	}
 }
 
@@ -115,7 +115,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	ImGui::SameLine();
 	if(ImGui::Button(WITH_ICON("Flask", "Mutate")))
 	{
-		�ontroller_->Mutate(randomStyleIndex_);
+		GetController()->Mutate(randomStyleIndex_);
 		NGLOG(LogGUI, Info, "Mutated noise settings");
 	}
 	NG::ShowShiftOnlyTooltip({
@@ -194,7 +194,7 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - 80);
 	ImGui::PushID("##LockAllBtn");
 
-	if(ImGui::Button(�ontroller_->IsAllLocked() ? "Unlock All" : "Lock All", ImVec2(80, 22.0f)))
+	if(ImGui::Button(GetController()->IsAllLocked() ? "Unlock All" : "Lock All", ImVec2(80, 22.0f)))
 	{
 		GetController()->SetLockAll();
 	}

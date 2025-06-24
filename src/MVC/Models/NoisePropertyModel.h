@@ -1,6 +1,6 @@
 #pragma once 
 #include "Noise/NoiseTypes.h"
-
+#include "../IModel.h"
 
 struct LockFlags
 {
@@ -34,33 +34,54 @@ struct LockFlags
 	}
 };
 
-class NoisePropertyModel
+class NoisePropertyModel : public IModel 
 {
 public:
 	const NoiseProperties& Get() const;
+
 	NoiseProperties& Access();
 
-	void Reset();
+#pragma region NoisePropertyModel
+	virtual std::string GetId() const override
+	{
+		return "noise_property_model";
+	}
+
+
+	virtual void Reset() override;
+
+	// Serialization from JSON 
+	virtual std::string SerializeToJson() const { return "{}"; }
+	virtual void LoadFromJson(const std::string&) {}
+#pragma endregion
+
+
 	void Randomize(bool respectLocks = true);
 	void Mutate(int style);
 
 
-	NoiseProperties props;
-	LockFlags locks;
+	LockFlags& GetLockFlags()
+	{
+		return locks;
+	}
 
 	void SetLockAll(bool lock = true) 
 	{
 		bLocked = !bLocked;
 		locks.SetAll(bLocked); 
 	}
+
 	bool IsAllLocked() const { return locks.AreAllLocked(); }
+
 	int GetRandomStyle() const;
 
-	static constexpr const char* resolutions_[] = {
+	static constexpr const char* resolutions_[] = 
+	{
 		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
 	};
 
-	int GetResolutionIndex() const {
+	int GetResolutionIndex() const 
+	{
 		return resolutionIndex_;
 	}
 
@@ -95,7 +116,8 @@ private:
 	//Random properties
 	int randomStyle = 0;
 
-	static constexpr char* randomStyles[] = {
+	static constexpr char* randomStyles[] = 
+	{
 		"Full Random",
 		"Controlled Chaos",
 		"Organic",
@@ -103,5 +125,7 @@ private:
 		"Minimal",
 	};
 
+	LockFlags locks;
+	NoiseProperties props;
 
 };

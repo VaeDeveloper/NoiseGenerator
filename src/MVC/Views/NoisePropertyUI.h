@@ -4,7 +4,7 @@
 #include <memory>
 
 
-class NoisePropertyUI
+class NoisePropertyUI 
 {
 public:
 	NoisePropertyUI();
@@ -30,5 +30,5 @@ private:
 	};
 
 	/* controller */
-	std::shared_ptr<NoisePropertyController> �ontroller_;
+	std::shared_ptr<NoisePropertyController> Сontroller_;
 };

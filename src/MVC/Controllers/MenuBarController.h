@@ -11,6 +11,7 @@
 #include "nfd.h"
 #include <functional>
 #include "Utils/Delegates.h"
+#include "../IController.h"
 
 
 
@@ -30,15 +31,16 @@ namespace NG
 
 }
 
-class MenuBarController
+class MenuBarController : public IController, public IControllerTyped<MenuBarModel>
 {
 public:
 	FOnInfoPanelToggled OnInfoPanelToggled;
 	
-	MenuBarController()
-		: Model(std::make_shared<MenuBarModel>()) 
-	{
-	}
+	MenuBarController();
+		
+
+	virtual void Initialize() {};
+
 
 	void ToggleFullScreen();
 
@@ -55,10 +57,14 @@ public:
 
 	void ToggleInfoPanel();
 
-	MenuBarModel* GetModel() const
+	std::shared_ptr<MenuBarModel> GetTypedModel() override 
 	{
-		if(Model)
-			return Model.get();
+		return Model;
+	}
+
+	std::shared_ptr<const MenuBarModel> GetTypedModel() const override 
+	{
+		return Model;
 	}
 
 private:

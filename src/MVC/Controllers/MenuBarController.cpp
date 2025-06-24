@@ -3,6 +3,11 @@
 DEFINE_LOG_CATEGORY(ExportLog);
 DEFINE_LOG_CATEGORY(MenuBarControllerLog);
 
+MenuBarController::MenuBarController() 
+	: Model(std::make_shared<MenuBarModel>())
+{
+}
+
 void MenuBarController::ToggleFullScreen()
 {
 	if(!Model) 

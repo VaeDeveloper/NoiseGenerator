@@ -118,6 +118,6 @@ NoiseProperties& NoisePropertyController::GetProperties()
 
 LockFlags& NoisePropertyController::GetLockFlags()
 {
-	return model.locks;
+	return model.GetLockFlags();
 }
 

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <vector>
+#include "../IModel.h"
 
 
 /**
@@ -10,11 +11,27 @@
  * Responsible for managing the OpenGL texture used to display noise preview data.
  * Handles allocation, upload, and state tracking of the preview texture.
  */
-class NoisePanelModel
+class NoisePanelModel : public IModel
 {
 public:
 	NoisePanelModel(){}
-	~NoisePanelModel();
+	virtual ~NoisePanelModel() override;
+
+
+#pragma region NoisePanelInterface
+	virtual std::string GetId() const override
+	{
+		return "noise_panel_model";
+	}
+
+	virtual void Reset() {};
+
+
+
+	// Serialization from JSON 
+	virtual std::string SerializeToJson() const { return "{}"; }
+	virtual void LoadFromJson(const std::string&) {}
+#pragma endregion
 
 	/** Initializes the texture if not already created */
 	void Initialize();
