@@ -1,5 +1,5 @@
 #include "NoiseGenerator.h"
-#include "Noise/NoiseMath.h"
+#include "Math/NoiseMath.h"
 #include "Logger/Logger.h"
 #include "Logger/LoggerMacro.h"
 #include "Utils/RandomGenerator.h"

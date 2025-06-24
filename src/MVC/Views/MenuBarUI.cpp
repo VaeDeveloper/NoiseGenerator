@@ -1,5 +1,5 @@
 #include "imgui.h"
-#include "MVC/Controller/MenuBarController.h"
+#include "MVC/Controllers/MenuBarController.h"
 #include "MenuBarUI.h"
 #include "GUI/IconRegistry.h"
 #include "Utils/Constants.h"

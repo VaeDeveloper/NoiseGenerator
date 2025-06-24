@@ -8,12 +8,12 @@
 #include "IconRegistry.h"
 #include "Utils/Constants.h"
 #include "Utils/UIUtils.h"
-#include "MVC/Controller/MenuBarController.h"
+#include "MVC/Controllers/MenuBarController.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include "Noise/NoiseTypes.h"
-#include "Noise/NoiseGenerator.h"
+#include "Generator/NoiseGenerator.h"
 #include "Export/ImageExporter.h"
 #include <random>
 #include <type_traits>
@@ -37,10 +37,7 @@ std::string EnsureExtension(const std::string& path, const std::string& ext)
 }
 
 
-namespace NG
-{
-	constexpr int spaceOffset = 24;
-}
+
 
 void GuiManager::Initialize(GLFWwindow* window)
 {
@@ -57,15 +54,23 @@ void GuiManager::Initialize(GLFWwindow* window)
 	NGLOG(LogGUI, Info, "ImGui initialized");
 
 	menuBar.Initialize();
+	propertyUI.Initialize();
 	noisePreview.Initialize();
 
 	// Delegate for info panel visible
-	menuBar.GetController()->OnInfoPanelToggled.Add(
+	menuBar.GetController()->OnInfoPanelToggled.Bind(
 		[this] (bool visible)
 		{
 			noisePreview.SetInfoPanelVisible(visible);
 		}
 	);
+
+	propertyUI.GetController()->OnNoiseReadyForUI.Bind(
+		[this] (float* data, int width, int height)
+		{
+			SetNoiseData(data, width, height);
+		});
+
 
 	int res = 8 << resolutionIndex;
 	NoiseProperties props = {};
@@ -144,9 +149,9 @@ void GuiManager::DrawMenuBar()
 {
 	menuBar.Draw();
 	// TODO !!! update only generate texture 
-	menuBar.SetTextureData(noisePreview.GetTextureId(), 
-		static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()), 
-			static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
+	menuBar.SetTextureData(noisePreview.GetTextureId(),
+		static_cast<int>(noisePreview.GetController()->GetModel()->GetWidth()),
+		static_cast<int>(noisePreview.GetController()->GetModel()->GetHeight()));
 }
 
 void GuiManager::DrawOutputLog()
@@ -183,6 +188,8 @@ void GuiManager::MutateNoiseStyle(int style)
 	auto randf = [] (float min, float max) {
 		return ImLerp(min, max, static_cast<float>(rand()) / RAND_MAX);
 		};
+
+
 
 	switch(style)
 	{
@@ -258,32 +265,6 @@ void GuiManager::RandomizeNoise()
 	NGLOG(LogGUI, Info, "Randomized noise settings");
 }
 
-void GuiManager::OpenURL(const char* url)
-{
-	std::string command;
-
-#if defined(_WIN32)
-	command = "start \"\" \"" + std::string(url) + "\"";
-#elif defined(__APPLE__)
-	command = "open \"" + std::string(url) + "\"";
-#elif defined(__linux__)
-	command = "xdg-open \"" + std::string(url) + "\"";
-#else
-	NGLOG(LogGUI, Error, "Unsupported platform for opening URLs");
-	return;
-#endif
-
-	int result = std::system(command.c_str());
-	if(result != 0)
-	{
-		NGLOG(LogGUI, Error, "Failed to open URL: " + std::string(url));
-	}
-	else
-	{
-		NGLOG(LogGUI, Info, "Opened URL: " + std::string(url));
-	}
-}
-
 void GuiManager::DrawResolutionComboWithLock()
 {
 	NG::LogWidget("Resolution", &resolutions[resolutionIndex], [&] ()
@@ -350,6 +331,8 @@ void GuiManager::Render()
 void GuiManager::SetNoiseData(float* data, int width, int height)
 {
 	noisePreview.UpdateTexture(data, width, height);
+	if(data != nullptr)
+		free(data);
 }
 
 void GuiManager::DrawUI()
@@ -395,215 +378,224 @@ void GuiManager::DrawUI()
 	ImGui::DockSpace(dockspace_id);
 	ImGui::End();
 
-	/** Generate Action */
-	ImGui::Begin("Noise Generator", nullptr, ImGuiWindowFlags_NoTitleBar);
-	SHOW_HIDDEN_TAB_BAR(ImGui::GetWindowDockID());
-	ImGui::SeparatorText("Generate Action");
-	ImGui::BeginDisabled(isGenerating);
-	if(ImGui::Button(WITH_ICON("Play", "Generate 2D Noise"), ImVec2(200, 30)) && !isGenerating)
-	{
-		NGLOG(LogGUI, Warning, "Generated 2D noise preview");
-
-		int res = 8 << resolutionIndex;
-		NoiseProperties props = {};
-		props.seed = std::random_device{}();
-		props.res = resolutionIndex;
-		props.roughness = roughness;
-		props.marbling = marbling;
-		props.low_freq_skip = low_freq_skip;
-		props.high_freq_skip = high_freq_skip;
-
-		props.turbulence = turbulence;
-		props.turbulence_res = turbulence_res;
-		props.turbulence_roughness = turbulence_roughness;
-		props.turbulence_low_freq_skip = turbulence_low_freq_skip;
-		props.turbulence_high_freq_skip = turbulence_high_freq_skip;
-		props.turbulence_marbling = turbulence_marbling;
-		props.turbulence_expshift = turbulence_expshift;
-		props.turbulence_offset_x = turbulence_offset_x;
-		props.turbulence_offset_y = turbulence_offset_y;
-
-		isGenerating = true;
-		generationProgress = 0.0f;
-		cancelRequested = false;
-		generationThread = std::thread([this, res, props] ()
-			{
-				float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
-					{
-						this->generationProgress = progress;
-						return !this->cancelRequested;
-					});
-
-				if(noise != nullptr)
-				{
-					this->QueueUITask([this, noise, res] ()
-						{
-							this->SetNoiseData(noise, res, res);
-							free(noise);
-							this->generationProgress = -1.0f;
-							this->isGenerating = false;
-						});
-				}
-				else
-				{
-					this->QueueUITask([this] ()
-						{
-							this->SetNoiseData(nullptr, 0, 0);
-							this->generationProgress = -1.0f;
-							this->isGenerating = false;
-						});
-				}
-			});
-
-		generationThread.detach();
-	}
-	ImGui::EndDisabled();
-	ImGui::SameLine();
-
-	if(ImGui::Button(WITH_ICON("TimesCircle", "Cancel"), ImVec2(120, 30))) {
-		cancelRequested = true;
-		NGLOG(LogGUI, Warning, "Cancel requested by user");
-	}
 
 
-	ImGui::SameLine();
-
-	ImGui::BeginDisabled(isGenerating);
-	if(ImGui::Button(WITH_ICON("Trash", "Clear"), ImVec2(120, 30)))
-	{
-		this->SetNoiseData(nullptr, 0, 0);
-		NGLOG(LogGUI, Warning, "Preview cleared");
-	}
-	ImGui::EndDisabled();
-
-
-	// Random 
-	ImGui::TextUnformatted(WITH_ICON("Dice", "Randomize Action"));
-	ImGui::Separator();
-	if(ImGui::Button(WITH_ICON("Random", "Randomize")))
-	{
-		RandomizeNoise();
-	}
-	ImGui::SameLine();
-	if(ImGui::Button(WITH_ICON("Flask", "Mutate")))
-	{
-		MutateNoiseStyle(randomStyle);
-		NGLOG(LogGUI, Info, "Mutated noise settings using style: " + std::string(randomStyles[randomStyle]));
-	}
-
-	ImGui::SameLine();
-	ImGui::SetNextItemWidth(150);
-	ImGui::Combo("Random Style", &randomStyle, randomStyles, IM_ARRAYSIZE(randomStyles));
-
-	// Layout Noise Settings
-	ImGui::TextUnformatted(WITH_ICON("SlidersH", "Noise Settings"));
-	ImGui::Separator();
-	DrawResolutionComboWithLock();
-
-	/* clang-format off */
-	/* Compact formatting style to improve readability of nested lambdas!!!*/
-	NG::LabeledWidgetWithLock("##lockRough", &lockRoughness, [&] () {
-		NG::LogWidget("Roughness", &roughness, [&] () {
-			return ImGui::SliderFloat("Roughness", &roughness, 0.01f, 1.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockMarb", &lockMarbling, [&] () {
-		NG::LogWidget("Marbling", &marbling, [&] () {
-			return ImGui::SliderFloat("Marbling", &marbling, 0.0f, 10.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockSeed", &lockSeed, [&] () {
-		NG::LogWidget("Seed", &seed, [&] () {
-			return ImGui::InputInt("Seed", &seed);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockLF", &lockLowFreq, [&] () {
-		NG::LogWidget("Low Freq Skip", &low_freq_skip, [&] () {
-			return ImGui::SliderInt("Low Freq Skip", &low_freq_skip, 0, 12);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockHF", &lockHighFreq, [&] () {
-		NG::LogWidget("High Freq Skip", &high_freq_skip, [&] () {
-			return ImGui::SliderInt("High Freq Skip", &high_freq_skip, 0, 12);
-			});
-		});
-
-	ImGui::TextUnformatted(WITH_ICON("Wind", "Turbulence"));
-	ImGui::Separator();
-	NG::LabeledWidgetWithLock("##lockTurb", &lockTurbulence, [&] () {
-		NG::LogWidget("Turbulence", &turbulence, [&] () {
-			return ImGui::SliderFloat("Turbulence", &turbulence, 0.0f, 64.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockTurbRes", &lockTurbRes, [&] () {
-		NG::LogWidget("Turbulence Res", &turbulence_res, [&] () {
-			return ImGui::Combo("Turbulence Res", &turbulence_res, resolutions, IM_ARRAYSIZE(resolutions));
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockTurbRough", &lockTurbRoughness, [&] () {
-		NG::LogWidget("Turbulence Roughness", &turbulence_roughness, [&] () {
-			return ImGui::SliderFloat("Turbulence Roughness", &turbulence_roughness, 0.01f, 1.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockTurbLF", &lockTurbLow, [&] () {
-		NG::LogWidget("Turb Low Freq Skip", &turbulence_low_freq_skip, [&] () {
-			return ImGui::SliderInt("Turb Low Freq Skip", &turbulence_low_freq_skip, 0, 12);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockTurbHF", &lockTurbHigh, [&] () {
-		NG::LogWidget("Turb High Freq Skip", &turbulence_high_freq_skip, [&] () {
-			return ImGui::SliderInt("Turb High Freq Skip", &turbulence_high_freq_skip, 0, 12);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockTurbMarb", &lockTurbMarbling, [&] () {
-		NG::LogWidget("Turbulence Marbling", &turbulence_marbling, [&] () {
-			return ImGui::SliderFloat("Turbulence Marbling", &turbulence_marbling, 0.0f, 10.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockExp", &lockExpShift, [&] () {
-		NG::LogWidget("Exp Shift", &turbulence_expshift, [&] () {
-			return ImGui::SliderFloat("Exp Shift", &turbulence_expshift, -4.0f, 4.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockX", &lockOffsetX, [&] () {
-		NG::LogWidget("Turb Offset X", &turbulence_offset_x, [&] () {
-			return ImGui::SliderFloat("Turb Offset X", &turbulence_offset_x, -1.0f, 1.0f);
-			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockY", &lockOffsetY, [&] () {
-		NG::LogWidget("Turb Offset Y", &turbulence_offset_y, [&] () {
-			return ImGui::SliderFloat("Turb Offset Y", &turbulence_offset_y, -1.0f, 1.0f);
-			});
-		});
-	/*--------------------------------------------------------------------------------------------------*/
-
-	if(isGenerating)
-	{
-		ImGui::ProgressBar(generationProgress, ImVec2(-1.0f, 0.0f), generationProgress >= 1.0f ? "Done" : "Generating...");
-		NGLOG(LogGUI, Info, "GenerationProgress -> " + std::to_string(generationProgress));
-		if(generationProgress >= 1.0f)
-		{
-			NGLOG(LogGUI, Info, "Generation Done");
-		}
-	}
-	ImGui::End();
+	propertyUI.Draw();
 
 	noisePreview.Draw();
 
-	// Log window
+	//// Log window
 	DrawOutputLog();
+
+	///** Generate Action */
+	//ImGui::Begin("Noise Generator", nullptr, ImGuiWindowFlags_NoTitleBar);
+	//SHOW_HIDDEN_TAB_BAR(ImGui::GetWindowDockID());
+	//ImGui::SeparatorText("Generate Action");
+	//ImGui::BeginDisabled(isGenerating);
+	//if(ImGui::Button(WITH_ICON("Play", "Generate 2D Noise"), ImVec2(200, 30)) && !isGenerating)
+	//{
+	//	NGLOG(LogGUI, Warning, "Generated 2D noise preview");
+
+	//	int res = 8 << resolutionIndex;
+	//	NoiseProperties props = {};
+	//	props.seed = std::random_device{}();
+	//	props.res = resolutionIndex;
+	//	props.roughness = roughness;
+	//	props.marbling = marbling;
+	//	props.low_freq_skip = low_freq_skip;
+	//	props.high_freq_skip = high_freq_skip;
+
+	//	props.turbulence = turbulence;
+	//	props.turbulence_res = turbulence_res;
+	//	props.turbulence_roughness = turbulence_roughness;
+	//	props.turbulence_low_freq_skip = turbulence_low_freq_skip;
+	//	props.turbulence_high_freq_skip = turbulence_high_freq_skip;
+	//	props.turbulence_marbling = turbulence_marbling;
+	//	props.turbulence_expshift = turbulence_expshift;
+	//	props.turbulence_offset_x = turbulence_offset_x;
+	//	props.turbulence_offset_y = turbulence_offset_y;
+
+	//	isGenerating = true;
+	//	generationProgress = 0.0f;
+	//	cancelRequested = false;
+	//	generationThread = std::thread([this, res, props] ()
+	//		{
+	//			float* noise = NG::FBMNoise2D(res, &props, [this] (float progress)
+	//				{
+	//					this->generationProgress = progress;
+	//					return !this->cancelRequested;
+	//				});
+
+	//			if(noise != nullptr)
+	//			{
+	//				this->QueueUITask([this, noise, res] ()
+	//					{
+	//						this->SetNoiseData(noise, res, res);
+	//						// free(noise);
+	//						this->generationProgress = -1.0f;
+	//						this->isGenerating = false;
+	//					});
+	//			}
+	//			else
+	//			{
+	//				this->QueueUITask([this] ()
+	//					{
+	//						this->SetNoiseData(nullptr, 0, 0);
+	//						this->generationProgress = -1.0f;
+	//						this->isGenerating = false;
+	//					});
+	//			}
+	//		});
+
+	//	generationThread.detach();
+	//}
+	//ImGui::EndDisabled();
+	//ImGui::SameLine();
+
+	//if(ImGui::Button(WITH_ICON("TimesCircle", "Cancel"), ImVec2(120, 30))) {
+	//	cancelRequested = true;
+	//	NGLOG(LogGUI, Warning, "Cancel requested by user");
+	//}
+
+
+	//ImGui::SameLine();
+
+	//ImGui::BeginDisabled(isGenerating);
+	//if(ImGui::Button(WITH_ICON("Trash", "Clear"), ImVec2(120, 30)))
+	//{
+	//	this->SetNoiseData(nullptr, 0, 0);
+	//	NGLOG(LogGUI, Warning, "Preview cleared");
+	//}
+	//ImGui::EndDisabled();
+
+
+	//// Random 
+	//ImGui::TextUnformatted(WITH_ICON("Dice", "Randomize Action"));
+	//ImGui::Separator();
+	//if(ImGui::Button(WITH_ICON("Random", "Randomize")))
+	//{
+	//	RandomizeNoise();
+	//}
+	//ImGui::SameLine();
+	//if(ImGui::Button(WITH_ICON("Flask", "Mutate")))
+	//{
+	//	MutateNoiseStyle(randomStyle);
+	//	NGLOG(LogGUI, Info, "Mutated noise settings using style: " + std::string(randomStyles[randomStyle]));
+	//}
+
+	//ImGui::SameLine();
+	//ImGui::SetNextItemWidth(150);
+	//ImGui::Combo("Random Style", &randomStyle, randomStyles, IM_ARRAYSIZE(randomStyles));
+
+	//// Layout Noise Settings
+	//ImGui::TextUnformatted(WITH_ICON("SlidersH", "Noise Settings"));
+	//ImGui::Separator();
+	//DrawResolutionComboWithLock();
+
+	///* clang-format off */
+	///* Compact formatting style to improve readability of nested lambdas!!!*/
+	//NG::LabeledWidgetWithLock("##lockRough", &lockRoughness, [&] () {
+	//	NG::LogWidget("Roughness", &roughness, [&] () {
+	//		return ImGui::SliderFloat("Roughness", &roughness, 0.01f, 1.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockMarb", &lockMarbling, [&] () {
+	//	NG::LogWidget("Marbling", &marbling, [&] () {
+	//		return ImGui::SliderFloat("Marbling", &marbling, 0.0f, 10.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockSeed", &lockSeed, [&] () {
+	//	NG::LogWidget("Seed", &seed, [&] () {
+	//		return ImGui::InputInt("Seed", &seed);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockLF", &lockLowFreq, [&] () {
+	//	NG::LogWidget("Low Freq Skip", &low_freq_skip, [&] () {
+	//		return ImGui::SliderInt("Low Freq Skip", &low_freq_skip, 0, 12);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockHF", &lockHighFreq, [&] () {
+	//	NG::LogWidget("High Freq Skip", &high_freq_skip, [&] () {
+	//		return ImGui::SliderInt("High Freq Skip", &high_freq_skip, 0, 12);
+	//		});
+	//	});
+
+	//ImGui::TextUnformatted(WITH_ICON("Wind", "Turbulence"));
+	//ImGui::Separator();
+	//NG::LabeledWidgetWithLock("##lockTurb", &lockTurbulence, [&] () {
+	//	NG::LogWidget("Turbulence", &turbulence, [&] () {
+	//		return ImGui::SliderFloat("Turbulence", &turbulence, 0.0f, 64.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockTurbRes", &lockTurbRes, [&] () {
+	//	NG::LogWidget("Turbulence Res", &turbulence_res, [&] () {
+	//		return ImGui::Combo("Turbulence Res", &turbulence_res, resolutions, IM_ARRAYSIZE(resolutions));
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockTurbRough", &lockTurbRoughness, [&] () {
+	//	NG::LogWidget("Turbulence Roughness", &turbulence_roughness, [&] () {
+	//		return ImGui::SliderFloat("Turbulence Roughness", &turbulence_roughness, 0.01f, 1.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockTurbLF", &lockTurbLow, [&] () {
+	//	NG::LogWidget("Turb Low Freq Skip", &turbulence_low_freq_skip, [&] () {
+	//		return ImGui::SliderInt("Turb Low Freq Skip", &turbulence_low_freq_skip, 0, 12);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockTurbHF", &lockTurbHigh, [&] () {
+	//	NG::LogWidget("Turb High Freq Skip", &turbulence_high_freq_skip, [&] () {
+	//		return ImGui::SliderInt("Turb High Freq Skip", &turbulence_high_freq_skip, 0, 12);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockTurbMarb", &lockTurbMarbling, [&] () {
+	//	NG::LogWidget("Turbulence Marbling", &turbulence_marbling, [&] () {
+	//		return ImGui::SliderFloat("Turbulence Marbling", &turbulence_marbling, 0.0f, 10.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockExp", &lockExpShift, [&] () {
+	//	NG::LogWidget("Exp Shift", &turbulence_expshift, [&] () {
+	//		return ImGui::SliderFloat("Exp Shift", &turbulence_expshift, -4.0f, 4.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockX", &lockOffsetX, [&] () {
+	//	NG::LogWidget("Turb Offset X", &turbulence_offset_x, [&] () {
+	//		return ImGui::SliderFloat("Turb Offset X", &turbulence_offset_x, -1.0f, 1.0f);
+	//		});
+	//	});
+
+	//NG::LabeledWidgetWithLock("##lockY", &lockOffsetY, [&] () {
+	//	NG::LogWidget("Turb Offset Y", &turbulence_offset_y, [&] () {
+	//		return ImGui::SliderFloat("Turb Offset Y", &turbulence_offset_y, -1.0f, 1.0f);
+	//		});
+	//	});
+	///*--------------------------------------------------------------------------------------------------*/
+
+	//if(isGenerating)
+	//{
+	//	ImGui::ProgressBar(generationProgress, ImVec2(-1.0f, 0.0f), generationProgress >= 1.0f ? "Done" : "Generating...");
+	//	NGLOG(LogGUI, Info, "GenerationProgress -> " + std::to_string(generationProgress));
+	//	if(generationProgress >= 1.0f)
+	//	{
+	//		NGLOG(LogGUI, Info, "Generation Done");
+	//	}
+	//}
+	//ImGui::End();
+
+	//noisePreview.Draw();
+
+	//// Log window
+	//DrawOutputLog();
 
 
 	std::lock_guard<std::mutex> lock(uiMutex);

@@ -1,6 +1,9 @@
 #pragma once
 #include <functional>
 
+
+
+
 template<typename... Args>
 class Delegate
 {
@@ -20,7 +23,9 @@ public:
 	void Execute(Args... args) const
 	{
 		if(callback)
+		{
 			callback(std::forward<Args>(args)...);
+		}
 	}
 
 	bool IsBound() const
@@ -49,8 +54,8 @@ public:
 	{
 		subscribers.erase(
 			std::remove_if(subscribers.begin(), subscribers.end(),
-				[&] (const FuncType& f) {
-					
+				[&] (const FuncType& f) 
+				{
 					return f.target_type() == func.target_type();
 				}),
 			subscribers.end()
@@ -67,7 +72,9 @@ public:
 		for(const auto& func : subscribers)
 		{
 			if(func)
+			{
 				func(args...);
+			}
 		}
 	}
 

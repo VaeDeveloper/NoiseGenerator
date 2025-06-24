@@ -32,8 +32,6 @@ struct LockFlags
 			turbulence && turbRes && turbRoughness && turbLow && turbHigh &&
 			turbMarbling && expShift && offsetX && offsetY;
 	}
-
-
 };
 
 class NoisePropertyModel
@@ -46,33 +44,64 @@ public:
 	void Randomize(bool respectLocks = true);
 	void Mutate(int style);
 
+
 	NoiseProperties props;
 	LockFlags locks;
 
-	void SetLockAll(bool value) { locks.SetAll(value); }
+	void SetLockAll(bool lock = true) 
+	{
+		bLocked = !bLocked;
+		locks.SetAll(bLocked); 
+	}
 	bool IsAllLocked() const { return locks.AreAllLocked(); }
 	int GetRandomStyle() const;
-	int GetResolutionIndex() const;
+
+	static constexpr const char* resolutions_[] = {
+		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
+	};
+
+	int GetResolutionIndex() const {
+		return resolutionIndex_;
+	}
+
+	void SetResolutionIndex(int index) {
+		if(index >= 0 && index < GetResolutionCount()) {
+			resolutionIndex_ = index;
+		}
+	}
+
+	int GetResolutionValue() const {
+		return 8 << resolutionIndex_;
+	}
+
+	static constexpr int GetResolutionCount() {
+		return sizeof(resolutions_) / sizeof(resolutions_[0]);
+	}
+
+	static constexpr const char* const* GetResolutions() {
+		return resolutions_;
+	}
+
 
 
 private:
 	float RandF(float min, float max) const;
 
+	bool bLocked = false;
 
-	int resolutionIndex = 3;
-	static constexpr char* resolutions[] =
-	{
-		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
-	};
+	int resolutionIndex_ = 3;
+
 
 	//Random properties
 	int randomStyle = 0;
 
 	static constexpr char* randomStyles[] = {
-	"Full Random",
-	"Controlled Chaos",
-	"Organic",
-	"Extreme",
-	"Minimal",
+		"Full Random",
+		"Controlled Chaos",
+		"Organic",
+		"Extreme",
+		"Minimal",
 	};
+
+
 };

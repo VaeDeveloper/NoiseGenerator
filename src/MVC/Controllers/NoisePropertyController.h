@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "MVC/Model/NoisePropertyModel.h"
+#include "MVC/Models/NoisePropertyModel.h"
 #include <functional>
 #include <atomic>
 #include <thread>
@@ -8,10 +8,8 @@
 #include <queue>
 #include "Utils/Delegates.h"
 
-DECLARE_DELEGATE_OneParam(FOnNoiseGenerated, float*); // pointer to noise
-DECLARE_DELEGATE(FOnGenerationCompleted);
-DECLARE_DELEGATE(FOnGenerationFailed);
-DECLARE_DELEGATE_OneParam(FOnProgressUpdated, float);
+DECLARE_DELEGATE_ThreeParams(FOnNoiseGenerated, float*, int, int);
+
 
 class NoisePropertyController
 {
@@ -21,7 +19,7 @@ public:
 	void Randomize();
 	void Mutate(int style);
 	void Reset();
-	void SetLockAll(bool value);
+	void SetLockAll();
 	bool IsAllLocked() const;
 
 	void StartGeneration();
@@ -29,30 +27,39 @@ public:
 	bool IsGenerating() const;
 	float GetProgress() const;
 
+	void ProcessUITasks();
+
 	NoiseProperties& GetProperties();
 	LockFlags& GetLockFlags();
 
-	void SetUITaskCallback(std::function<void(std::function<void()>)> cb);
+	FOnNoiseGenerated OnNoiseReadyForUI;
 
+	NoisePropertyModel& GetModel() {
+		return model;
+	}
 
-	FOnNoiseGenerated OnNoiseGenerated;
-	FOnGenerationCompleted OnGenerationCompleted;
-	FOnGenerationFailed OnGenerationFailed;
-	FOnProgressUpdated OnProgressUpdated;
-
+	const NoisePropertyModel& GetModel() const {
+		return model;
+	}
+	
+	std::queue<std::function<void()>> uiTasks;
+	std::mutex uiMutex;
 private:
+	void QueueUITask(std::function<void()> task);
 
-	void GenerateNoiseAsync();
-
+	
 	NoisePropertyModel model;
 
 	std::atomic<bool> isGenerating = false;
 	std::atomic<float> generationProgress = 0.0f;
 	std::atomic<bool> cancelRequested = false;
+
 	std::thread generationThread;
 
+	
+	
 	int randomStyle = 0;
-	int resolutionIndex = 3;
+	int resolutionIndex = 2;
 
 
 

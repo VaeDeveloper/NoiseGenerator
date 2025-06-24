@@ -9,10 +9,13 @@
 #include <mutex>
 
 
-#include "MVC/View/NoisePreviewPanelUI.h"
-#include "MVC/View/MenuBarUI.h"
+#include "MVC/Views/NoisePropertyUI.h"
+#include "MVC/Views/NoisePreviewPanelUI.h"
 
-#include <GLFW/glfw3.h>
+// todo 
+#include "MVC/Views/MenuBarUI.h"
+
+
 
 
 class GuiManager
@@ -24,8 +27,6 @@ public:
 	void Render();
 	void DrawUI();
 	void SetNoiseData(float* data, int width, int height);
-
-
 
 private:
 	void QueueUITask(std::function<void()> task);
@@ -40,7 +41,7 @@ private:
 	void SetAllLock(bool state);
 	void MutateNoiseStyle(int style);
 	void RandomizeNoise();
-	void OpenURL(const char* url);
+
 	void DrawResolutionComboWithLock();
 
 private:
@@ -48,6 +49,7 @@ private:
 	bool bDockBuilt = false;
 	bool bShowOutputLog = true;
 	MenuBarUI menuBar;
+	NoisePropertyUI propertyUI;
 	NoisePreviewPanelUI noisePreview;
 
 	std::thread generationThread;
@@ -57,8 +59,6 @@ private:
 	std::atomic<float> generationProgress = -1.0f;
 
 	std::mutex uiMutex;
-
-
 	std::queue<std::function<void()>> uiTasks;
 
 

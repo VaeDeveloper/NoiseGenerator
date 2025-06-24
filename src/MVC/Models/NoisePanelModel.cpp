@@ -35,6 +35,7 @@ void NoisePanelModel::UploadData(const float* data, int width, int height)
 	this->width = width;
 	this->height = height;
 	int tpixels = width * height;
+
 	// Using raw `new` here instead of std::vector for maximum performance,
 	// avoiding zero-initialization and extra safety overhead.
 	// Manual memory management is safe in this scope due to predictable allocation size.

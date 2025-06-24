@@ -1,8 +1,8 @@
 #pragma once 
 
-#include "MVC/Model/MenuBarModel.h"
+#include "MVC/Models/MenuBarModel.h"
+#include "MVC/Controllers/NoisePanelController.h"
 #include "Logger/LoggerMacro.h"
-#include "MVC/Controller/NoisePanelController.h"
 #include "GLFW/glfw3.h"
 #include "Export/ImageExporter.h"
 #include "Utils/StringUtils.h"
@@ -14,7 +14,7 @@
 
 
 
-using FOnInfoPanelToggled = MulticastDelegate<bool>; // �������� � ��������/������
+DECLARE_DELEGATE_OneParam(FOnInfoPanelToggled, bool);
 
 namespace NG
 {

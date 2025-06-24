@@ -41,3 +41,4 @@ void NoisePanelController::UploadNoise(const float* noiseData, int w, int h) con
 
 	model->UploadData(noiseData, w, h);
 }
+

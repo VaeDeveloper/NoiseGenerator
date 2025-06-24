@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NoiseTypes.h"
+#include "Noise/NoiseTypes.h"
 #include <functional>
 
 namespace NG

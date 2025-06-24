@@ -216,10 +216,10 @@ add_executable(NoiseGenerator
   src/Logger/LoggerUI.h
   src/Logger/LoggerMacro.h
 
-  src/Noise/NoiseGenerator.cpp
-  src/Noise/NoiseGenerator.h
-  src/Noise/NoiseMath.cpp
-  src/Noise/NoiseMath.h
+  src/Generator/NoiseGenerator.cpp
+  src/Generator/NoiseGenerator.h
+  src/Math/NoiseMath.cpp
+  src/Math/NoiseMath.h
   src/Noise/NoiseTypes.h
 
   src/Utils/Constants.h
@@ -232,20 +232,31 @@ add_executable(NoiseGenerator
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
 
-  src/MVC/Controller/NoisePanelController.cpp
-  src/MVC/Controller/NoisePanelController.h
-  src/MVC/Controller/MenuBarController.cpp
-  src/MVC/Controller/MenuBarController.h
 
-  src/MVC/View/NoisePreviewPanelUI.cpp
-  src/MVC/View/NoisePreviewPanelUI.h
-  src/MVC/View/MenuBarUI.cpp
-  src/MVC/View/MenuBarUI.h
+  src/MVC/IView.h
+  src/MVC/IModel.h
+  src/MVC/IController.h
 
-  src/MVC/Model/NoisePanelModel.cpp
-  src/MVC/Model/NoisePanelModel.h
-  src/MVC/Model/MenuBarModel.cpp
-  src/MVC/Model/MenuBarModel.h
+  src/MVC/Controllers/NoisePanelController.cpp
+  src/MVC/Controllers/NoisePanelController.h
+  src/MVC/Controllers/NoisePropertyController.cpp
+  src/MVC/Controllers/NoisePropertyController.h
+  src/MVC/Controllers/MenuBarController.cpp
+  src/MVC/Controllers/MenuBarController.h
+
+  src/MVC/Views/NoisePreviewPanelUI.cpp
+  src/MVC/Views/NoisePreviewPanelUI.h
+  src/MVC/Views/NoisePropertyUI.cpp
+  src/MVC/Views/NoisePropertyUI.h
+  src/MVC/Views/MenuBarUI.cpp
+  src/MVC/Views/MenuBarUI.h
+
+  src/MVC/Models/NoisePanelModel.cpp
+  src/MVC/Models/NoisePanelModel.h
+  src/MVC/Models/NoisePropertyModel.cpp
+  src/MVC/Models/NoisePropertyModel.h
+  src/MVC/Models/MenuBarModel.cpp
+  src/MVC/Models/MenuBarModel.h
 
   src/ThirdParty/stb_image.h
   src/ThirdParty/stb_image_write.h
@@ -275,10 +286,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Logger/LoggerUI.h
   src/Logger/LoggerMacro.h
 
-  src/Noise/NoiseGenerator.cpp
-  src/Noise/NoiseGenerator.h
-  src/Noise/NoiseMath.cpp
-  src/Noise/NoiseMath.h
+  src/Generator/NoiseGenerator.cpp
+  src/Generator/NoiseGenerator.h
+  src/Math/NoiseMath.cpp
+  src/Math/NoiseMath.h
   src/Noise/NoiseTypes.h
   
   src/Utils/Constants.h
@@ -288,20 +299,30 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Utils/FileUtils.h
   src/Utils/Delegates.h
   
-  src/MVC/Controller/NoisePanelController.cpp
-  src/MVC/Controller/NoisePanelController.h
-  src/MVC/Controller/MenuBarController.cpp
-  src/MVC/Controller/MenuBarController.h
+  src/MVC/IView.h
+  src/MVC/IModel.h
+  src/MVC/IController.h
 
-  src/MVC/View/NoisePreviewPanelUI.cpp
-  src/MVC/View/NoisePreviewPanelUI.h
-  src/MVC/View/MenuBarUI.cpp
-  src/MVC/View/MenuBarUI.h
+  src/MVC/Controllers/NoisePanelController.cpp
+  src/MVC/Controllers/NoisePanelController.h
+  src/MVC/Controllers/NoisePropertyController.cpp
+  src/MVC/Controllers/NoisePropertyController.h
+  src/MVC/Controllers/MenuBarController.cpp
+  src/MVC/Controllers/MenuBarController.h
 
-  src/MVC/Model/NoisePanelModel.cpp
-  src/MVC/Model/NoisePanelModel.h
-  src/MVC/Model/MenuBarModel.cpp
-  src/MVC/Model/MenuBarModel.h
+  src/MVC/Views/NoisePreviewPanelUI.cpp
+  src/MVC/Views/NoisePreviewPanelUI.h
+  src/MVC/Views/NoisePropertyUI.cpp
+  src/MVC/Views/NoisePropertyUI.h
+  src/MVC/Views/MenuBarUI.cpp
+  src/MVC/Views/MenuBarUI.h
+
+  src/MVC/Models/NoisePanelModel.cpp
+  src/MVC/Models/NoisePanelModel.h
+  src/MVC/Models/NoisePropertyModel.cpp
+  src/MVC/Models/NoisePropertyModel.h
+  src/MVC/Models/MenuBarModel.cpp
+  src/MVC/Models/MenuBarModel.h
   
   
   src/Config/SettingsManager.cpp

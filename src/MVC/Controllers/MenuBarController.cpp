@@ -103,7 +103,7 @@ void MenuBarController::ToggleInfoPanel()
 	bool newState = !Model->IsInfoPanelVisible();
 	Model->SetInfoPanelVisible(newState);
 
-	OnInfoPanelToggled.Broadcast(newState); // уведомим подписчиков
+	OnInfoPanelToggled.Execute(newState);
 }
 
 

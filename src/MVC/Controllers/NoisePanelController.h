@@ -1,7 +1,8 @@
 #pragma once 
 
-#include "MVC/Model/NoisePanelModel.h"
+#include "MVC/Models/NoisePanelModel.h"
 #include <memory>
+#include <functional>
 
 
 /**
@@ -19,6 +20,9 @@ public:
 	/** Returns a pointer to the underlying model */
 	NoisePanelModel* GetModel();
 
+
+
+
 	/**
 	 * Uploads noise data to the model, if it has been initialized.
 	 *
@@ -29,6 +33,7 @@ public:
 	void UploadNoise(const float* noiseData, int w, int h) const;
 
 private:
+	
 	/** Unique instance of the model owned by this controller */
 	std::unique_ptr<NoisePanelModel> model;
 };
