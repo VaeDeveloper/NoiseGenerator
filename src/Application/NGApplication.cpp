@@ -1,65 +1,21 @@
 #include "NGApplication.h"
-#include "Config/SettingsManager.h"
+#include "SettingsManager.h"
 
 
 
 DEFINE_LOG_CATEGORY(SystemLog);
-
 DEFINE_LOG_CATEGORY(LogApp);
-
 DEFINE_LOG_CATEGORY(LogGLFW);
 DEFINE_LOG_CATEGORY(LogOpenGL);
 
 NGApplication::NGApplication()
 {
-	LogSystemInfo();
+
 }
 
 NGApplication::~NGApplication()
 {
 	Shutdown();
-}
-
-void NGApplication::LogSystemInfo()
-{
-//	NGLOG(SystemLog, Info, "==== System Info ====");
-//
-//#ifdef _WIN32
-//	NGLOG(SystemLog, Info, "Platform          : Windows");
-//#elif __APPLE__
-//	NGLOG(SystemLog, Info, "Platform          : macOS");
-//#elif __linux__
-//	NGLOG(SystemLog, Info, "Platform          : Linux");
-//#else
-//	NGLOG(SystemLog, Info, "Platform          : Unknown");
-//#endif
-//
-//	// CPU Cores
-//	unsigned int cores = std::thread::hardware_concurrency();
-//	NGLOG(LogApp, Info, "CPU Cores         : " + std::to_string(cores));
-//
-//#ifdef _WIN32
-//	// Memory Info
-//	MEMORYSTATUSEX memStatus;
-//	memStatus.dwLength = sizeof(memStatus);
-//	if (GlobalMemoryStatusEx(&memStatus))
-//	{
-//		auto availMB = memStatus.ullAvailPhys / (1024 * 1024);
-//		auto totalMB = memStatus.ullTotalPhys / (1024 * 1024);
-//		NGLOG(SystemLog, Info, "Memory Available  : " + std::to_string(availMB) + " MB");
-//		NGLOG(SystemLog, Info, "Memory Total      : " + std::to_string(totalMB) + " MB");
-//	}
-//
-//	// Screen Resolution
-//	RECT desktop;
-//	const HWND hDesktop = GetDesktopWindow();
-//	GetWindowRect(hDesktop, &desktop);
-//	int screenWidth = desktop.right;
-//	int screenHeight = desktop.bottom;
-//	NGLOG(SystemLog, Info, "Screen Resolution : " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight));
-//#endif
-//
-//	NGLOG(SystemLog, Info, "=====================");
 }
 
 InitStatus NGApplication::InitializeApplication()

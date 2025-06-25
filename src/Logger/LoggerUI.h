@@ -2,7 +2,7 @@
 
 #include "Logger.h"
 #include "imgui.h"
-#include "GUI/IconRegistry.h"
+#include "IconRegistry.h"
 
 inline void DrawLoggerWindow(bool* open = nullptr)
 {

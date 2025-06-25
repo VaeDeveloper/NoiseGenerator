@@ -1,5 +1,5 @@
 #include "NoisePanelModel.h"
-#include "Logger/LoggerMacro.h"
+#include "LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(NoisePanelLog);
 
@@ -25,13 +25,6 @@ void NoisePanelModel::Initialize()
 
 void NoisePanelModel::UploadData(const float* data, int width, int height)
 {
-	if(!data || width <= 0 || height <= 0)
-	{
-		NGLOG(NoisePanelLog, Warning, "Invalid parameters passed to UploadData (width = "
-			+ std::to_string(width) + ", height = " + std::to_string(height) + ")");
-		return;
-	}
-
 	this->width = width;
 	this->height = height;
 	int tpixels = width * height;
@@ -55,14 +48,6 @@ void NoisePanelModel::UploadData(const float* data, int width, int height)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, gTextureId);
-	//glTexSubImage2D( 
-	//	GL_TEXTURE_2D,
-	//	0, // mip level
-	//	0, 0, width, height,
-	//	GL_RGB,
-	//	GL_FLOAT,
-	//	rgb_data
-	//);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, rgb_data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

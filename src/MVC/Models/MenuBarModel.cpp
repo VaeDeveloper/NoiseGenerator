@@ -1,5 +1,10 @@
 #include "MenuBarModel.h"
 
+std::string MenuBarModel::GetId() const
+{
+	return "menu_bar_model";
+}
+
 bool MenuBarModel::IsFullscreen() const
 {
 	return bFullscreen;

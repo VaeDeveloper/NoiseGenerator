@@ -1,17 +1,20 @@
 #pragma once 
 
-#include "MVC/Controllers/NoisePropertyController.h"
+#include "NoisePropertyController.h"
 #include <memory>
 
+#include "IView.h"
+#include "BoilerplateMacro.h"
 
-class NoisePropertyUI 
+
+class NoisePropertyUI : public IView, public IViewTyped<NoisePropertyController>
 {
+	IMPL_TYPED_CONTROLLER(NoisePropertyController, controller);
 public:
-	NoisePropertyUI();
-	void Initialize();
+	virtual void Initialize() override;
+	virtual void Draw() override;
 
-	void Draw();
-	NoisePropertyController* GetController() const;
+
 private:
 	void DrawNoiseSettings();
 	void DrawGenerateActions();
@@ -30,5 +33,5 @@ private:
 	};
 
 	/* controller */
-	std::shared_ptr<NoisePropertyController> Сontroller_;
+	std::shared_ptr<NoisePropertyController> controller;
 };

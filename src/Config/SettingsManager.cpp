@@ -1,11 +1,9 @@
 #include "SettingsManager.h"
-#include "Logger/LoggerMacro.h"
+#include "LoggerMacro.h"
 #include <filesystem>
-#include "Utils/FileUtils.h"
+#include "FileUtils.h"
 
 DEFINE_LOG_CATEGORY(LogSettings);
-
-
 
 SettingsManager& SettingsManager::Get()
 {

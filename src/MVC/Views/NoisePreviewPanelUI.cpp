@@ -2,77 +2,32 @@
 #include <imgui_internal.h>
 #include "NoisePreviewPanelUI.h"
 
-#include "GUI/GuiUtils.h"
-
-
-#include "Logger/Logger.h"
-#include "Logger/LoggerMacro.h"
+#include "GuiUtils.h"
+#include "Logger.h"
+#include "LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogNoisePanel);
 
-
-
-//static GLuint LoadComputeShader(const char* path)
-//{
-//	std::ifstream file(path);
-//	if(!file)
-//	{
-//		std::cerr << "Shader file not found or failed to open: " << path << std::endl;
-//		throw std::runtime_error("Failed to open shader file");
-//	}
-//	std::string source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-//	const char* src = source.c_str();
-//
-//	GLuint shader = glCreateShader(GL_COMPUTE_SHADER);
-//	glShaderSource(shader, 1, &src, nullptr);
-//	glCompileShader(shader);
-//
-//	GLint success;
-//	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-//	if(!success)
-//	{
-//		char log[512];
-//		glGetShaderInfoLog(shader, 512, NULL, log);
-//		std::cerr << "Shader compile failed:\n" << log << std::endl;
-//		throw std::runtime_error(std::string("Shader compile error:\n") + log);
-//	}
-//
-//	GLuint program = glCreateProgram();
-//	glAttachShader(program, shader);
-//	glLinkProgram(program);
-//	glDeleteShader(shader);
-//
-//	return program;
-//}
-//
-//
-//void RunPerlinCompute(GLuint textureId, int width, int height, float seed, float roughness, int freq)
-//{
-//	static GLuint program = LoadComputeShader("D:/GitProject/NoiseGenerator/shaders/perlin.comp");
-//	glUseProgram(program);
-//
-//	glUniform1f(glGetUniformLocation(program, "seed"), seed);
-//	glUniform1f(glGetUniformLocation(program, "roughness"), roughness);
-//	glUniform1i(glGetUniformLocation(program, "freq"), freq);
-//
-//	glBindImageTexture(0, textureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-//	glDispatchCompute((GLuint)ceil(width / 16.0f), (GLuint)ceil(height / 16.0f), 1);
-//
-//	GLenum err = glGetError();
-//	if(err != GL_NO_ERROR)
-//	{
-//		NGLOG(LogNoisePanel, Error, "GL Error after dispatch: 0x");
-//		std::cerr << "GL Error after dispatch: 0x" << std::hex << err << std::endl;
-//	}
-//
-//	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-//}
-
 void NoisePreviewPanelUI::Initialize()
 {
+	try
+	{
+		controller = std::make_shared<NoisePanelController>();
+		NGLOG(LogNoisePanel, Info, "Noise Panel Controller Initialized");
+	}
+	catch(const std::bad_alloc& e)
+	{
+		NGLOG(LogNoisePanel, Error, std::string("Failed to allocate NoisePanelController: ") + e.what());
+		controller = nullptr;
+	}
+	catch(const std::exception& e)
+	{
+		NGLOG(LogNoisePanel, Error, std::string("Unexpected error during controller creation: ") + e.what());
+		controller = nullptr;
+	}
+
 	SetPreviewWidth(1024.0f);
 	SetPreviewHeight(1024.0f);
-	controller = std::make_unique<NoisePanelController>();
 }
 
 void NoisePreviewPanelUI::UpdateTexture(const float* data, int width, int height)

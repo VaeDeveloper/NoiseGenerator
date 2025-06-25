@@ -15,6 +15,15 @@ public:
 		callback = std::move(func);
 	}
 
+	template<typename T>
+	void Bind(T* obj, void (T::* method)(Args...))
+	{
+		callback = [obj, method] (Args... args) 
+			{
+				(obj->*method)(std::forward<Args>(args)...);
+			};
+	}
+
 	void Unbind()
 	{
 		callback = nullptr;
@@ -48,6 +57,15 @@ public:
 	void Add(const FuncType& func)
 	{
 		subscribers.push_back(func);
+	}
+
+	template<typename T>
+	void Add(T* instance, void (T::* method)(Args...))
+	{
+		subscribers.emplace_back([instance, method] (Args... args)
+			{
+				(instance->*method)(std::forward<Args>(args)...);
+			});
 	}
 
 	void Remove(const FuncType& func)

@@ -6,9 +6,9 @@
 #include <glad/glad.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <ThirdParty/stb_image_write.h>
+#include <stb_image_write.h>
 
-#include "Logger/LoggerMacro.h"
+#include "LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogExport);
 

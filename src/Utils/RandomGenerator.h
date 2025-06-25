@@ -11,7 +11,8 @@ class RandomGenerator
 public:
 	/** Constructs the generator with an optional seed (random_device by default) */
 	explicit RandomGenerator(unsigned int seed = std::random_device{}())
-		: rng(seed) {
+		: rng(seed) 
+	{
 	}
 
 	/** Reseeds the generator with a new seed */

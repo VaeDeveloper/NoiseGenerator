@@ -1,6 +1,8 @@
 #pragma once 
 
-#include "MVC/Models/NoisePanelModel.h"
+#include "NoisePanelModel.h"
+#include "IController.h"
+#include "BoilerplateMacro.h"
 #include <memory>
 #include <functional>
 
@@ -12,16 +14,14 @@
  * Manages the NoisePanelModel instance and provides a high-level interface
  * for uploading noise data and accessing the model.
  */
-class NoisePanelController
+class NoisePanelController : public IController, public IControllerTyped<NoisePanelModel>
 {
 public:
+	IMPL_TYPED_MODEL(NoisePanelModel, model);
+
 	NoisePanelController();
 
-	/** Returns a pointer to the underlying model */
-	NoisePanelModel* GetModel();
-
-
-
+	virtual void Initialize() override;
 
 	/**
 	 * Uploads noise data to the model, if it has been initialized.
@@ -32,8 +32,8 @@ public:
 	 */
 	void UploadNoise(const float* noiseData, int w, int h) const;
 
+
 private:
-	
 	/** Unique instance of the model owned by this controller */
-	std::unique_ptr<NoisePanelModel> model;
+	std::shared_ptr<NoisePanelModel> model;
 };

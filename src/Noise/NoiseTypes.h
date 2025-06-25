@@ -8,7 +8,7 @@ struct NoiseProperties
 	float roughness = 0.5;
 	int low_freq_skip = 0;
 	int high_freq_skip = 0;
-	float marbling = 3;
+	float marbling = 0;
 
 	float turbulence = 0.0f;
 	int turbulence_res = 2;

@@ -3,8 +3,8 @@
 
 #include <glad/glad.h>
 
-#include "GUI/GuiManager.h"
-#include "Logger/LoggerMacro.h"
+#include "GuiManager.h"
+#include "LoggerMacro.h"
 
 enum class InitStatus
 {
@@ -42,6 +42,4 @@ private:
 	void LogGraphicsInfo();
 
 	bool bIsInitialized = false;
-
-	void LogSystemInfo();
 };

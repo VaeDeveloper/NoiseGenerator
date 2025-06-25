@@ -1,26 +1,31 @@
 #include "MenuBarController.h"
 
-DEFINE_LOG_CATEGORY(ExportLog);
-DEFINE_LOG_CATEGORY(MenuBarControllerLog);
+DEFINE_LOG_CATEGORY(MBControllerLog);
 
-MenuBarController::MenuBarController() 
-	: Model(std::make_shared<MenuBarModel>())
+void MenuBarController::Initialize()
 {
+	model = std::make_shared<MenuBarModel>();
 }
 
 void MenuBarController::ToggleFullScreen()
 {
-	if(!Model) 
+	if(!model) 
 	{
-		NGLOG(MenuBarControllerLog, Error, std::string("Model don't init") + __FUNCTION__ + " at line " + std::to_string(__LINE__));
+		NGLOG(MBControllerLog, Error, std::string("Model don't init  ") + __FUNCTION__ + 
+			" at line " + std::to_string(__LINE__));
 		return;
 	}
 
-	bool bNewState = !Model->IsFullscreen();
-	Model->SetFullscreen(bNewState);
+	const bool bNewState = !model->IsFullscreen();
+	model->SetFullscreen(bNewState);
 
 	GLFWwindow* window = glfwGetCurrentContext();
-	if(!window) return;
+	if(!window)
+	{
+		NGLOG(MBControllerLog, Error, std::string("Error getter current context : ") + __FUNCTION__ +
+			" at line-" + std::to_string(__LINE__));
+		return;
+	}
 
 	if(bNewState)
 	{
@@ -29,8 +34,8 @@ void MenuBarController::ToggleFullScreen()
 	}
 	else
 	{
-		int width = SettingsManager::Get().GetWindowWidth();
-		int height = SettingsManager::Get().GetWindowHeight();
+		const int width = SettingsManager::Get().GetWindowWidth();
+		const int height = SettingsManager::Get().GetWindowHeight();
 		glfwSetWindowMonitor(window, nullptr, 100, 100, width, height, 0);
 	}
 }
@@ -39,7 +44,7 @@ void MenuBarController::ExportAs(const std::string& format, GLuint textureId, in
 {
 	if(textureId == 0 || width <= 0 || height <= 0)
 	{
-		NGLOG(ExportLog, Error, std::string("Invalid export parameters.  ") + __FUNCTION__);
+		NGLOG(MBControllerLog, Error, std::string("Invalid export parameters.  ") + __FUNCTION__ + std::to_string(__LINE__));
 		return;
 	}
 
@@ -52,10 +57,21 @@ void MenuBarController::ExportAs(const std::string& format, GLuint textureId, in
 		std::string pathStr = NG::EnsureExtension(outPath, extension);
 		bool success = false;
 
-		if(format == "png")      success = ImageExporter::SavePNG(pathStr, textureId, width, height);
-		else if(format == "tga") success = ImageExporter::SaveTGA(pathStr, textureId, width, height);
-		else if(format == "bmp") success = ImageExporter::SaveBMP(pathStr, textureId, width, height);
-		else if(format == "jpg") success = ImageExporter::SaveJPG(pathStr, textureId, width, height, 90);
+		if(format == "png")
+		{
+			success = ImageExporter::SavePNG(pathStr, textureId, width, height);
+		}
+		else if(format == "tga")
+		{
+		}
+		else if(format == "bmp")
+		{
+			success = ImageExporter::SaveBMP(pathStr, textureId, width, height);
+		}
+		else if(format == "jpg") 
+		{
+			success = ImageExporter::SaveJPG(pathStr, textureId, width, height, 90);
+		}
 
 		free(outPath);
 	}
@@ -63,13 +79,14 @@ void MenuBarController::ExportAs(const std::string& format, GLuint textureId, in
 
 bool MenuBarController::IsFullscreen() const
 {
-	if(!Model)
+	if(!model)
 	{
-		NGLOG(MenuBarControllerLog, Error, std::string("Model don't init") + __FUNCTION__ + " at line " + std::to_string(__LINE__));
+		NGLOG(MBControllerLog, Error, std::string("Model don't init") + __FUNCTION__ +
+			" at line " + std::to_string(__LINE__));
 		return false;
 	}
 
-	return Model->IsFullscreen();
+	return model->IsFullscreen();
 }
 
 void MenuBarController::OpenAbout(const char* url)
@@ -90,11 +107,11 @@ void MenuBarController::OpenAbout(const char* url)
 	int result = std::system(command.c_str());
 	if(result != 0)
 	{
-		NGLOG(MenuBarControllerLog, Error, "Failed to open URL: " + std::string(url));
+		NGLOG(MBControllerLog, Error, "Failed to open URL: " + std::string(url));
 	}
 	else
 	{
-		NGLOG(MenuBarControllerLog, Info, "Opened URL: " + std::string(url));
+		NGLOG(MBControllerLog, Info, "Opened URL: " + std::string(url));
 	}
 }
 
@@ -105,8 +122,8 @@ void MenuBarController::RequestExit()
 
 void MenuBarController::ToggleInfoPanel()
 {
-	bool newState = !Model->IsInfoPanelVisible();
-	Model->SetInfoPanelVisible(newState);
+	bool newState = !model->IsInfoPanelVisible();
+	model->SetInfoPanelVisible(newState);
 
 	OnInfoPanelToggled.Execute(newState);
 }

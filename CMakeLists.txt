@@ -236,6 +236,7 @@ add_executable(NoiseGenerator
   src/MVC/IView.h
   src/MVC/IModel.h
   src/MVC/IController.h
+  src/MVC/BoilerplateMacro.h
 
   src/MVC/Controllers/NoisePanelController.cpp
   src/MVC/Controllers/NoisePanelController.h
@@ -302,6 +303,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/MVC/IView.h
   src/MVC/IModel.h
   src/MVC/IController.h
+  src/MVC/BoilerplateMacro.h
 
   src/MVC/Controllers/NoisePanelController.cpp
   src/MVC/Controllers/NoisePanelController.h
@@ -340,6 +342,20 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/ThirdParty PREFIX "ThirdParty"
 # -----------------------
 target_include_directories(NoiseGenerator PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Models
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controllers
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Views
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/GUI
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Export
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Config
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Generator
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Utils
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Math
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Noise
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Application
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ThirdParty
   ${CMAKE_BINARY_DIR}/_deps/nativefiledialog-src/src/include
   ${inih_SOURCE_DIR}
   ${inih_SOURCE_DIR}/cpp

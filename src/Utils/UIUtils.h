@@ -1,14 +1,13 @@
 #pragma once 
 
-#include "Logger/LoggerMacro.h"
-#include "GUI/IconRegistry.h"
+#include "LoggerMacro.h"
+#include "IconRegistry.h"
 #include <unordered_map>
 #include "imgui.h"
-#include "Utils/StringUtils.h"
-#include "Utils/Constants.h"
+#include "StringUtils.h"
+#include "Constants.h"
+
 DECLARE_LOG_CATEGORY_EXTERN(LogGUI);
-
-
 
 namespace NG
 {
@@ -43,13 +42,21 @@ namespace NG
 	}
 
 	template<typename T>
-	void LogWidget(const char* label, T* value, std::function<bool()> widget)
+	void LogWidget(const char* label, T* value, std::function<bool()> widget, const std::vector<std::string>& tooltip = {})
 	{
 		if(widget())
 		{
 			NGLOG(LogGUI, Info, std::string(label) + " = " + NG::StringUtils::ToString(*value));
 		}
+
+		if(!tooltip.empty())
+		{
+			
+			NG::ShowShiftOnlyTooltip(tooltip);
+		}
 	}
+
+
 
 	template<typename IndexType>
 	void LogWidgetComboWithNames(const char* label, IndexType* index, const char* const* names, int count)
@@ -60,6 +67,8 @@ namespace NG
 			NGLOG(LogGUI, Info, std::string(label) + " = " + name);
 		}
 	}
+
+
 
 
 	inline void ShowCustomTooltipWithDelay(float delaySeconds, std::function<void()> content)
@@ -74,10 +83,8 @@ namespace NG
 			hoverTimers[itemId] += ImGui::GetIO().DeltaTime;
 			if(hoverTimers[itemId] >= delaySeconds)
 			{
-				// ћ€гкий голубой фон и почти белый текст
 				ImVec4 bgColor = ImVec4(0.3f, 0.5f, 0.8f, 1.0f);  // светло-голубой
 				ImVec4 textColor = ImVec4(0.95f, 0.95f, 0.98f, 1.0f); // почти белый
-
 				ImGui::PushStyleColor(ImGuiCol_PopupBg, bgColor);
 				ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
@@ -117,7 +124,7 @@ namespace NG
 	inline void ShowShiftOnlyTooltip(const std::vector<std::string>& lines,float delaySeconds = 0.6f)
 	{
 		const ImGuiIO& io = ImGui::GetIO();
-		if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && io.KeyShift)
+		if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && io.KeyShift)
 		{
 			ShowTooltipFromLines(lines, delaySeconds);
 		}

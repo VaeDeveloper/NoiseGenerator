@@ -25,7 +25,7 @@
 			(including Perlin noise) with customizable parameters, preview rendering, and export options.
 */
 
-#include "Application/NGApplication.h"
+#include "NGApplication.h"
 #include <thread>
 #include <string>
 #include <filesystem>
@@ -77,11 +77,11 @@ void LogSystemInfo()
 
 int RunApplication()
 {
-	try 
+	try
 	{
 		NGApplication app;
 		InitStatus status = app.InitializeApplication();
-		if(status != InitStatus::Success) 
+		if(status != InitStatus::Success)
 		{
 			NGLOG(LogTemp, Error, std::string("Init failed: ") + NGApplication::GetInitStatus(status));
 			return -1;
@@ -90,12 +90,12 @@ int RunApplication()
 		app.RunApplication();
 		return 0;
 	}
-	catch(const std::exception& e) 
+	catch(const std::exception& e)
 	{
 		NGLOG(LogTemp, Error, std::string("Unhandled exception: ") + e.what());
 		return -2;
 	}
-	catch(...) 
+	catch(...)
 	{
 		NGLOG(LogTemp, Error, "Unknown unhandled exception occurred");
 		return -3;
@@ -104,21 +104,21 @@ int RunApplication()
 
 #ifdef _WIN32
 #ifdef _DEBUG
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
 	LogSystemInfo();
 	return RunApplication();
 }
 #else
 #include <Windows.h>
-int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int) 
+int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	LogSystemInfo();
 	return RunApplication();
 }
 #endif
 #else
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
 	return RunApplication();
 }

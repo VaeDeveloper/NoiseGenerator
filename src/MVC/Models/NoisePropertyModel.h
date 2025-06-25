@@ -1,6 +1,6 @@
 #pragma once 
-#include "Noise/NoiseTypes.h"
-#include "../IModel.h"
+#include "NoiseTypes.h"
+#include "IModel.h"
 
 struct LockFlags
 {
@@ -34,88 +34,46 @@ struct LockFlags
 	}
 };
 
-class NoisePropertyModel : public IModel 
+class NoisePropertyModel : public IModel
 {
 public:
+	virtual std::string GetId() const override;
+	virtual void Reset() override;
+	virtual std::string SerializeToJson() const { return "{}"; }
+	virtual void LoadFromJson(const std::string&) {}
+
 	const NoiseProperties& Get() const;
 
 	NoiseProperties& Access();
 
-#pragma region NoisePropertyModel
-	virtual std::string GetId() const override
-	{
-		return "noise_property_model";
-	}
-
-
-	virtual void Reset() override;
-
-	// Serialization from JSON 
-	virtual std::string SerializeToJson() const { return "{}"; }
-	virtual void LoadFromJson(const std::string&) {}
-#pragma endregion
-
-
 	void Randomize(bool respectLocks = true);
 	void Mutate(int style);
 
-
-	LockFlags& GetLockFlags()
-	{
-		return locks;
-	}
-
-	void SetLockAll(bool lock = true) 
-	{
-		bLocked = !bLocked;
-		locks.SetAll(bLocked); 
-	}
-
+	LockFlags& GetLockFlags();
+	void SetLockAll(bool lock = true);
 	bool IsAllLocked() const { return locks.AreAllLocked(); }
-
 	int GetRandomStyle() const;
-
-	static constexpr const char* resolutions_[] = 
+	int GetResolutionIndex() const;
+	void SetResolutionIndex(int index);
+	int GetResolutionValue() const;
+	static constexpr int GetResolutionCount();
+	static constexpr const char* const* GetResolutions()
 	{
-		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
-	};
-
-	int GetResolutionIndex() const 
-	{
-		return resolutionIndex_;
+		return resolutions;
 	}
 
-	void SetResolutionIndex(int index) {
-		if(index >= 0 && index < GetResolutionCount()) {
-			resolutionIndex_ = index;
-		}
-	}
+	
 
-	int GetResolutionValue() const {
-		return 8 << resolutionIndex_;
-	}
-
-	static constexpr int GetResolutionCount() {
-		return sizeof(resolutions_) / sizeof(resolutions_[0]);
-	}
-
-	static constexpr const char* const* GetResolutions() {
-		return resolutions_;
-	}
-
-
-
+	int turbulenceResIndex = 2;
 private:
 	float RandF(float min, float max) const;
 
 	bool bLocked = false;
-
-	int resolutionIndex_ = 3;
-
-
-	//Random properties
+	int resolutionIndex = 3;
 	int randomStyle = 0;
 
+	LockFlags locks;
+	NoiseProperties props;
 	static constexpr char* randomStyles[] = 
 	{
 		"Full Random",
@@ -125,7 +83,8 @@ private:
 		"Minimal",
 	};
 
-	LockFlags locks;
-	NoiseProperties props;
-
+	static constexpr const char* resolutions[] =
+	{
+		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
+	};
 };

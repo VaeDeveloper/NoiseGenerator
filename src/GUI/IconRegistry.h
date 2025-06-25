@@ -2,8 +2,8 @@
 
 #include <map>
 #include <string>
-#include "Utils/FileUtils.h"
-#include "ThirdParty/IconsFontAwesome5.h"
+#include "FileUtils.h"
+#include "IconsFontAwesome5.h"
 
 struct ImGuiIO;
 

@@ -31,6 +31,7 @@
  * - Keeps access uniform across all controllers using shared ownership of models.
  */
 #define IMPL_TYPED_MODEL(Type, Field) \
+public:\
     std::shared_ptr<Type> GetModel() override { return Field; } \
     std::shared_ptr<const Type> GetModel() const override { return Field; }
 
@@ -64,5 +65,6 @@
   * - Helps enforce architectural clarity between UI and logic layers.
   */
 #define IMPL_TYPED_CONTROLLER(Type, Field) \
+public:\
     std::shared_ptr<Type> GetTypedController() override { return Field; } \
     std::shared_ptr<const Type> GetTypedController() const override { return Field; }

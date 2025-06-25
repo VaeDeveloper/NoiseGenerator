@@ -1,22 +1,20 @@
 #pragma once
 #include "MVC/Controllers/NoisePanelController.h"
+#include "IView.h"
+#include "BoilerplateMacro.h"
 
 
 
-enum class NoiseBackend
+
+class NoisePreviewPanelUI : public IView, public IViewTyped<NoisePanelController>
 {
-	CPU,
-	GPU
-};
-
-//extern NoiseBackend g_Backend;
-
-class NoisePreviewPanelUI
-{
+	IMPL_TYPED_CONTROLLER(NoisePanelController, controller);
 public:
-	void Initialize();
+	virtual void Initialize() override;
+	virtual void Draw() override;
+
+
 	void UpdateTexture(const float* data, int width, int height);
-	void Draw();
 	void SetShowInfoPanel(bool value) { showInfoPanel = value; }
 	bool GetShowInfoPanel() const { return showInfoPanel; }
 
@@ -33,20 +31,14 @@ public:
 		return controller && controller->GetModel()->IsInitialized();
 	}
 
-	NoisePanelController* GetController() const 
-	{
-		return controller.get();
-	}
-
 	void SetInfoPanelVisible(bool visible)
 	{
 		showInfoPanel = visible;
 	}
 private:
-
 	bool showInfoPanel = true;
 	float previewWidth = 0;
 	float previewHeight = 0;
 
-	std::unique_ptr<NoisePanelController> controller;
+	std::shared_ptr<NoisePanelController> controller;
 };

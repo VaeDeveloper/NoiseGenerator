@@ -1,12 +1,12 @@
 #pragma once 
 
-#include "MVC/Models/NoisePropertyModel.h"
+#include "NoisePropertyModel.h"
 #include <functional>
 #include <atomic>
 #include <thread>
 #include <mutex>
 #include <queue>
-#include "Utils/Delegates.h"
+#include "Delegates.h"
 
 DECLARE_DELEGATE_ThreeParams(FOnNoiseGenerated, float*, int, int);
 
@@ -24,6 +24,7 @@ public:
 
 	void StartGeneration();
 	void CancelGeneration();
+	void Clear();
 	bool IsGenerating() const;
 	float GetProgress() const;
 

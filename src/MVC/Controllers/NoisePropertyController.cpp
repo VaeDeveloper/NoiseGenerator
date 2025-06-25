@@ -1,6 +1,6 @@
 #include "NoisePropertyController.h"
-#include "MVC/Models/NoisePropertyModel.h"
-#include "Generator/NoiseGenerator.h"
+#include "NoisePropertyModel.h"
+#include "NoiseGenerator.h"
 #include <random>
 
 NoisePropertyController::NoisePropertyController()
@@ -89,6 +89,10 @@ void NoisePropertyController::QueueUITask(std::function<void()> task)
 void NoisePropertyController::CancelGeneration()
 {
 	cancelRequested = true;
+}
+
+void NoisePropertyController::Clear()
+{
 }
 
 bool NoisePropertyController::IsGenerating() const

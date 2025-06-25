@@ -1,5 +1,5 @@
 #include "NoisePropertyModel.h"
-#include "Logger/LoggerMacro.h"
+#include "LoggerMacro.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <random>
@@ -16,10 +16,15 @@ NoiseProperties& NoisePropertyModel::Access()
 	return props;
 }
 
+std::string NoisePropertyModel::GetId() const
+{
+	return "noise_property_model";
+}
+
 void NoisePropertyModel::Reset()
 {
 	props = {};
-	resolutionIndex_ = 3;
+	resolutionIndex = 3;
 	SetLockAll();
 
 	NGLOG(NoisePropertyLog, Info, "NoisePropertyModel reset to default");
@@ -27,14 +32,14 @@ void NoisePropertyModel::Reset()
 
 void NoisePropertyModel::Randomize(bool respectLocks)
 {
-	int res = 8 << resolutionIndex_;
+	int res = 8 << resolutionIndex;
 	if(!locks.seed) props.seed = rand();
 	if(!locks.roughness) props.roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
 	if(!locks.marbling) props.marbling = ImLerp(0.0f, 10.0f, static_cast<float>(rand()) / RAND_MAX);
 	if(!locks.lowFreq) props.low_freq_skip = rand() % 5;
 	if(!locks.highFreq) props.high_freq_skip = rand() % 5;
 	if(!locks.turbulence) props.turbulence = ImLerp(0.0f, 64.0f, static_cast<float>(rand()) / RAND_MAX);
-	if(!locks.turbRes) props.turbulence_res = rand() % IM_ARRAYSIZE(GetResolutions());
+	if(!locks.turbRes) props.turbulence_res = rand() % IM_ARRAYSIZE(resolutions);
 	if(!locks.turbRoughness) props.turbulence_roughness = ImLerp(0.01f, 1.0f, static_cast<float>(rand()) / RAND_MAX);
 	if(!locks.turbLow) props.turbulence_low_freq_skip = rand() % 5;
 	if(!locks.turbHigh) props.turbulence_high_freq_skip = rand() % 5;
@@ -57,7 +62,7 @@ void NoisePropertyModel::Mutate(int style)
 		if(!locks.lowFreq) props.low_freq_skip = rand() % 5;
 		if(!locks.highFreq) props.high_freq_skip = rand() % 5;
 		if(!locks.turbulence) props.turbulence = RandF(0.0f, 64.0f);
-		if(!locks.turbRes) props.turbulence_res = rand() % IM_ARRAYSIZE(GetResolutions());
+		if(!locks.turbRes) props.turbulence_res = rand() % IM_ARRAYSIZE(resolutions);
 		if(!locks.turbRoughness) props.turbulence_roughness = RandF(0.01f, 1.0f);
 		if(!locks.turbLow) props.turbulence_low_freq_skip = rand() % 5;
 		if(!locks.turbHigh) props.turbulence_high_freq_skip = rand() % 5;
@@ -102,12 +107,44 @@ void NoisePropertyModel::Mutate(int style)
 	}
 }
 
+LockFlags& NoisePropertyModel::GetLockFlags()
+{
+	return locks;
+}
+
+void NoisePropertyModel::SetLockAll(bool lock)
+{
+	bLocked = !bLocked;
+	locks.SetAll(bLocked);
+}
+
 int NoisePropertyModel::GetRandomStyle() const
 {
 	return randomStyle;
 }
 
+int NoisePropertyModel::GetResolutionIndex() const
+{
+	return resolutionIndex;
+}
 
+void NoisePropertyModel::SetResolutionIndex(int index)
+{
+	if(index >= 0 && index < GetResolutionCount())
+	{
+		resolutionIndex = index;
+	}
+}
+
+int NoisePropertyModel::GetResolutionValue() const
+{
+	return 8 << resolutionIndex;
+}
+
+constexpr int NoisePropertyModel::GetResolutionCount()
+{
+	return sizeof(resolutions) / sizeof(resolutions[0]);
+}
 
 float NoisePropertyModel::RandF(float min, float max) const
 {

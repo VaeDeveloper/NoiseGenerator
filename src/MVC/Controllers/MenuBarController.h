@@ -1,18 +1,18 @@
 #pragma once 
 
-#include "MVC/Models/MenuBarModel.h"
-#include "MVC/Controllers/NoisePanelController.h"
-#include "Logger/LoggerMacro.h"
+#include "MenuBarModel.h"
+#include "NoisePanelController.h"
+#include "LoggerMacro.h"
 #include "GLFW/glfw3.h"
-#include "Export/ImageExporter.h"
-#include "Utils/StringUtils.h"
-#include "Config/SettingsManager.h"
+#include "ImageExporter.h"
+#include "StringUtils.h"
+#include "SettingsManager.h"
 #include <memory>
 #include "nfd.h"
 #include <functional>
-#include "Utils/Delegates.h"
-#include "../IController.h"
-
+#include "Delegates.h"
+#include "IController.h"
+#include "BoilerplateMacro.h"
 
 
 DECLARE_DELEGATE_OneParam(FOnInfoPanelToggled, bool);
@@ -33,41 +33,20 @@ namespace NG
 
 class MenuBarController : public IController, public IControllerTyped<MenuBarModel>
 {
+	IMPL_TYPED_MODEL(MenuBarModel, model);
 public:
-	FOnInfoPanelToggled OnInfoPanelToggled;
+	virtual void Initialize() override;
 	
-	MenuBarController();
-		
-
-	virtual void Initialize() {};
-
-
 	void ToggleFullScreen();
-
-
 	void ExportAs(const std::string& format, GLuint textureId, int width, int height);
-
 	bool IsFullscreen() const;
-
-
 	void OpenAbout(const char* url);
-
 	void RequestExit();
-
-
 	void ToggleInfoPanel();
 
-	std::shared_ptr<MenuBarModel> GetTypedModel() override 
-	{
-		return Model;
-	}
 
-	std::shared_ptr<const MenuBarModel> GetTypedModel() const override 
-	{
-		return Model;
-	}
-
+	FOnInfoPanelToggled OnInfoPanelToggled;
 private:
-	std::shared_ptr<MenuBarModel> Model;
+	std::shared_ptr<MenuBarModel> model;
 
 };

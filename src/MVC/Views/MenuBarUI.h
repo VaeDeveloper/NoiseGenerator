@@ -6,15 +6,25 @@
 #include <string>
 #include <vector>
 
+#include "IView.h"
+#include "BoilerplateMacro.h"
+
+#include "Delegates.h"
+
+DECLARE_DELEGATE_ThreeParams(OnTextureParamChanged, unsigned int, int, int);
+
 class MenuBarController;
 
-class MenuBarUI
+class MenuBarUI : public IView, public IViewTyped<MenuBarController>
 {
+	IMPL_TYPED_CONTROLLER(MenuBarController, controller);
 public:
-	void Initialize();
-	void Draw();
+	virtual void Initialize() override;
+	virtual void Draw() override;
+	
 	void SetTextureData(GLuint id, int w, int h);
-	MenuBarController* GetController() const;
+
+	OnTextureParamChanged TextureParamsChanged;
 private:
 	void DrawFileItem();
 	void DrawViewItem();
@@ -23,10 +33,11 @@ private:
 	void ExportTooltipText(const std::vector<std::string>& lines);
 	void ShowShiftOnlyTooltip(float delay, const std::vector<std::string>& lines);
 
-	std::shared_ptr<MenuBarController> Controller;
 
-	GLuint TextureId = 0;
-	int TextureWidth = 0;
-	int TextureHeight = 0;
+	GLuint textureId = 0;
+	int textureWidth = 0;
+	int textureHeight = 0;
+
+	std::shared_ptr<MenuBarController> controller;
 };
 

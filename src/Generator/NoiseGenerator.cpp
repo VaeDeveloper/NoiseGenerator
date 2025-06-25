@@ -1,8 +1,8 @@
 #include "NoiseGenerator.h"
-#include "Math/NoiseMath.h"
-#include "Logger/Logger.h"
-#include "Logger/LoggerMacro.h"
-#include "Utils/RandomGenerator.h"
+#include "NoiseMath.h"
+#include "Logger.h"
+#include "LoggerMacro.h"
+#include "RandomGenerator.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstring>

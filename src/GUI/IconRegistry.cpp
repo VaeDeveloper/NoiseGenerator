@@ -1,6 +1,6 @@
 #include "IconRegistry.h"
 #include "imgui.h"
-#include "Logger/LoggerMacro.h"
+#include "LoggerMacro.h"
 
 DEFINE_LOG_CATEGORY(LogIcon);
 
