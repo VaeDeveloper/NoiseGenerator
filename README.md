@@ -100,6 +100,15 @@ cd NoiseGenerator
 dev_ops\generate_project.bat
 dev_ops\build_project.bat
 ```
+
+## 🧪 Running Tests
+
+You can configure and build tests using a special flag:
+
+```bash
+dev_ops\generate_project.bat
+3 - tesing options
+```
 ---
 ## 🧠 Roadmap / Ideas
 
