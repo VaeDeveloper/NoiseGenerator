@@ -11,6 +11,18 @@ NoisePanelModel::~NoisePanelModel()
 	}
 }
 
+std::string NoisePanelModel::GetId() const
+{
+	return "noise_panel_model";
+}
+
+void NoisePanelModel::Reset()
+{
+	gTextureId = 0;
+	width = 0;
+	height = 0;
+}
+
 void NoisePanelModel::Initialize()
 {
 	if(bTextureInitialized)

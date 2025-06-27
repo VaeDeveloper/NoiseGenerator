@@ -135,6 +135,17 @@ if(NOT inih_POPULATED)
 endif()
 FetchContent_MakeAvailable(inih)
 
+# nlohmann::json
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+)
+if(NOT nlohmann_json_POPULATED)
+  message(STATUS "🔽 Downloading nlohmann::json from GitHub...")
+endif()
+FetchContent_MakeAvailable(nlohmann_json)
+
 # -----------------------
 # Build libraries
 # -----------------------
@@ -228,7 +239,10 @@ add_executable(NoiseGenerator
   src/Utils/UIUtils.h
   src/Utils/FileUtils.h
   src/Utils/Delegates.h
-
+  
+  src/Utils/NoiseParameterVisible.h
+  src/Utils/NoiseParameterVisible.cpp
+  
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
 
@@ -259,9 +273,14 @@ add_executable(NoiseGenerator
   src/MVC/Models/MenuBarModel.cpp
   src/MVC/Models/MenuBarModel.h
 
+
+  src/Serialization/NoisePresetSerialization.h
+
   src/ThirdParty/stb_image.h
   src/ThirdParty/stb_image_write.h
   src/ThirdParty/IconsFontAwesome5.h
+  src/ThirdParty/OpenSimplex2S.hpp
+  src/ThirdParty/OpenSimplex2S.cpp
 )
 
 # -----------------------
@@ -299,6 +318,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/Utils/UIUtils.h
   src/Utils/FileUtils.h
   src/Utils/Delegates.h
+  src/Utils/NoiseParameterVisible.h
+  src/Utils/NoiseParameterVisible.cpp
   
   src/MVC/IView.h
   src/MVC/IModel.h
@@ -325,8 +346,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
   src/MVC/Models/NoisePropertyModel.h
   src/MVC/Models/MenuBarModel.cpp
   src/MVC/Models/MenuBarModel.h
-  
-  
+
+  src/Serialization/NoisePresetSerialization.h
+
   src/Config/SettingsManager.cpp
   src/Config/SettingsManager.h
 )
@@ -335,6 +357,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src/ThirdParty PREFIX "ThirdParty"
   src/ThirdParty/stb_image.h
   src/ThirdParty/stb_image_write.h
   src/ThirdParty/IconsFontAwesome5.h
+  src/ThirdParty/OpenSimplex2S.hpp
+  src/ThirdParty/OpenSimplex2S.cpp
 )
 
 # -----------------------
@@ -372,6 +396,7 @@ target_link_libraries(NoiseGenerator PRIVATE
   OpenGL::GL
   nfd
   inih
+  nlohmann_json::nlohmann_json
 )
 
 # -----------------------

@@ -2,6 +2,8 @@
 
 #include <string>
 #include <algorithm>
+#include "nlohmann/json.hpp"
+#include "NoiseTypes.h"
 
 namespace NG
 {
@@ -56,6 +58,34 @@ namespace NG
 		{
 			return str.size() >= suffix.size() &&
 				str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+		}
+
+		template<>
+		inline std::string ToString<DistanceMetric>(DistanceMetric val) {
+			return nlohmann::json(val).get<std::string>(); 
+		}
+
+		template<>
+		inline std::string ToString<CellularReturnType>(CellularReturnType val) {
+			return nlohmann::json(val).get<std::string>();
+		}
+
+		template<typename T>
+		std::string EnumToStringSafe(T value)
+		{
+			if constexpr(std::is_enum_v<T>)
+			{
+				try {
+					return nlohmann::json(value).get<std::string>();
+				}
+				catch(...) {
+					return "enum(" + std::to_string(static_cast<int>(value)) + ")";
+				}
+			}
+			else
+			{
+				return NG::StringUtils::ToString(value);
+			}
 		}
 	}
 }

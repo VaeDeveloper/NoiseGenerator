@@ -1,4 +1,4 @@
-#pragma once 
+п»ї#pragma once 
 
 #include "LoggerMacro.h"
 #include "IconRegistry.h"
@@ -46,16 +46,14 @@ namespace NG
 	{
 		if(widget())
 		{
-			NGLOG(LogGUI, Info, std::string(label) + " = " + NG::StringUtils::ToString(*value));
+			NGLOG(LogGUI, Info, std::string(label) + " = " + StringUtils::EnumToStringSafe(*value));
 		}
 
 		if(!tooltip.empty())
 		{
-			
 			NG::ShowShiftOnlyTooltip(tooltip);
 		}
 	}
-
 
 
 	template<typename IndexType>
@@ -83,8 +81,8 @@ namespace NG
 			hoverTimers[itemId] += ImGui::GetIO().DeltaTime;
 			if(hoverTimers[itemId] >= delaySeconds)
 			{
-				ImVec4 bgColor = ImVec4(0.3f, 0.5f, 0.8f, 1.0f);  // светло-голубой
-				ImVec4 textColor = ImVec4(0.95f, 0.95f, 0.98f, 1.0f); // почти белый
+				ImVec4 bgColor = ImVec4(0.3f, 0.5f, 0.8f, 1.0f);  // СЃРІРµС‚Р»Рѕ-РіРѕР»СѓР±РѕР№
+				ImVec4 textColor = ImVec4(0.95f, 0.95f, 0.98f, 1.0f); // РїРѕС‡С‚Рё Р±РµР»С‹Р№
 				ImGui::PushStyleColor(ImGuiCol_PopupBg, bgColor);
 				ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 

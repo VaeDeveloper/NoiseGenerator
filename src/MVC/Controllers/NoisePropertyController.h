@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <unordered_map>
 #include "Delegates.h"
 
 DECLARE_DELEGATE_ThreeParams(FOnNoiseGenerated, float*, int, int);
@@ -45,10 +46,20 @@ public:
 	
 	std::queue<std::function<void()>> uiTasks;
 	std::mutex uiMutex;
+
+
+	void SaveCurrentPreset(const std::string& name);
+
+
+	void LoadPreset(const std::string& name);
+
+	std::vector<std::string> NoisePropertyController::GetPresetNames() const;
+
 private:
 	void QueueUITask(std::function<void()> task);
 
-	
+
+	std::unordered_map<std::string, NoisePreset> savedPresets;
 	NoisePropertyModel model;
 
 	std::atomic<bool> isGenerating = false;

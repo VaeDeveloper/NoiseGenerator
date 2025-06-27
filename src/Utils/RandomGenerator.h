@@ -15,6 +15,11 @@ public:
 	{
 	}
 
+	std::mt19937& GetEngine()
+	{
+		return rng;
+	}
+
 	/** Reseeds the generator with a new seed */
 	void Reseed(unsigned int seed)
 	{

@@ -1025,7 +1025,5 @@ private:
 		{ "YenSign", ICON_FA_YEN_SIGN },
 		{ "YinYang", ICON_FA_YIN_YANG }
 	};
-
-	
 };
 

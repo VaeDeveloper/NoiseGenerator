@@ -14,17 +14,9 @@
 class NoisePanelModel : public IModel
 {
 public:
-	NoisePanelModel(){}
 	virtual ~NoisePanelModel() override;
-
-	virtual std::string GetId() const override
-	{
-		return "noise_panel_model";
-	}
-
-	virtual void Reset() {};
-	virtual std::string SerializeToJson() const { return "{}"; }
-	virtual void LoadFromJson(const std::string&) {}
+	virtual std::string GetId() const override;
+	virtual void Reset() override;
 
 	/** Initializes the texture if not already created */
 	void Initialize();
