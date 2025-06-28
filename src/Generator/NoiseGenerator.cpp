@@ -611,7 +611,8 @@ namespace NG
 		while((1 << octaves) < res) octaves++;
 
 		for(int level = 0; level < octaves; level++) {
-			if(level >= in_props->low_freq_skip && level <= octaves - in_props->high_freq_skip) {
+			if(level >= in_props->low_freq_skip && level <= octaves - in_props->high_freq_skip) 
+			{
 				unsigned int levelSeed = in_props->seed + level * 17;
 				data = StupidNoise2D(res, freq, data, scale, levelSeed);
 			}
@@ -658,8 +659,10 @@ namespace NG
 			float* temp = new float[res * res];
 			memcpy(temp, data, res * res * sizeof(float));
 
-			for(int j = 0; j < res; j++) {
-				for(int i = 0; i < res; i++) {
+			for(int j = 0; j < res; j++) 
+			{
+				for(int i = 0; i < res; i++) 
+				{
 					float x = Sample2D(dx, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 					float y = Sample2D(dy, turbulence_res, turbulence_res, (float)i / res, (float)j / res) * 2.0f - 1.0f;
 
@@ -677,7 +680,8 @@ namespace NG
 					data[i + j * res] = Sample2D(temp, res, res, x, y);
 				}
 
-				if(onProgress && !onProgress(0.4f + (float)j / res * 0.5f)) {
+				if(onProgress && !onProgress(0.4f + (float)j / res * 0.5f)) 
+				{
 					delete[] temp;
 					free(data);
 					free(dx);
@@ -702,13 +706,15 @@ namespace NG
 		}
 
 		// === Marbling ===
-		if(in_props->marbling != 0.0f) {
+		if(in_props->marbling != 0.0f) 
+		{
 			for(int i = 0; i < res * res; i++) {
 				data[i] = sinf(PI2 * data[i] * in_props->marbling) * 0.5f + 0.5f;
 			}
 		}
 
-		if(onProgress && !onProgress(1.0f)) {
+		if(onProgress && !onProgress(1.0f)) 
+		{
 			free(data);
 			return nullptr;
 		}
@@ -1152,11 +1158,9 @@ namespace NG
 		if(!data) return nullptr;
 
 		OpenSimplex2S noiseGen(props->seed);
-
 		const int octaves = props->base_frequency;
 		const float persistence = props->gain;
 		const float lacunarity = props->cell_count;
-
 		float maxVal = 0.0f;
 		float minVal = 99999.0f;
 		float maxAmp = 0.0f;

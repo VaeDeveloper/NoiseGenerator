@@ -4,6 +4,62 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
+/**
+ * Enum representing each editable parameter in NoiseProperties.
+ * Used for visibility filtering and UI binding.
+ */
+enum class NoiseParameter
+{
+	// === Base ===
+	BaseFrequency,
+	Seed,
+	Resolution,
+	Roughness,
+	LowFreqSkip,
+	HighFreqSkip,
+	Marbling,
+
+	// === Turbulence ===
+	Turbulence,
+	TurbulenceRes,
+	TurbulenceRoughness,
+	TurbulenceLowFreqSkip,
+	TurbulenceHighFreqSkip,
+	TurbulenceMarbling,
+	TurbulenceExpShift,
+	TurbulenceOffsetX,
+	TurbulenceOffsetY,
+
+	// === Warp ===
+	WarpStrength,
+	WarpOctaves,
+	WarpType,
+	WarpSource,
+	WarpTarget,
+
+	// === Ridged / Billow ===
+	Gain,
+	Bias,
+	UseAbsValue,
+	InvertRidges,
+
+	// === Cellular / Voronoi / Worley ===
+	CellularDistance,
+	CellularReturn,
+	CellJitter,
+	CellCount,
+
+	// === Gabor ===
+	GaborImpulseCount,
+	GaborAngleVariance,
+	GaborSigma,
+	GaborFrequency,
+	GaborImpulseSpread,
+
+	// === Spectral ===
+	SpectralType
+};
+
 enum class NoiseType
 {
 	//Classic

@@ -206,8 +206,8 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 	{
 		"Value", "Perlin", "Simplex", "FBM", "Worley",
 		"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
-		"Gabor", "White","OpenSimplex", "SuperSimplex" 
-		/*"IQNoise", "SwissTurbulence", "JordanNoise"*/
+		"Gabor", "White","OpenSimplex"
+		/* "SuperSimplex" ,"IQNoise", "SwissTurbulence", "JordanNoise"*/
 	};
 
 	int currentType = static_cast<int>(controller->GetModel().GetType());
@@ -256,7 +256,6 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 
 void NoisePropertyUI::DrawNoiseSettings()
 {
-	ImGui::BeginChild("NoiseSettingsScrollRegion", ImVec2(0, 800), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
 
 	auto& props = controller->GetProperties();
 	auto& locks = controller->GetLockFlags();
@@ -326,10 +325,10 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	ImGui::TextUnformatted(WITH_ICON("Wind", "Turbulence"));
 
 	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Turbulence))
 	{
+		ImGui::TextUnformatted(WITH_ICON("Wind", "Turbulence"));
 		NG::LabeledWidgetWithLock("##lockTurb", &locks.bTurbulence, [&] () {
 			NG::LogWidget("Turbulence", &props.turbulence, [&] () {
 				return ImGui::SliderFloat("Turbulence", &props.turbulence, 0.0f, 64.0f);
@@ -490,165 +489,189 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	NG::LabeledWidgetWithLock("##lockCellJitter", &locks.bCellJitter, [&] () {
-		NG::LogWidget("Cell Jitter", &props.cell_jitter, [&] () {
-			return ImGui::SliderFloat("Cell Jitter", &props.cell_jitter, 0.0f, 2.0f);
-			}, {
-				"How randomly feature points are offset inside cells.",
-				"0 = center-aligned, 1 = max chaos."
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellJitter))
+	{
+		NG::LabeledWidgetWithLock("##lockCellJitter", &locks.bCellJitter, [&] () {
+			NG::LogWidget("Cell Jitter", &props.cell_jitter, [&] () {
+				return ImGui::SliderFloat("Cell Jitter", &props.cell_jitter, 0.0f, 2.0f);
+				}, {
+					"How randomly feature points are offset inside cells.",
+					"0 = center-aligned, 1 = max chaos."
+				});
 			});
-		});
-
+	}
 	
-	NG::LabeledWidgetWithLock("##lockCellMetric", &locks.bCellularDistance, [&] () {
-		NG::LogWidget("Distance Metric", &props.cellular_distance, [&] () {
-			const char* items[] = { "Euclidean", "Manhattan", "Natural" };
-			int current = static_cast<int>(props.cellular_distance);
-			if(ImGui::Combo("Distance Metric", &current, items, IM_ARRAYSIZE(items))) 
-			{
-				props.cellular_distance = static_cast<DistanceMetric>(current);
-				return true;
-			}
-			return false;
-			}, {
-				"Distance function used for nearest cell.",
-				"Manhattan = boxy, Euclidean = round."
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellularDistance))
+	{
+		NG::LabeledWidgetWithLock("##lockCellMetric", &locks.bCellularDistance, [&] () {
+			NG::LogWidget("Distance Metric", &props.cellular_distance, [&] () {
+				const char* items[] = { "Euclidean", "Manhattan", "Natural" };
+				int current = static_cast<int>(props.cellular_distance);
+				if(ImGui::Combo("Distance Metric", &current, items, IM_ARRAYSIZE(items)))
+				{
+					props.cellular_distance = static_cast<DistanceMetric>(current);
+					return true;
+				}
+				return false;
+				}, {
+					"Distance function used for nearest cell.",
+					"Manhattan = boxy, Euclidean = round."
+				});
 			});
-		});
+	}
 
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellularReturn))
+	{
+		NG::LabeledWidgetWithLock("##lockReturnType", &locks.bCellularReturn, [&] () {
+			NG::LogWidget("Return Type", &props.cellular_return, [&] () {
+				const char* items[] = { "F1", "F2 - F1", "Edge Distance" };
+				int current = static_cast<int>(props.cellular_return);
+				if(ImGui::Combo("Return Type", &current, items, IM_ARRAYSIZE(items)))
+				{
+					props.cellular_return = static_cast<CellularReturnType>(current);
+					return true;
+				}
+				return false;
+				}, {
+					"How to compute value from cell distances.",
+					"Edge = distance to edge between cells."
+				});
+			});
+	}
 	
-	NG::LabeledWidgetWithLock("##lockReturnType", &locks.bCellularReturn, [&] () {
-		NG::LogWidget("Return Type", &props.cellular_return, [&] () {
-			const char* items[] = { "F1", "F2 - F1", "Edge Distance" };
-			int current = static_cast<int>(props.cellular_return);
-			if(ImGui::Combo("Return Type", &current, items, IM_ARRAYSIZE(items))) 
-			{
-				props.cellular_return = static_cast<CellularReturnType>(current);
-				return true;
-			}
-			return false;
-			}, {
-				"How to compute value from cell distances.",
-				"Edge = distance to edge between cells."
-			});
-		});
-
 	
-	ImGui::TextUnformatted(WITH_ICON("WaveSquare", "Gabor"));
 
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborImpulseCount))
+	{
+		ImGui::TextUnformatted(WITH_ICON("WaveSquare", "Gabor"));
+		NG::LabeledWidgetWithLock("##lockGaborCount", &locks.bGaborImpulseCount, [&] () {
+			NG::LogWidget("Impulse Count", &props.gabor_impulse_count, [&] () {
+				return ImGui::SliderInt("Impulse Count", &props.gabor_impulse_count, 1, 64);
+				}, {
+					"Number of random impulses used per sample.",
+					"Higher = smoother noise, slower to compute."
+				});
+			});
+	}
 	
-	NG::LabeledWidgetWithLock("##lockGaborCount", &locks.bGaborImpulseCount, [&] () {
-		NG::LogWidget("Impulse Count", &props.gabor_impulse_count, [&] () {
-			return ImGui::SliderInt("Impulse Count", &props.gabor_impulse_count, 1, 64);
-			}, {
-				"Number of random impulses used per sample.",
-				"Higher = smoother noise, slower to compute."
-			});
-		});
 
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborAngleVariance))
+	{
+		NG::LabeledWidgetWithLock("##lockGaborVar", &locks.bGaborAngleVariance, [&] () {
+			NG::LogWidget("Angle Variance", &props.gabor_angle_variance, [&] () {
+				return ImGui::SliderFloat("Angle Variance", &props.gabor_angle_variance, 0.0f, 1.0f);
+				}, {
+					"Random angular variation for impulses.",
+					"0 = aligned, 1 = fully random."
+				});
+			});
+	}
 	
-	NG::LabeledWidgetWithLock("##lockGaborVar", &locks.bGaborAngleVariance, [&] () {
-		NG::LogWidget("Angle Variance", &props.gabor_angle_variance, [&] () {
-			return ImGui::SliderFloat("Angle Variance", &props.gabor_angle_variance, 0.0f, 1.0f);
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborSigma))
+	{
+		NG::LogWidget("Gabor Sigma", &props.gabor_sigma, [&] () {
+			return ImGui::SliderFloat("Sigma", &props.gabor_sigma, 0.005f, 0.3f);
 			}, {
-				"Random angular variation for impulses.",
-				"0 = aligned, 1 = fully random."
+				"Controls the width of the Gaussian filter.",
+				"Smaller = sharper, larger = blurrier."
 			});
-		});
+	}
 
-	
-	NG::LogWidget("Gabor Sigma", &props.gabor_sigma, [&] () {
-		return ImGui::SliderFloat("Sigma", &props.gabor_sigma, 0.005f, 0.3f);
-		}, {
-			"Controls the width of the Gaussian filter.",
-			"Smaller = sharper, larger = blurrier."
-		});
-
-
-
-	NG::LogWidget("Gabor Spread", &props.gabor_impulse_spread, [&] () {
-		return ImGui::SliderFloat("Spread", &props.gabor_impulse_spread, 0.1f, 4.0f);
-		}, {
-			"Controls how far impulses are scattered.",
-			"Higher = more dispersed noise."
-		});
-
-
-	ImGui::TextUnformatted(WITH_ICON("VectorSquare", "Domain Warp"));
-
-	
-	NG::LabeledWidgetWithLock("##lockWarpType", &locks.bWarpType, [&] () {
-		NG::LogWidget("Warp Type", &props.warp_type, [&] () {
-			const char* items[] = { "None", "Basic", "Recursive", "IQStyle" };
-			int current = static_cast<int>(props.warp_type);
-			if(ImGui::Combo("Warp Type", &current, items, IM_ARRAYSIZE(items))) {
-				props.warp_type = static_cast<WarpType>(current);
-				return true;
-			}
-			return false;
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborImpulseSpread))
+	{
+		NG::LogWidget("Gabor Spread", &props.gabor_impulse_spread, [&] () {
+			return ImGui::SliderFloat("Spread", &props.gabor_impulse_spread, 0.1f, 4.0f);
 			}, {
-				"How the coordinates are warped.",
-				"IQ-style = multi-octave smart warping"
+				"Controls how far impulses are scattered.",
+				"Higher = more dispersed noise."
 			});
-		});
+	}
 
-	NG::LabeledWidgetWithLock("##lockWarpStrength", &locks.bWarpStrength, [&] () {
-		NG::LogWidget("Warp Strength", &props.warp_strength, [&] () {
-			return ImGui::SliderFloat("Warp Strength", &props.warp_strength, 0.0f, 2.0f);
-			}, {
-				"Intensity of coordinate warping.",
-				"Higher = more distortion."
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpType))
+	{
+		ImGui::TextUnformatted(WITH_ICON("VectorSquare", "Domain Warp"));
+		NG::LabeledWidgetWithLock("##lockWarpType", &locks.bWarpType, [&] () {
+			NG::LogWidget("Warp Type", &props.warp_type, [&] () {
+				const char* items[] = { "None", "Basic", "Recursive", "IQStyle" };
+				int current = static_cast<int>(props.warp_type);
+				if(ImGui::Combo("Warp Type", &current, items, IM_ARRAYSIZE(items))) {
+					props.warp_type = static_cast<WarpType>(current);
+					return true;
+				}
+				return false;
+				}, {
+					"How the coordinates are warped.",
+					"IQ-style = multi-octave smart warping"
+				});
 			});
-		});
-
-	NG::LabeledWidgetWithLock("##lockWarpOctaves", &locks.bWarpOctaves, [&] () {
-		NG::LogWidget("Warp Octaves", &props.warp_octaves, [&] () {
-			return ImGui::SliderInt("Warp Octaves", &props.warp_octaves, 1, 8);
-			}, {
-				"Fractal layering for warp noise.",
-				"More octaves = more detail."
+	}
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpStrength))
+	{
+		NG::LabeledWidgetWithLock("##lockWarpStrength", &locks.bWarpStrength, [&] () {
+			NG::LogWidget("Warp Strength", &props.warp_strength, [&] () {
+				return ImGui::SliderFloat("Warp Strength", &props.warp_strength, 0.0f, 2.0f);
+				}, {
+					"Intensity of coordinate warping.",
+					"Higher = more distortion."
+				});
 			});
-		});
+	}
 
-	NG::LabeledWidgetWithLock("##lockWarpSource", &locks.bWarpSource, [&] () {
-		NG::LogWidget("Warp Source", &props.warp_source, [&] () {
-			const char* noiseTypes[] = {
-				"Value", "Perlin", "Simplex", "FBM", "Worley",
-				"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
-				"Gabor", "White", "Blue", "Red", "Pink",
-				"OpenSimplex", "SuperSimplex", "IQNoise", "SwissTurbulence", "JordanNoise"
-			};
-			int current = static_cast<int>(props.warp_source);
-			if(ImGui::Combo("Warp Source", &current, noiseTypes, IM_ARRAYSIZE(noiseTypes))) {
-				props.warp_source = static_cast<NoiseType>(current);
-				return true;
-			}
-			return false;
-			}, {
-				"Which noise is used to warp coordinates.",
-				"Only affects coordinate flow."
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpOctaves))
+	{
+		NG::LabeledWidgetWithLock("##lockWarpOctaves", &locks.bWarpOctaves, [&] () {
+			NG::LogWidget("Warp Octaves", &props.warp_octaves, [&] () {
+				return ImGui::SliderInt("Warp Octaves", &props.warp_octaves, 1, 8);
+				}, {
+					"Fractal layering for warp noise.",
+					"More octaves = more detail."
+				});
 			});
-		});
+	}
 
-	NG::LabeledWidgetWithLock("##lockWarpTarget", &locks.bWarpTarget, [&] () {
-		NG::LogWidget("Warp Target", &props.warp_target, [&] () {
-			const char* noiseTypes[] = {
-				"Value", "Perlin", "Simplex", "FBM", "Worley",
-				"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
-				"Gabor", "White", "Blue", "Red", "Pink",
-				"OpenSimplex", "SuperSimplex", "IQNoise", "SwissTurbulence", "JordanNoise"
-			};
-			int current = static_cast<int>(props.warp_target);
-			if(ImGui::Combo("Warp Target", &current, noiseTypes, IM_ARRAYSIZE(noiseTypes))) {
-				props.warp_target = static_cast<NoiseType>(current);
-				return true;
-			}
-			return false;
-			}, {
-				"Base noise applied after warping.",
-				"Resulting pattern is from this noise."
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpSource))
+	{
+		NG::LabeledWidgetWithLock("##lockWarpSource", &locks.bWarpSource, [&] () {
+			NG::LogWidget("Warp Source", &props.warp_source, [&] () {
+				const char* noiseTypes[] = {
+					"Value", "Perlin", "Simplex", "FBM", "Worley",
+					"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
+					"Gabor", "White", "Blue", "Red", "Pink",
+					"OpenSimplex", "SuperSimplex", "IQNoise", "SwissTurbulence", "JordanNoise"
+				};
+				int current = static_cast<int>(props.warp_source);
+				if(ImGui::Combo("Warp Source", &current, noiseTypes, IM_ARRAYSIZE(noiseTypes))) {
+					props.warp_source = static_cast<NoiseType>(current);
+					return true;
+				}
+				return false;
+				}, {
+					"Which noise is used to warp coordinates.",
+					"Only affects coordinate flow."
+				});
 			});
-		});
+	}
 
-	ImGui::EndChild(); 
+	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpTarget))
+	{
+		NG::LabeledWidgetWithLock("##lockWarpTarget", &locks.bWarpTarget, [&] () {
+			NG::LogWidget("Warp Target", &props.warp_target, [&] () {
+				const char* noiseTypes[] = {
+					"Value", "Perlin", "Simplex", "FBM", "Worley",
+					"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
+					"Gabor", "White", "Blue", "Red", "Pink",
+					"OpenSimplex", "SuperSimplex", "IQNoise", "SwissTurbulence", "JordanNoise"
+				};
+				int current = static_cast<int>(props.warp_target);
+				if(ImGui::Combo("Warp Target", &current, noiseTypes, IM_ARRAYSIZE(noiseTypes))) {
+					props.warp_target = static_cast<NoiseType>(current);
+					return true;
+				}
+				return false;
+				}, {
+					"Base noise applied after warping.",
+					"Resulting pattern is from this noise."
+				});
+			});
+	}
 }
