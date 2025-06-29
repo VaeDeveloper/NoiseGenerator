@@ -134,6 +134,11 @@ void NoisePropertyModel::SetResolutionIndex(int index)
 	{
 		resolutionIndex = index;
 	}
+	else
+	{
+		NGLOG(NoisePropertyLog, Warning, "Attempted to set invalid resolution index: %d (allowed range: 0-%d)",
+			index, GetResolutionCount() - 1);
+	}
 }
 
 int NoisePropertyModel::GetResolutionValue() const
@@ -141,10 +146,7 @@ int NoisePropertyModel::GetResolutionValue() const
 	return 8 << resolutionIndex;
 }
 
-constexpr int NoisePropertyModel::GetResolutionCount()
-{
-	return sizeof(resolutions) / sizeof(resolutions[0]);
-}
+
 
 NoiseType NoisePropertyModel::GetType() const
 {

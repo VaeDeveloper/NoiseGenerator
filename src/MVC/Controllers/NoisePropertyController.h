@@ -1,6 +1,9 @@
 #pragma once 
 
 #include "NoisePropertyModel.h"
+#include "BoilerplateMacro.h"
+#include "RandomGenerator.h"
+#include "IController.h"
 #include <functional>
 #include <atomic>
 #include <thread>
@@ -11,11 +14,13 @@
 
 DECLARE_DELEGATE_ThreeParams(FOnNoiseGenerated, float*, int, int);
 
-
-class NoisePropertyController
+class NoisePropertyController : public IController, IControllerTyped<NoisePropertyModel>
 {
+	IMPL_TYPED_MODEL(NoisePropertyModel, model);
 public:
 	NoisePropertyController();
+	~NoisePropertyController();
+	virtual void Initialize() override;
 
 	void Randomize();
 	void Mutate(int style);
@@ -36,44 +41,28 @@ public:
 
 	FOnNoiseGenerated OnNoiseReadyForUI;
 
-	NoisePropertyModel& GetModel() {
-		return model;
-	}
-
-	const NoisePropertyModel& GetModel() const {
-		return model;
-	}
-	
 	std::queue<std::function<void()>> uiTasks;
 	std::mutex uiMutex;
 
 
 	void SaveCurrentPreset(const std::string& name);
-
-
 	void LoadPreset(const std::string& name);
 
 	std::vector<std::string> NoisePropertyController::GetPresetNames() const;
 
+	static void GenerationThreadEntry(NoisePropertyController* instance, NoiseProperties propsCopy);
 private:
 	void QueueUITask(std::function<void()> task);
-
+	void GenerateAsync(NoiseProperties propsCopy);
 
 	std::unordered_map<std::string, NoisePreset> savedPresets;
-	NoisePropertyModel model;
 
 	std::atomic<bool> isGenerating = false;
 	std::atomic<float> generationProgress = 0.0f;
 	std::atomic<bool> cancelRequested = false;
 
 	std::thread generationThread;
-
 	
-	
-	int randomStyle = 0;
-	int resolutionIndex = 2;
-
-
-
-
+	std::shared_ptr<NoisePropertyModel> model;
+	RandomGenerator generator;
 };

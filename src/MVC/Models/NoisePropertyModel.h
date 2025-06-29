@@ -150,48 +150,99 @@ struct LockFlags
 };
 
 
+/**
+ * Encapsulates procedural noise properties and behavior.
+ *
+ * Provides support for resolution selection, randomization, mutation styles,
+ * and property locking. Used to drive noise-based systems with customizable
+ * and constrained parameters.
+ */
 class NoisePropertyModel : public IModel
 {
 public:
 	virtual std::string GetId() const override;
 	virtual void Reset() override;
 
+	/** Returns a const reference to the current noise properties. */
 	const NoiseProperties& Get() const;
 
+	/** Returns a mutable reference to the noise properties. */
 	NoiseProperties& Access();
 
+	/**
+	 * Randomizes the noise properties.
+	 * @param respectLocks - If true, locked properties will remain unchanged.
+	 */
 	void Randomize(bool respectLocks = true);
+
+	/**
+	 * Applies a mutation to the current properties based on a style index.
+	 * @param style - The mutation style index to apply.
+	 */
 	void Mutate(int style);
 
+	/** Returns a reference to the lock flags used to control which properties are locked. */
 	LockFlags& GetLockFlags();
+
+	/** Sets the locked state for all lockable properties. */
 	void SetLockAll(bool lock = true);
+
+	/** Returns true if all lock flags are enabled. */
 	bool IsAllLocked() const { return locks.AreAllLocked(); }
+
+	/** Returns the index of the current randomization style. */
 	int GetRandomStyle() const;
+
+	/** Gets the current resolution index. */
 	int GetResolutionIndex() const;
+
+	/** Sets the current resolution index. */
 	void SetResolutionIndex(int index);
+
+	/** Gets the actual resolution value corresponding to the index. */
 	int GetResolutionValue() const;
-	static constexpr int GetResolutionCount();
+
+	/** Returns the number of available resolution options. */
+	static constexpr int GetResolutionCount()
+	{
+		return sizeof(resolutions) / sizeof(resolutions[0]);
+	}
+
+	/** Returns a pointer to the list of resolution string values. */
 	static constexpr const char* const* GetResolutions()
 	{
 		return resolutions;
 	}
 
+	/** Gets the current noise type (e.g., Perlin, Simplex, etc.). */
 	NoiseType GetType() const;
+
+	/** Sets the noise type. */
 	void SetType(NoiseType type);
 
+	/** Index used for turbulence resolution, default is 2. */
 	int turbulenceResIndex = 2;
+
 private:
+
+	/**
+	 * Returns a random float within a specified range.
+	 * @param min - The minimum bound.
+	 * @param max - The maximum bound.
+	 */
 	float RandF(float min, float max) const;
 
+	/** If true, the entire property model is considered locked. */
 	bool bLocked = false;
+
+	/** Index into the resolutions array. */
 	int resolutionIndex = 3;
+
+	/** Index representing the current randomization style. */
 	int randomStyle = 0;
 
-	LockFlags locks;
-	NoiseProperties props;
-	NoiseType type = NoiseType::Perlin;
-
-	static constexpr char* randomStyles[] = 
+	/** List of randomization style names. */
+	static constexpr const char* randomStyles[] =
 	{
 		"Full Random",
 		"Controlled Chaos",
@@ -200,8 +251,18 @@ private:
 		"Minimal",
 	};
 
+	/** List of resolution options as string representations. */
 	static constexpr const char* resolutions[] =
 	{
 		"8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
 	};
+
+	/** Lock flags that determine which properties are locked from modification. */
+	LockFlags locks;
+
+	/** The current set of noise generation properties. */
+	NoiseProperties props;
+
+	/** The currently selected noise type. */
+	NoiseType type = NoiseType::Perlin;
 };

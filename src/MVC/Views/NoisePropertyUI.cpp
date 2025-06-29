@@ -199,7 +199,7 @@ void NoisePropertyUI::DrawGenerateActions()
 
 void NoisePropertyUI::DrawResolutionComboWithLock()
 {
-	int index = controller->GetModel().GetResolutionIndex();
+	int index = controller->GetModel()->GetResolutionIndex();
 	int oldIndex = index;
 
 	const char* noiseTypeNames[] =
@@ -210,10 +210,10 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 		/* "SuperSimplex" ,"IQNoise", "SwissTurbulence", "JordanNoise"*/
 	};
 
-	int currentType = static_cast<int>(controller->GetModel().GetType());
+	int currentType = static_cast<int>(controller->GetModel()->GetType());
 	if(ImGui::Combo("Noise Type", &currentType, noiseTypeNames, IM_ARRAYSIZE(noiseTypeNames)))
 	{
-		controller->GetModel().SetType(static_cast<NoiseType>(currentType));
+		controller->GetModel()->SetType(static_cast<NoiseType>(currentType));
 	}
 	ImGui::Separator();
 
@@ -233,7 +233,7 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 
 	if(changed && index != oldIndex)
 	{
-		controller->GetModel().SetResolutionIndex(index);
+		controller->GetModel()->SetResolutionIndex(index);
 
 		const char* resolutionName = NoisePropertyModel::GetResolutions()[index];
 		NGLOG(LogGUI, Info, std::string("Resolution = ") + resolutionName);
@@ -264,7 +264,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	/* clang-format off */
 	/* Compact formatting style to improve readability of nested lambdas!!! */
 
-	if (IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::BaseFrequency))
+	if (IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::BaseFrequency))
 	{
 		NG::LabeledWidgetWithLock("##lockFreq", &locks.bFrequency, [&] () {
 			NG::LogWidget("Frequency", &props.base_frequency, [&] () {
@@ -277,7 +277,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	}
 
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Roughness))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Roughness))
 	{
 		NG::LabeledWidgetWithLock("##lockRough", &locks.bRoughness, [&] () {
 			NG::LogWidget("Roughness", &props.roughness, [&] () {
@@ -289,7 +289,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Marbling))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Marbling))
 	{
 		NG::LabeledWidgetWithLock("##lockMarb", &locks.bMarbling, [&] () {
 			NG::LogWidget("Marbling", &props.marbling, [&] () {
@@ -301,7 +301,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::LowFreqSkip))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::LowFreqSkip))
 	{
 		NG::LabeledWidgetWithLock("##lockLF", &locks.bLowFreq, [&] () {
 			NG::LogWidget("Low Freq Skip", &props.low_freq_skip, [&] () {
@@ -313,7 +313,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::HighFreqSkip))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::HighFreqSkip))
 	{
 		NG::LabeledWidgetWithLock("##lockHF", &locks.bHighFreq, [&] () {
 			NG::LogWidget("High Freq Skip", &props.high_freq_skip, [&] () {
@@ -326,7 +326,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	}
 
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Turbulence))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Turbulence))
 	{
 		ImGui::TextUnformatted(WITH_ICON("Wind", "Turbulence"));
 		NG::LabeledWidgetWithLock("##lockTurb", &locks.bTurbulence, [&] () {
@@ -339,12 +339,12 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceRes))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceRes))
 	{
 		NG::LabeledWidgetWithLock("##lockTurbRes", &locks.bTurbRes, [&] () {
 			NG::LogWidget("Turbulence Res", &props.turbulence_res, [&] () {
-				const char* const* items = controller->GetModel().GetResolutions();
-				int count = controller->GetModel().GetResolutionCount();
+				const char* const* items = controller->GetModel()->GetResolutions();
+				int count = controller->GetModel()->GetResolutionCount();
 				return ImGui::Combo("Turbulence Res", &props.turbulence_res, items, count);
 				}, {
 					"Resolution of the turbulence layer.",
@@ -353,7 +353,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceRoughness))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceRoughness))
 	{
 		NG::LabeledWidgetWithLock("##lockTurbRough", &locks.bTurbRoughness, [&] () {
 			NG::LogWidget("Turbulence Roughness", &props.turbulence_roughness, [&] () {
@@ -366,7 +366,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	}
 
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceLowFreqSkip))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceLowFreqSkip))
 	{
 		NG::LabeledWidgetWithLock("##lockTurbLF", &locks.bTurbLow, [&] () {
 			NG::LogWidget("Turb Low Freq Skip", &props.turbulence_low_freq_skip, [&] () {
@@ -378,7 +378,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceHighFreqSkip))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceHighFreqSkip))
 	{
 		NG::LabeledWidgetWithLock("##lockTurbHF", &locks.bTurbHigh, [&] () {
 			NG::LogWidget("Turb High Freq Skip", &props.turbulence_high_freq_skip, [&] () {
@@ -390,7 +390,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceMarbling))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceMarbling))
 	{
 		NG::LabeledWidgetWithLock("##lockTurbMarb", &locks.bTurbMarbling, [&] () {
 			NG::LogWidget("Turbulence Marbling", &props.turbulence_marbling, [&] () {
@@ -402,7 +402,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceExpShift))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceExpShift))
 	{
 		NG::LabeledWidgetWithLock("##lockExp", &locks.bExpShift, [&] () {
 			NG::LogWidget("Exp Shift", &props.turbulence_expshift, [&] () {
@@ -414,7 +414,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceOffsetX))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceOffsetX))
 	{
 		NG::LabeledWidgetWithLock("##lockX", &locks.bOffsetX, [&] () {
 			NG::LogWidget("Turb Offset X", &props.turbulence_offset_x, [&] () {
@@ -427,7 +427,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	}
 
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::TurbulenceOffsetY))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::TurbulenceOffsetY))
 	{
 		NG::LabeledWidgetWithLock("##lockY", &locks.bOffsetY, [&] () {
 			NG::LogWidget("Turb Offset Y", &props.turbulence_offset_y, [&] () {
@@ -441,7 +441,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Gain))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Gain))
 	{
 		ImGui::TextUnformatted(WITH_ICON("WaveSquare", "Ridged / Billow"));
 		NG::LabeledWidgetWithLock("##lockGain", &locks.bGain, [&] () {
@@ -454,7 +454,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::Bias))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Bias))
 	{
 		NG::LabeledWidgetWithLock("##lockBias", &locks.bBias, [&] () {
 			NG::LogWidget("Bias", &props.bias, [&] () {
@@ -466,17 +466,17 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::UseAbsValue))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::UseAbsValue))
 	{
 		ImGui::Checkbox("Use Abs (Billow)", &props.use_abs_value);
 	}
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::InvertRidges))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::InvertRidges))
 	{
 		ImGui::Checkbox("Invert Ridges", &props.invert_ridges);
 	}
 
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellCount))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellCount))
 	{
 		ImGui::TextUnformatted(WITH_ICON("Cubes", "Cellular / Voronoi"));
 		NG::LabeledWidgetWithLock("##lockCellCount", &locks.bCellCount, [&] () {
@@ -489,7 +489,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellJitter))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellJitter))
 	{
 		NG::LabeledWidgetWithLock("##lockCellJitter", &locks.bCellJitter, [&] () {
 			NG::LogWidget("Cell Jitter", &props.cell_jitter, [&] () {
@@ -501,7 +501,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellularDistance))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellularDistance))
 	{
 		NG::LabeledWidgetWithLock("##lockCellMetric", &locks.bCellularDistance, [&] () {
 			NG::LogWidget("Distance Metric", &props.cellular_distance, [&] () {
@@ -520,7 +520,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::CellularReturn))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellularReturn))
 	{
 		NG::LabeledWidgetWithLock("##lockReturnType", &locks.bCellularReturn, [&] () {
 			NG::LogWidget("Return Type", &props.cellular_return, [&] () {
@@ -541,7 +541,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	
 	
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborImpulseCount))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborImpulseCount))
 	{
 		ImGui::TextUnformatted(WITH_ICON("WaveSquare", "Gabor"));
 		NG::LabeledWidgetWithLock("##lockGaborCount", &locks.bGaborImpulseCount, [&] () {
@@ -555,7 +555,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	}
 	
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborAngleVariance))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborAngleVariance))
 	{
 		NG::LabeledWidgetWithLock("##lockGaborVar", &locks.bGaborAngleVariance, [&] () {
 			NG::LogWidget("Angle Variance", &props.gabor_angle_variance, [&] () {
@@ -567,7 +567,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 	
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborSigma))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborSigma))
 	{
 		NG::LogWidget("Gabor Sigma", &props.gabor_sigma, [&] () {
 			return ImGui::SliderFloat("Sigma", &props.gabor_sigma, 0.005f, 0.3f);
@@ -577,7 +577,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::GaborImpulseSpread))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborImpulseSpread))
 	{
 		NG::LogWidget("Gabor Spread", &props.gabor_impulse_spread, [&] () {
 			return ImGui::SliderFloat("Spread", &props.gabor_impulse_spread, 0.1f, 4.0f);
@@ -587,7 +587,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpType))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::WarpType))
 	{
 		ImGui::TextUnformatted(WITH_ICON("VectorSquare", "Domain Warp"));
 		NG::LabeledWidgetWithLock("##lockWarpType", &locks.bWarpType, [&] () {
@@ -605,7 +605,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpStrength))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::WarpStrength))
 	{
 		NG::LabeledWidgetWithLock("##lockWarpStrength", &locks.bWarpStrength, [&] () {
 			NG::LogWidget("Warp Strength", &props.warp_strength, [&] () {
@@ -617,7 +617,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpOctaves))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::WarpOctaves))
 	{
 		NG::LabeledWidgetWithLock("##lockWarpOctaves", &locks.bWarpOctaves, [&] () {
 			NG::LogWidget("Warp Octaves", &props.warp_octaves, [&] () {
@@ -629,7 +629,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpSource))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::WarpSource))
 	{
 		NG::LabeledWidgetWithLock("##lockWarpSource", &locks.bWarpSource, [&] () {
 			NG::LogWidget("Warp Source", &props.warp_source, [&] () {
@@ -652,7 +652,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 			});
 	}
 
-	if(IsPropertyVisible(GetControllerRef().GetModel().GetType(), NoiseParameter::WarpTarget))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::WarpTarget))
 	{
 		NG::LabeledWidgetWithLock("##lockWarpTarget", &locks.bWarpTarget, [&] () {
 			NG::LogWidget("Warp Target", &props.warp_target, [&] () {

@@ -10,37 +10,54 @@
 #include "LoggerMacro.h"
 #include "Serialization/NoisePresetSerialization.h"
 
+
 namespace fs = std::filesystem;
 
 DEFINE_LOG_CATEGORY(NGController);
 
 NoisePropertyController::NoisePropertyController()
 {
+	model = std::make_shared<NoisePropertyModel>();
+}
+
+NoisePropertyController::~NoisePropertyController()
+{
+	cancelRequested = true;
+
+	if(generationThread.joinable())
+	{
+		generationThread.join();
+	}
+}
+
+void NoisePropertyController::Initialize()
+{
+
 }
 
 void NoisePropertyController::Randomize()
 {
-	model.Randomize();
+	model->Randomize();
 }
 
 void NoisePropertyController::Mutate(int style)
 {
-	model.Mutate(style);
+	model->Mutate(style);
 }
 
 void NoisePropertyController::Reset()
 {
-	model.Reset();
+	model->Reset();
 }
 
 void NoisePropertyController::SetLockAll()
 {
-	model.SetLockAll();
+	model->SetLockAll();
 }
 
 bool NoisePropertyController::IsAllLocked() const
 {
-	return model.IsAllLocked();
+	return model->IsAllLocked();
 }
 
 void NoisePropertyController::StartGeneration()
@@ -50,108 +67,13 @@ void NoisePropertyController::StartGeneration()
 		return;
 	}
 
-	NoiseProperties propsCopy = model.Get();
-	propsCopy.res = model.GetResolutionValue();
-	propsCopy.seed = std::random_device{}();
+	NoiseProperties propsCopy = model->Get();
+	propsCopy.res = model->GetResolutionValue();
+	propsCopy.seed = generator.NextInt(0, std::numeric_limits<int>::max());
 	isGenerating = true;
 	generationProgress = 0.0f;
 	cancelRequested = false;
-	generationThread = std::thread([this, propsCopy] ()
-		{
-			auto noiseType = this->GetModel().GetType();
-			float* noise = nullptr;
-
-			auto progressCallback = [this] (float progress)
-				{
-					this->generationProgress = progress;
-					return !this->cancelRequested;
-				};
-
-			switch(noiseType)
-			{
-			case NoiseType::Value:
-				noise = NG::ValueNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Perlin:
-				noise = NG::PerlinNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Simplex:
-				noise = NG::SimplexFBMNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::FBM:
-				noise = NG::FBMNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Cellular:
-				noise = NG::CellularNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-			case NoiseType::Voronoi:
-				noise = NG::VoronoiNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Ridged:
-				noise = NG::RidgedNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Worley:
-				noise = NG::WorleyNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-			
-			case NoiseType::DomainWarp:
-				noise = NG::DomainWarpNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Billow:
-				noise = NG::BillowNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::OpenSimplex:
-				noise = NG::OpenSimplexNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::White:
-				noise = NG::WhiteNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-
-			case NoiseType::Gabor:
-				noise = NG::GaborNoise2D(propsCopy.res, &propsCopy, progressCallback);
-				break;
-			default:
-				NGLOG(NGController, Error, "Unknown noise type");
-				break;
-			}
-
-
-
-			if(noise != nullptr)
-			{
-				this->QueueUITask([this, noise, propsCopy] ()
-					{
-						if(OnNoiseReadyForUI.IsBound())
-						{
-							OnNoiseReadyForUI.Execute(noise, propsCopy.res, propsCopy.res);
-						}
-						this->generationProgress = -1.0f;
-						this->isGenerating = false;
-					});
-			}
-			else
-			{
-				this->QueueUITask([this] ()
-					{
-						if(OnNoiseReadyForUI.IsBound())
-						{
-							OnNoiseReadyForUI.Execute(nullptr, 0, 0);
-						}
-						this->generationProgress = -1.0f;
-						this->isGenerating = false;
-					});
-			}
-		});
-
+	generationThread = std::thread(&NoisePropertyController::GenerationThreadEntry, this, propsCopy);
 	generationThread.detach();
 }
 
@@ -159,6 +81,48 @@ void NoisePropertyController::QueueUITask(std::function<void()> task)
 {
 	std::lock_guard<std::mutex> lock(uiMutex);
 	uiTasks.push(std::move(task));
+}
+
+void NoisePropertyController::GenerateAsync(NoiseProperties propsCopy)
+{
+	auto noiseType = model->GetType();
+	float* noise = nullptr;
+
+	auto progressCallback = [this] (float progress)
+		{
+			this->generationProgress = progress;
+			return !this->cancelRequested;
+		};
+
+	switch(noiseType)
+	{
+	case NoiseType::Value:        noise = NG::ValueNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Perlin:       noise = NG::PerlinNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Simplex:      noise = NG::SimplexFBMNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::FBM:          noise = NG::FBMNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Cellular:     noise = NG::CellularNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Voronoi:      noise = NG::VoronoiNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Ridged:       noise = NG::RidgedNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Worley:       noise = NG::WorleyNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::DomainWarp:   noise = NG::DomainWarpNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Billow:       noise = NG::BillowNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::OpenSimplex:  noise = NG::OpenSimplexNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::White:        noise = NG::WhiteNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	case NoiseType::Gabor:        noise = NG::GaborNoise2D(propsCopy.res, &propsCopy, progressCallback); break;
+	default:
+		NGLOG(NGController, Error, "Unknown noise type");
+		break;
+	}
+
+	this->QueueUITask([this, noise, propsCopy] ()
+		{
+			if(OnNoiseReadyForUI.IsBound())
+			{
+				OnNoiseReadyForUI.Execute(noise, propsCopy.res, propsCopy.res);
+			}
+			this->generationProgress = -1.0f;
+			this->isGenerating = false;
+		});
 }
 
 void NoisePropertyController::CancelGeneration()
@@ -192,12 +156,12 @@ void NoisePropertyController::ProcessUITasks()
 
 NoiseProperties& NoisePropertyController::GetProperties()
 {
-	return model.Access();
+	return model->Access();
 }
 
 LockFlags& NoisePropertyController::GetLockFlags()
 {
-	return model.GetLockFlags();
+	return model->GetLockFlags();
 }
 
 void NoisePropertyController::SaveCurrentPreset(const std::string& name)
@@ -217,8 +181,8 @@ void NoisePropertyController::SaveCurrentPreset(const std::string& name)
 		return;
 	}
 
-	NoiseProperties props = GetModel().Access();
-	NoisePreset preset{ name, props, model.GetType(), model.GetResolutionIndex() };
+	NoiseProperties props = model->Access();
+	NoisePreset preset{ name, props, model->GetType(), model->GetResolutionIndex() };
 
 	nlohmann::json j = preset;
 	out << j.dump(4);
@@ -235,6 +199,7 @@ void NoisePropertyController::LoadPreset(const std::string& name)
 		return;
 	}
 
+
 	std::string path = basePath + "/" + name + ".json";
 	nlohmann::json j;
 	std::ifstream in(path);
@@ -248,9 +213,9 @@ void NoisePropertyController::LoadPreset(const std::string& name)
 		in >> j;
 		NoisePreset preset = j.get<NoisePreset>();
 
-		GetModel().SetType(preset.type);
-		GetModel().Access() = preset.properties;
-		GetModel().SetResolutionIndex(preset.resolutionIndex);
+		GetModel()->SetType(preset.type);
+		GetModel()->Access() = preset.properties;
+		GetModel()->SetResolutionIndex(preset.resolutionIndex);
 
 		NGLOG(NGController, Info, "Preset loaded: " + name);
 	}
@@ -276,4 +241,9 @@ std::vector<std::string> NoisePropertyController::GetPresetNames() const
 	}
 
 	return names;
+}
+
+void NoisePropertyController::GenerationThreadEntry(NoisePropertyController* instance, NoiseProperties propsCopy)
+{
+	instance->GenerateAsync(propsCopy);
 }
