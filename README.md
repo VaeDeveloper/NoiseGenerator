@@ -43,12 +43,9 @@ Available in the `NoiseType`:
 - Cellular
 - Voronoi
 - Gabor
-- White / Blue / Red / Pink noise
+- White Noise
 - OpenSimplex
-- SuperSimplex
-- IQNoise
-- SwissTurbulence
-- JordanNoise
+
 
 > 📦 Easily extendable via `NoiseType`, generator dispatch, and serialization logic.
 
