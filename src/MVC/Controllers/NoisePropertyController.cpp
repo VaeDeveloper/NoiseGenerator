@@ -28,6 +28,8 @@ NoisePropertyController::~NoisePropertyController()
 	{
 		generationThread.join();
 	}
+
+	OnNoiseReadyForUI.Unbind();
 }
 
 void NoisePropertyController::Initialize()

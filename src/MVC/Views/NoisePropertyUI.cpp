@@ -135,7 +135,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	static char presetName[128] = "";
 	static std::string selectedPreset;
 
-	static std::vector<std::string> presetNames = controller->GetPresetNames();
+	static std::vector<std::string> presetNames = GetControllerRef().GetPresetNames();
 	ImGui::SeparatorText("Presets");
 
 	
@@ -147,7 +147,7 @@ void NoisePropertyUI::DrawGenerateActions()
 		if(strlen(presetName) > 0)
 		{
 			controller->SaveCurrentPreset(std::string(presetName));
-			presetNames = controller->GetPresetNames();
+			presetNames = GetControllerRef().GetPresetNames();
 			memset(presetName, 0, IM_ARRAYSIZE(presetName));
 		}
 		else

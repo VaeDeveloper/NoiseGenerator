@@ -17,6 +17,7 @@ DECLARE_DELEGATE_ThreeParams(FOnNoiseGenerated, float*, int, int);
 class NoisePropertyController : public IController, IControllerTyped<NoisePropertyModel>
 {
 	IMPL_TYPED_MODEL(NoisePropertyModel, model);
+
 public:
 	NoisePropertyController();
 	~NoisePropertyController();
@@ -41,16 +42,16 @@ public:
 
 	FOnNoiseGenerated OnNoiseReadyForUI;
 
-	std::queue<std::function<void()>> uiTasks;
-	std::mutex uiMutex;
-
-
+	
 	void SaveCurrentPreset(const std::string& name);
 	void LoadPreset(const std::string& name);
 
 	std::vector<std::string> NoisePropertyController::GetPresetNames() const;
 
 	static void GenerationThreadEntry(NoisePropertyController* instance, NoiseProperties propsCopy);
+
+	std::queue<std::function<void()>> uiTasks;
+	std::mutex uiMutex;
 private:
 	void QueueUITask(std::function<void()> task);
 	void GenerateAsync(NoiseProperties propsCopy);

@@ -1,9 +1,6 @@
 #pragma once
 #include <functional>
 
-
-
-
 template<typename... Args>
 class Delegate
 {
@@ -53,29 +50,32 @@ class MulticastDelegate
 public:
 	using FuncType = std::function<void(Args...)>;
 
-
-	void Add(const FuncType& func)
+	struct Subscription
 	{
-		subscribers.push_back(func);
+		int id;
+		FuncType func;
+	};
+
+	int Add(const FuncType& func)
+	{
+		int id = nextId++;
+		subscribers.push_back({ id, func });
+		return id;
 	}
 
 	template<typename T>
-	void Add(T* instance, void (T::* method)(Args...))
+	int Add(T* instance, void (T::* method)(Args...))
 	{
-		subscribers.emplace_back([instance, method] (Args... args)
-			{
-				(instance->*method)(std::forward<Args>(args)...);
+		return Add([instance, method] (Args... args) {
+			(instance->*method)(std::forward<Args>(args)...);
 			});
 	}
 
-	void Remove(const FuncType& func)
+	void Remove(int id)
 	{
 		subscribers.erase(
 			std::remove_if(subscribers.begin(), subscribers.end(),
-				[&] (const FuncType& f) 
-				{
-					return f.target_type() == func.target_type();
-				}),
+				[id] (const Subscription& sub) { return sub.id == id; }),
 			subscribers.end()
 		);
 	}
@@ -87,12 +87,10 @@ public:
 
 	void Broadcast(Args... args) const
 	{
-		for(const auto& func : subscribers)
+		for(const auto& sub : subscribers)
 		{
-			if(func)
-			{
-				func(args...);
-			}
+			if(sub.func)
+				sub.func(args...);
 		}
 	}
 
@@ -102,7 +100,61 @@ public:
 	}
 
 private:
-	std::vector<FuncType> subscribers;
+	std::vector<Subscription> subscribers;
+	int nextId = 0;
+};
+
+
+template<typename... Args>
+class ScopedDelegate
+{
+public:
+	using DelegateType = Delegate<Args...>;
+
+	ScopedDelegate(DelegateType& delegate, std::function<void(Args...)> func)
+		: delegateRef(&delegate)
+	{
+		delegateRef->Bind(std::move(func));
+	}
+
+	template<typename T>
+	ScopedDelegate(DelegateType& delegate, T* obj, void (T::* method)(Args...))
+		: delegateRef(&delegate)
+	{
+		delegateRef->Bind(obj, method);
+	}
+
+	~ScopedDelegate()
+	{
+		if(delegateRef)
+		{
+			delegateRef->Unbind();
+		}
+	}
+
+	ScopedDelegate(const ScopedDelegate&) = delete;
+	ScopedDelegate& operator=(const ScopedDelegate&) = delete;
+
+	ScopedDelegate(ScopedDelegate&& other) noexcept
+		: delegateRef(other.delegateRef)
+	{
+		other.delegateRef = nullptr;
+	}
+
+	ScopedDelegate& operator=(ScopedDelegate&& other) noexcept
+	{
+		if(this != &other) {
+			if(delegateRef)
+				delegateRef->Unbind();
+
+			delegateRef = other.delegateRef;
+			other.delegateRef = nullptr;
+		}
+		return *this;
+	}
+
+private:
+	DelegateType* delegateRef;
 };
 
 
