@@ -229,12 +229,13 @@ add_executable(NoiseGenerator
 
   src/Generator/NoiseGenerator.cpp
   src/Generator/NoiseGenerator.h
+  src/Generator/RandomGenerator.h
   src/Math/NoiseMath.cpp
   src/Math/NoiseMath.h
   src/Noise/NoiseTypes.h
 
   src/Utils/Constants.h
-  src/Utils/RandomGenerator.h
+
   src/Utils/StringUtils.h
   src/Utils/UIUtils.h
   src/Utils/FileUtils.h
@@ -308,12 +309,13 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source" FILES
 
   src/Generator/NoiseGenerator.cpp
   src/Generator/NoiseGenerator.h
+  src/Generator/RandomGenerator.h
+
   src/Math/NoiseMath.cpp
   src/Math/NoiseMath.h
   src/Noise/NoiseTypes.h
   
   src/Utils/Constants.h
-  src/Utils/RandomGenerator.h
   src/Utils/StringUtils.h
   src/Utils/UIUtils.h
   src/Utils/FileUtils.h
@@ -468,4 +470,9 @@ add_custom_command(TARGET NoiseGenerator POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_SOURCE_DIR}/fonts
           $<TARGET_FILE_DIR:NoiseGenerator>/fonts
+
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:NoiseGenerator>/presets
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_SOURCE_DIR}/presets
+          $<TARGET_FILE_DIR:NoiseGenerator>/presets
 )
