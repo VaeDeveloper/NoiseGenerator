@@ -3,6 +3,7 @@
 #include <filesystem>
 #include "FileUtils.h"
 
+
 DEFINE_LOG_CATEGORY(LogSettings);
 
 SettingsManager& SettingsManager::Get()
@@ -13,7 +14,7 @@ SettingsManager& SettingsManager::Get()
 
 bool SettingsManager::Load(const std::string& path) 
 {
-	auto configPath = NG::FileSystem::FindPath("config/settings.ini");
+	const auto configPath = NG::FileSystem::FindPath("config/settings.ini");
 	if(configPath.empty()) 
 	{
 		NGLOG(LogSettings, Error, "Config file not found after searching parent folders.");
