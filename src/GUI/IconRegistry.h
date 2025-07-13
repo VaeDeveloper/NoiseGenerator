@@ -7,19 +7,51 @@
 
 struct ImGuiIO;
 
+/**
+ * Macro that combines an icon and a label into a single C-style string.
+ *
+ * @param icon The name of the icon as registered in IconRegistry.
+ * @param label The textual label to display next to the icon.
+ * @return A C-style string combining the icon symbol and the label.
+ */
 #define WITH_ICON(icon, label) (IconRegistry::Get(icon) + std::string(" ") + (label)).c_str()
 
-
+ /**
+  * A static registry that provides access to icon strings by name.
+  * Used for rendering FontAwesome icons in ImGui interfaces.
+  */
 class IconRegistry
 {
 public:
+	/**
+	 * Retrieves the icon string corresponding to the given name.
+	 *
+	 * @param Name The identifier of the icon (e.g., "Ad", "Archive").
+	 * @return A pointer to the icon's string, or an empty string if not found.
+	 */
 	static const char* Get(const std::string& Name);
 
+	/**
+	 * Initializes the icon font using the specified ImGuiIO instance.
+	 * Should be called once during application startup to load the icon font.
+	 *
+	 * @param io The ImGuiIO instance used to configure fonts.
+	 * @param fontSize The desired font size for the icons (default is 12.0f).
+	 */
 	static void InitializeIcons(const ImGuiIO& io, float fontSize = 12.0f);
 
 private:
+	/**
+	 * Provides access to the internal icon mapping table.
+	 *
+	 * @return A reference to the static map that stores icon name-to-symbol pairs.
+	 */
 	inline static const std::map<std::string, const char*>& GetMap();
 
+	/**
+	 * A static map that holds the association between icon names and
+	 * their corresponding FontAwesome string representations.
+	 */
 	inline static const std::map<std::string, const char*> IconMap =
 	{
 		{ "Ad", ICON_FA_AD },
