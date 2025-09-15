@@ -25,6 +25,8 @@ void NoisePropertyUI::Draw()
 
 void NoisePropertyUI::DrawGenerateActions()
 {
+
+#pragma region ActionSection 
 	ImGui::SeparatorText("Generate Action");
 
 	ImGui::BeginDisabled(controller->IsGenerating());
@@ -35,7 +37,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	NG::ShowShiftOnlyTooltip({
 	"Start generating 2D noise based on current settings.",
 	"May take time depending on resolution and turbulence.",
-	"Output is passed to the UI asynchronously."});
+	"Output is passed to the UI asynchronously." });
 	ImGui::EndDisabled();
 
 
@@ -47,7 +49,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	}
 	NG::ShowShiftOnlyTooltip({
 	"Cancel noise generation.",
-	"Useful if it's taking too long or parameters are wrong."});
+	"Useful if it's taking too long or parameters are wrong." });
 	ImGui::EndDisabled();
 
 	ImGui::SameLine();
@@ -60,7 +62,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	}
 	NG::ShowShiftOnlyTooltip({
 	"Clear the current noise preview.",
-	"Does not reset settings - only clears the texture."});
+	"Does not reset settings - only clears the texture." });
 	ImGui::EndDisabled();
 
 
@@ -76,10 +78,13 @@ void NoisePropertyUI::DrawGenerateActions()
 	{
 		float barHeight = ImGui::GetFrameHeight();
 		ImGui::Dummy(ImVec2(barSize.x, barHeight));
-	}	
+	}
 	ImGui::EndDisabled();
+#pragma endregion ActionSection
 
-	// Randomize/Mutate
+
+
+#pragma region RendomizeSection	// Randomize/Mutate
 	ImGui::TextUnformatted(WITH_ICON("Dice", "Randomize Action"));
 	ImGui::Separator();
 	if(ImGui::Button(WITH_ICON("Random", "Randomize")))
@@ -89,7 +94,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	NG::ShowShiftOnlyTooltip({
 	"Randomly change all noise parameters.",
 	"May create chaotic or interesting results.",
-	"Use Mutate if you want subtler changes."});
+	"Use Mutate if you want subtler changes." });
 
 	ImGui::SameLine();
 	if(ImGui::Button(WITH_ICON("Flask", "Mutate")))
@@ -101,7 +106,7 @@ void NoisePropertyUI::DrawGenerateActions()
 	"Mutate noise parameters based on selected style.",
 	"Full Random: very chaotic",
 	"Organic: natural transitions",
-	"Minimal: small, subtle changes"});
+	"Minimal: small, subtle changes" });
 
 	ImGui::SameLine();
 	if(ImGui::Button(WITH_ICON("Flask", "Reset")))
@@ -111,11 +116,10 @@ void NoisePropertyUI::DrawGenerateActions()
 	}
 	NG::ShowShiftOnlyTooltip({
 	"Reset all settings",
-	"Full reset noise settings",});
-
+	"Full reset noise settings", });
 
 	ImGui::SameLine();
-	
+
 	ImGui::SetNextItemWidth(200);
 	NG::LogWidgetComboWithNames("Random Style", &randomStyleIndex_, randomStyles_, IM_ARRAYSIZE(randomStyles_));
 	NG::ShowShiftOnlyTooltip({
@@ -124,25 +128,24 @@ void NoisePropertyUI::DrawGenerateActions()
 		" Controlled Chaos - semi-random with constraints",
 		" Organic - smooth, natural-looking patterns",
 		" Extreme - high contrast, harsh transitions",
-		" Minimal - subtle and uniform variations"});
-
+		" Minimal - subtle and uniform variations" });
 
 	ImGui::TextUnformatted(WITH_ICON("SlidersH", "Noise Settings"));
-	
 	ImGui::Separator();
+#pragma endregion RendomizeSection
 
 
+
+#pragma region PresetsSection
 	static char presetName[128] = "";
 	static std::string selectedPreset;
-
 	static std::vector<std::string> presetNames = GetControllerRef().GetPresetNames();
-	ImGui::SeparatorText("Presets");
 
-	
+	ImGui::SeparatorText("Presets");
 	ImGui::InputText("Preset Name", presetName, IM_ARRAYSIZE(presetName));
 	ImGui::SameLine();
 
-	if(ImGui::Button(WITH_ICON("Save", "Save Preset"))) 
+	if(ImGui::Button(WITH_ICON("Save", "Save Preset")))
 	{
 		if(strlen(presetName) > 0)
 		{
@@ -156,13 +159,12 @@ void NoisePropertyUI::DrawGenerateActions()
 		}
 	}
 
-
 	if(ImGui::BeginCombo("Load Preset", selectedPreset.c_str()))
 	{
-		for(const auto& name : presetNames) 
+		for(const auto& name : presetNames)
 		{
-			bool isSelected = (name == selectedPreset);
-			if(ImGui::Selectable(name.c_str(), isSelected)) 
+			const bool isSelected = (name == selectedPreset);
+			if(ImGui::Selectable(name.c_str(), isSelected))
 			{
 				selectedPreset = name;
 				controller->LoadPreset(name);
@@ -195,18 +197,21 @@ void NoisePropertyUI::DrawGenerateActions()
 		selectedPreset.clear();
 		presetNames = controller->GetPresetNames();
 	}
+#pragma endregion PresetsSection
 }
 
 void NoisePropertyUI::DrawResolutionComboWithLock()
 {
 	int index = controller->GetModel()->GetResolutionIndex();
-	int oldIndex = index;
+	const int oldIndex = index;
 
 	const char* noiseTypeNames[] =
 	{
 		"Value", "Perlin", "Simplex", "FBM", "Worley",
 		"Ridged", "Billow", "DomainWarp", "Cellular", "Voronoi",
 		"Gabor", "White","OpenSimplex"
+
+		/** TODO!!! */
 		/* "SuperSimplex" ,"IQNoise", "SwissTurbulence", "JordanNoise"*/
 	};
 
@@ -218,8 +223,8 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 	ImGui::Separator();
 
 	ImVec2 oldPadding = ImGui::GetStyle().FramePadding;
-	float targetHeight = 22.0f;
-	float textHeight = ImGui::GetTextLineHeight();
+	constexpr float targetHeight = 22.0f;
+	const float textHeight = ImGui::GetTextLineHeight();
 	ImGui::GetStyle().FramePadding.y = (targetHeight - textHeight) * 0.5f;
 
 	bool changed = ImGui::Combo(
@@ -242,9 +247,9 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 
 	ImGui::SameLine();
 
-	float spaceOffset = 24;
-	float space = ImGui::GetContentRegionAvail().x;
-	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - 80);
+	constexpr float spaceOffset = 80.0f;
+	const float space = ImGui::GetContentRegionAvail().x;
+	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + space - spaceOffset);
 	ImGui::PushID("##LockAllBtn");
 
 	if(ImGui::Button(controller->IsAllLocked() ? "Unlock All" : "Lock All", ImVec2(80, 22.0f)))
@@ -256,7 +261,6 @@ void NoisePropertyUI::DrawResolutionComboWithLock()
 
 void NoisePropertyUI::DrawNoiseSettings()
 {
-
 	auto& props = controller->GetProperties();
 	auto& locks = controller->GetLockFlags();
 
@@ -264,7 +268,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 	/* clang-format off */
 	/* Compact formatting style to improve readability of nested lambdas!!! */
 
-	if (IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::BaseFrequency))
+	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::BaseFrequency))
 	{
 		NG::LabeledWidgetWithLock("##lockFreq", &locks.bFrequency, [&] () {
 			NG::LogWidget("Frequency", &props.base_frequency, [&] () {
@@ -288,7 +292,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Marbling))
 	{
 		NG::LabeledWidgetWithLock("##lockMarb", &locks.bMarbling, [&] () {
@@ -440,7 +444,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 
 
 	}
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::Gain))
 	{
 		ImGui::TextUnformatted(WITH_ICON("WaveSquare", "Ridged / Billow"));
@@ -465,17 +469,19 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::UseAbsValue))
 	{
 		ImGui::Checkbox("Use Abs (Billow)", &props.use_abs_value);
 	}
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::InvertRidges))
 	{
 		ImGui::Checkbox("Invert Ridges", &props.invert_ridges);
 	}
 
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellCount))
 	{
 		ImGui::TextUnformatted(WITH_ICON("Cubes", "Cellular / Voronoi"));
@@ -488,7 +494,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellJitter))
 	{
 		NG::LabeledWidgetWithLock("##lockCellJitter", &locks.bCellJitter, [&] () {
@@ -500,7 +506,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::CellularDistance))
 	{
 		NG::LabeledWidgetWithLock("##lockCellMetric", &locks.bCellularDistance, [&] () {
@@ -538,8 +544,8 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
-	
+
+
 
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborImpulseCount))
 	{
@@ -553,7 +559,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
 
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborAngleVariance))
 	{
@@ -566,7 +572,7 @@ void NoisePropertyUI::DrawNoiseSettings()
 				});
 			});
 	}
-	
+
 	if(IsPropertyVisible(GetControllerRef().GetModel()->GetType(), NoiseParameter::GaborSigma))
 	{
 		NG::LogWidget("Gabor Sigma", &props.gabor_sigma, [&] () {
